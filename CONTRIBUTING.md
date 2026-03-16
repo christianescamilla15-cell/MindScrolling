@@ -24,7 +24,7 @@ Before contributing, internalize the product principle:
 ### Backend
 
 ```bash
-git clone https://github.com/your-org/mindscrolling.git
+git clone https://github.com/YOUR_USERNAME/MindScrolling.git
 cd mindscrolling/backend
 npm install
 cp ../.env.example .env

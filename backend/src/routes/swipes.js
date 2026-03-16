@@ -1,66 +1,72 @@
-import { supabase } from "../db/client.js";
+import { supabase }                from "../db/client.js";
+import { updatePreferenceVector } from "../services/embeddings.js";
 
-// Which aggregate score column to increment per category
-const CATEGORY_SCORE_COL = {
-  stoicism:    "wisdom_score",
-  philosophy:  "philosophy_score",
-  discipline:  "discipline_score",
-  reflection:  "reflection_score",
-};
-
-const SCORE_INCREMENT = 1.0; // points added to the relevant score per swipe
+// Dwell thresholds
+const SKIP_THRESHOLD_MS  = 500;    // dwell < 500 ms → quick dismissal
+const DWELL_SIGNAL_MS    = 5000;   // dwell ≥ 5 s → long engagement → update semantic vector
 
 export default async function swipesRoutes(fastify) {
   /**
    * POST /swipes
    * Body: { quote_id, direction, category, dwell_time_ms }
+   * Fire-and-forget — client does not need to await a meaningful response.
    */
   fastify.post("/", async (request, reply) => {
-    const deviceId = request.deviceId;
+    const { deviceId } = request;
     const { quote_id, direction, category, dwell_time_ms = 0 } = request.body ?? {};
 
     if (!quote_id)  return reply.status(400).send({ error: "quote_id is required",  code: "MISSING_FIELD" });
     if (!direction) return reply.status(400).send({ error: "direction is required", code: "MISSING_FIELD" });
     if (!category)  return reply.status(400).send({ error: "category is required",  code: "MISSING_FIELD" });
 
-    // ── Ensure user row exists (required for all FK operations below) ──────
-    const { data: existingUser, error: userFetchErr } = await supabase
-      .from("users")
-      .select("streak, total_reflections, last_active")
-      .eq("device_id", deviceId)
-      .maybeSingle();
+    const VALID_DIRECTIONS = ["up", "down", "left", "right"];
+    if (!VALID_DIRECTIONS.includes(direction)) {
+      return reply.status(400).send({ error: "direction must be up, down, left, or right", code: "INVALID_DIRECTION" });
+    }
+
+    const dwellMs = Math.max(0, Number(dwell_time_ms) || 0);
+    const isSkip  = dwellMs < SKIP_THRESHOLD_MS;
+
+    // ── Parallel fetch: user row + current preference row ─────────────────────
+    const [
+      { data: existingUser, error: userFetchErr },
+      { data: prefRow },
+    ] = await Promise.all([
+      supabase
+        .from("users")
+        .select("streak, total_reflections, last_active")
+        .eq("device_id", deviceId)
+        .maybeSingle(),
+
+      supabase
+        .from("user_preferences")
+        .select("swipe_count, skip_count, total_dwell_ms")
+        .eq("device_id", deviceId)
+        .eq("category", category)
+        .maybeSingle(),
+    ]);
 
     if (userFetchErr) {
       return reply.status(500).send({ error: "Failed to fetch user", code: "DB_ERROR" });
     }
 
-    // ── Streak logic ──────────────────────────────────────────────────────
-    const todayStr     = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-    const lastActive   = existingUser?.last_active ?? null;
-    let   streak       = existingUser?.streak       ?? 0;
-    const reflections  = existingUser?.total_reflections ?? 0;
+    // ── Streak logic ───────────────────────────────────────────────────────────
+    const todayStr    = new Date().toISOString().slice(0, 10);
+    const lastActive  = existingUser?.last_active ?? null;
+    let   streak      = existingUser?.streak              ?? 0;
+    const reflections = existingUser?.total_reflections   ?? 0;
 
     if (!lastActive) {
-      // First ever swipe
       streak = 1;
-    } else if (lastActive === todayStr) {
-      // Already active today — streak unchanged
-    } else {
+    } else if (lastActive !== todayStr) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-      if (lastActive === yesterdayStr) {
-        streak += 1;
-      } else {
-        streak = 1;
-      }
+      streak = lastActive === yesterday.toISOString().slice(0, 10) ? streak + 1 : 1;
     }
 
-    // ── Upsert user (streak + reflection count + last_active) ─────────────
-    const { error: userUpsertErr } = await supabase
-      .from("users")
-      .upsert(
+    // ── Parallel write: upsert user + insert swipe event ─────────────────────
+    const [{ error: userUpsertErr }, { error: swipeErr }] = await Promise.all([
+      supabase.from("users").upsert(
         {
           device_id:         deviceId,
           streak,
@@ -68,52 +74,29 @@ export default async function swipesRoutes(fastify) {
           last_active:       todayStr,
         },
         { onConflict: "device_id" }
-      );
+      ),
 
-    if (userUpsertErr) {
-      return reply.status(500).send({ error: "Failed to update user", code: "DB_ERROR" });
-    }
-
-    // ── Insert swipe event ─────────────────────────────────────────────────
-    const { error: swipeErr } = await supabase
-      .from("swipe_events")
-      .insert({
+      supabase.from("swipe_events").insert({
         device_id:     deviceId,
         quote_id,
         direction,
         category,
-        dwell_time_ms: Number(dwell_time_ms) || 0,
-      });
+        dwell_time_ms: dwellMs,
+      }),
+    ]);
 
-    if (swipeErr) {
-      return reply.status(500).send({ error: "Failed to record swipe", code: "DB_ERROR" });
-    }
+    if (userUpsertErr) return reply.status(500).send({ error: "Failed to update user",  code: "DB_ERROR" });
+    if (swipeErr)      return reply.status(500).send({ error: "Failed to record swipe", code: "DB_ERROR" });
 
-    // ── Update user_preferences (swipe_count + score field) ───────────────
-    const scoreCol = CATEGORY_SCORE_COL[category];
-
-    // Fetch current preference row so we can compute new score value
-    const { data: prefRow } = await supabase
-      .from("user_preferences")
-      .select("swipe_count, wisdom_score, discipline_score, reflection_score, philosophy_score")
-      .eq("device_id", deviceId)
-      .eq("category", category)
-      .maybeSingle();
-
-    const currentSwipeCount   = prefRow?.swipe_count   ?? 0;
-    const currentScoreValue   = prefRow?.[scoreCol]     ?? 0;
-
+    // ── Update behavioural preference signals ─────────────────────────────────
     const prefUpdate = {
-      device_id:         deviceId,
+      device_id:      deviceId,
       category,
-      swipe_count:       currentSwipeCount + 1,
-      updated_at:        new Date().toISOString(),
+      swipe_count:    (prefRow?.swipe_count    ?? 0) + 1,
+      skip_count:     isSkip ? (prefRow?.skip_count  ?? 0) + 1 : (prefRow?.skip_count  ?? 0),
+      total_dwell_ms: (prefRow?.total_dwell_ms ?? 0) + dwellMs,
+      updated_at:     new Date().toISOString(),
     };
-
-    // Only update the score column that matches this category
-    if (scoreCol) {
-      prefUpdate[scoreCol] = Number(currentScoreValue) + SCORE_INCREMENT;
-    }
 
     const { error: prefErr } = await supabase
       .from("user_preferences")
@@ -123,6 +106,11 @@ export default async function swipesRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to update preferences", code: "DB_ERROR" });
     }
 
-    return reply.status(200).send({ recorded: true });
+    // ── Fire-and-forget: update semantic vector on deep engagement ────────────
+    if (dwellMs >= DWELL_SIGNAL_MS) {
+      updatePreferenceVector(deviceId, quote_id, "dwell").catch(() => {});
+    }
+
+    return reply.status(200).send({ ok: true });
   });
 }

@@ -119,7 +119,7 @@ MindScrolling reemplaza el doom-scrolling con frases filosóficas curadas presen
 
 ## Sprint 4 — Inteligencia adaptativa, personalización y monetización
 
-**Período:** 2026-03-15 al 2026-04-18
+**Período:** 2026-04-19 al 2026-05-02
 **Objetivo:** Transformar el MVP en un producto inteligente con onboarding personalizado, feed adaptativo, mapa filosófico, desafíos diarios y modelo premium.
 
 ### Tareas

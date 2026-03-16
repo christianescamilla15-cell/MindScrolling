@@ -1,4 +1,5 @@
-import { supabase } from "../db/client.js";
+import { supabase }                from "../db/client.js";
+import { updatePreferenceVector } from "../services/embeddings.js";
 
 export default async function vaultRoutes(fastify) {
   /** GET /vault — list saved quotes */
@@ -16,29 +17,68 @@ export default async function vaultRoutes(fastify) {
 
   /** POST /vault — save a quote */
   fastify.post("/", async (request, reply) => {
+    const { deviceId } = request;
     const { quote_id } = request.body ?? {};
     if (!quote_id) return reply.status(400).send({ error: "quote_id is required", code: "MISSING_FIELD" });
 
-    const { error } = await supabase
+    // Check for duplicate
+    const { data: existing } = await supabase
       .from("vault")
-      .upsert({ device_id: request.deviceId, quote_id }, { onConflict: "device_id,quote_id" });
+      .select("quote_id")
+      .eq("device_id", deviceId)
+      .eq("quote_id", quote_id)
+      .maybeSingle();
 
+    if (existing) return reply.send({ ok: true, status: "already_saved" });
+
+    // Fetch category (needed for vault preference signal)
+    const { data: quote } = await supabase
+      .from("quotes")
+      .select("category")
+      .eq("id", quote_id)
+      .maybeSingle();
+
+    // Parallel: insert vault row + increment vault preference signal
+    const ops = [supabase.from("vault").insert({ device_id: deviceId, quote_id })];
+    if (quote?.category) {
+      ops.push(supabase.rpc("increment_vault", { p_device_id: deviceId, p_category: quote.category }));
+    }
+
+    const [{ error }] = await Promise.all(ops);
     if (error) return reply.status(500).send({ error: "Failed to save quote", code: "DB_ERROR" });
-    return reply.status(201).send({ saved: true, quote_id });
+
+    // Fire-and-forget: update semantic preference vector (strongest signal α=0.25)
+    updatePreferenceVector(deviceId, quote_id, "vault").catch(() => {});
+
+    return reply.send({ ok: true });
   });
 
-  /** DELETE /vault/:quote_id — remove a quote */
-  fastify.delete("/:quote_id", async (request, reply) => {
-    const { quote_id } = request.params;
+  /** DELETE /vault/:id — remove a quote */
+  fastify.delete("/:id", async (request, reply) => {
+    const { deviceId }   = request;
+    const { id: quote_id } = request.params;
+
+    // Fetch category before deleting (for preference signal decrement)
+    const { data: quote } = await supabase
+      .from("quotes")
+      .select("category")
+      .eq("id", quote_id)
+      .maybeSingle();
 
     const { error, count } = await supabase
       .from("vault")
       .delete({ count: "exact" })
-      .eq("device_id", request.deviceId)
+      .eq("device_id", deviceId)
       .eq("quote_id", quote_id);
 
     if (error) return reply.status(500).send({ error: "Failed to remove quote", code: "DB_ERROR" });
     if (count === 0) return reply.status(404).send({ error: "Quote not in vault", code: "NOT_FOUND" });
-    return reply.send({ removed: true, quote_id });
+
+    // Fire-and-forget decrement
+    if (quote?.category) {
+      supabase.rpc("decrement_vault", { p_device_id: deviceId, p_category: quote.category }).catch(() => {});
+    }
+
+    return reply.send({ ok: true });
   });
 }

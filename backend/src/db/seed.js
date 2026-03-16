@@ -24,7 +24,7 @@ const PER_CAT = Math.ceil(TARGET / 4); // 1375
 const CATEGORIES = ["stoicism", "philosophy", "discipline", "reflection"];
 
 const CAT_TO_DIR = {
-  stoicism: "left", philosophy: "up", discipline: "right", reflection: "down",
+  stoicism: "up", philosophy: "down", discipline: "right", reflection: "left",
 };
 
 /* ─── Tags to fetch (untapped) with their preferred default category ────────── */

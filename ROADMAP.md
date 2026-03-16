@@ -81,7 +81,7 @@ Every phase must leave the product meaningfully more valuable to the user — no
 - `backend/src/routes/` — 9 route files
 - `backend/src/db/migrations/001_initial.sql` — 12 tables
 - `backend/src/db/seed.js` — v5, 5,500 quotes, resume-safe
-- `frontend/src/components/` — Onboarding, Settings, PhilosophyMap, DailyChallenge, EvolutionCard, DonationPanel
+- `frontend_legacy/src/components/` — Onboarding, Settings, PhilosophyMap, DailyChallenge, EvolutionCard, DonationPanel
 
 ---
 

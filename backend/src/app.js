@@ -12,23 +12,24 @@ import swipesRoutes     from "./routes/swipes.js";
 import challengesRoutes from "./routes/challenges.js";
 import mapRoutes        from "./routes/map.js";
 import premiumRoutes    from "./routes/premium.js";
+import insightsRoutes   from "./routes/insights.js";
 import deviceIdPlugin   from "./plugins/deviceId.js";
 
 const app = Fastify({ logger: true });
 
-/* ─── Plugins ─────────────────────────────────────────────────────────────────── */
+/* ─── Plugins ──────────────────────────────────────────────────────────────── */
 await app.register(cors, {
   origin: process.env.ALLOWED_ORIGIN || "http://localhost:5173",
 });
 
 await app.register(rateLimit, {
-  max: 60,
-  timeWindow: "1 minute",
+  max:        Number(process.env.RATE_LIMIT_MAX)        || 60,
+  timeWindow: Number(process.env.RATE_LIMIT_WINDOW_MS)  || 60_000,
 });
 
 await app.register(deviceIdPlugin);
 
-/* ─── Routes ──────────────────────────────────────────────────────────────────── */
+/* ─── Routes ───────────────────────────────────────────────────────────────── */
 await app.register(quotesRoutes,     { prefix: "/quotes"     });
 await app.register(vaultRoutes,      { prefix: "/vault"      });
 await app.register(likesRoutes,      { prefix: "/quotes"     });
@@ -38,11 +39,12 @@ await app.register(swipesRoutes,     { prefix: "/swipes"     });
 await app.register(challengesRoutes, { prefix: "/challenges" });
 await app.register(mapRoutes,        { prefix: "/map"        });
 await app.register(premiumRoutes,    { prefix: "/premium"    });
+await app.register(insightsRoutes,   { prefix: "/insights"   });
 
-/* ─── Health check ────────────────────────────────────────────────────────────── */
+/* ─── Health ───────────────────────────────────────────────────────────────── */
 app.get("/health", async () => ({ status: "ok", ts: new Date().toISOString() }));
 
-/* ─── Start ───────────────────────────────────────────────────────────────────── */
+/* ─── Start ────────────────────────────────────────────────────────────────── */
 try {
   await app.listen({ port: Number(process.env.PORT) || 3000, host: "0.0.0.0" });
 } catch (err) {

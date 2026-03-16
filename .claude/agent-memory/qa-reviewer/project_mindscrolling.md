@@ -1,26 +1,65 @@
 ---
 name: MindScrolling - QA context
-description: Known bugs, edge cases, and API contract issues identified in the first QA pass (2026-03-15)
+description: Known bugs, API contract issues, documentation inconsistencies, and edge cases from QA audits on 2026-03-15
 type: project
 ---
 
-First QA review conducted on 2026-03-15 against MindScroll_MVP.jsx and the proposed backend API contract.
+## QA Audit 1 (2026-03-15) — React MVP + API contract
 
-**Critical bugs found in current React MVP:**
-1. Double setState bug in handleSwipe: setReflections is called twice (once flat, once in functional updater), causing reflections to increment by 2 per swipe instead of 1. Streak logic also reads stale `r` — the inner functional updater receives the value AFTER the first increment, making the modulo check off-by-one.
-2. streak and reflections are hardcoded to 3 and 12 at initialization (useState(3), useState(12)) — not real data, no localStorage persistence. These reset to fake values on every page load.
-3. `current` counter grows unbounded. At current > Number.MAX_SAFE_INTEGER (theoretical) it would break, but in practice the modulo `current % deck.length` wraps correctly. Not a blocker but the counter display `current + 1 / deck.length` will eventually show wrong progress once current exceeds deck.length.
-4. The card counter shows `{current + 1} / {deck.length}` — after swiping all 15 cards, current = 15 and display shows "16 / 15", which is confusing UX.
-5. Share button has no handler — onClick is missing entirely. Renders silently broken for users.
-6. handleTap (double-tap like) and the like button in the action bar BOTH call onLike(quote.id). A single click on the like button always fires handleTap first (onClick on parent), then e.stopPropagation() on the button — this works correctly because stopPropagation prevents double trigger, but it's fragile and worth documenting.
+**Critical bugs found in MindScroll_MVP.jsx:**
+1. Double setState: setReflections called twice in handleSwipe, increments by 2 per swipe.
+2. useState(3) and useState(12) hardcoded — streak and reflections reset to fake values on reload.
+3. Card counter shows "16/15" after last swipe.
+4. Share button had no onClick handler — silently broken.
+5. Streak modulo reads stale value after first increment — off-by-one.
 
 **API contract issues:**
-- POST /quotes/:id/like accepts { action: "like"|"unlike" } but the frontend toggle logic infers state from local Set — the backend receives the intended final action, which is correct. However, there is no GET endpoint to retrieve liked quote IDs on app load, making it impossible to restore like state after the page refresh once localStorage is implemented.
-- POST /vault and GET /vault are separate from GET /quotes/feed — but the feed response does not include a `is_saved` or `is_liked` field, so on fresh load the frontend cannot know which cards from the feed are already liked/saved without a second round-trip.
-- DELETE /vault/:quote_id — quote_id in path as string, but quote IDs in the current data are integers. Type mismatch risk between JS number and URL string param if not coerced in backend.
-- GET /stats streak logic is backend-computed, but frontend also computes streak locally (every 5 reflections). These two sources will diverge immediately unless the frontend stops computing streak and defers entirely to /stats.
-- No error response contract defined for any endpoint (no 4xx/5xx shape).
-- No rate limiting or abuse protection documented on POST /quotes/:id/like.
+- No GET endpoint for liked quote IDs — like state unrestorable on reload.
+- Feed response lacks is_saved / is_liked fields — extra round-trip needed.
+- DELETE /vault/:quote_id — type mismatch risk (string path vs integer ID).
+- Dual streak calculation (frontend + backend) will diverge.
+- No error response contract (no 4xx/5xx shape).
+- No rate limiting documented on POST /quotes/:id/like.
 
-**Why:** These issues were found during MVP + localStorage + multilanguage readiness review.
-**How to apply:** Reference this in future QA passes to track which issues were fixed vs still open.
+---
+
+## QA Audit 2 (2026-03-15) — Full documentation audit
+
+### CRITICAL: Swipe direction conflict across documents
+
+The authoritative mappings differ across files:
+
+| Source | LEFT | RIGHT | UP | DOWN |
+|---|---|---|---|---|
+| seed.js (line 27) | stoicism | discipline | philosophy | reflection |
+| README.md diagram | stoicism | discipline | philosophy | reflection |
+| ARCHITECTURE.md section 2 | stoicism | discipline | philosophy | reflection |
+| SCRUM.md Sprint 5 table | stoicism | discipline | philosophy | reflection |
+| **feed_constants.dart (actual code)** | **reflection** | **discipline** | **stoicism** | **philosophy** |
+
+The Flutter app code (feed_constants.dart) is INVERTED from all documentation for LEFT (stoicism vs reflection) and DOWN/UP (philosophy vs stoicism). This is the highest-severity finding.
+
+### Other critical findings:
+- MindScroll_MVP.jsx is listed in .gitignore (line 173) — the MVP source file is excluded from tracking. If this is intentional it should be documented; if not, it's a data-loss risk.
+- tags_temp.json is listed in .gitignore (line 171) — also excluded from tracking, exists on disk.
+- `frontend/` directory exists on disk (not a legacy directory) — README and ARCHITECTURE only reference `frontend_legacy/`. The active `frontend/` is completely undocumented.
+- `cloud/`, `Agent Memory/`, and `Agents/` directories referenced in no docs — confirmed non-existent on disk (not an issue, just confirmed).
+- BACKLOG.md is stale: still shows Sprint 0/1/2 as future planning with "decisions to resolve before Sprint 1" — all of these were resolved in Sprints 0–4. Document predates the current Sprint 5 state.
+- BACKLOG.md does not reflect Sprint 3, 4, or 5 work at all.
+
+### Medium findings:
+- pubspec.yaml font family is "Playfair" — README and ARCHITECTURE say "Playfair Display". Minor inconsistency (family name alias only).
+- pubspec.yaml declares 14 dependencies (http, flutter_riverpod, riverpod_annotation, shared_preferences, flutter_secure_storage, uuid, go_router, flutter_card_swiper, share_plus, url_launcher, screenshot, image_gallery_saver, flutter_localizations, intl, shimmer = 15 total). ROADMAP.md Phase 3 claims "14 dependencies" — actual count is 15.
+- SCRUM.md Sprint 4 period is "2026-03-15 al 2026-04-18" — same start date as Sprint 3 ("2026-04-05 al 2026-04-18"). Sprint 4 start date is wrong.
+- README.md env table lists PREMIUM_BASE_PRICE_USD but .env.example does not include RATE_LIMIT_MAX / RATE_LIMIT_WINDOW_MS — README table omits these two variables that are in .env.example.
+- ARCHITECTURE.md scoring formula coefficients sum to 0.75 (0.35+0.15+0.10+0.10+0.05) — missing 0.25. The formula is incomplete or the weights don't sum to 1.0.
+- SCRUM.md feed composition: "60%/20%/10%/10%" for batch of 20 = 12/4/2/2 quotes. ARCHITECTURE.md says "12/4/2/2" (consistent numerically) but labels them differently: "dominant/secondary/exploration/special". Minor label discrepancy.
+- .gitignore line 29: package-lock.json is ignored — this is non-standard for a Node.js project and will make reproducible installs harder for contributors.
+- .gitignore line 173: MindScroll_MVP.jsx ignored — but README.md refers to it as an existing deliverable.
+- CONTRIBUTING.md line 28: clone URL is `https://github.com/your-org/mindscrolling.git` — placeholder not replaced.
+- ROADMAP.md Phase 2 deliverables list references `frontend/src/components/` — but the structure is now `frontend_legacy/`.
+- SCRUM.md Sprint 4 file structure references `frontend/` not `frontend_legacy/`.
+- No API_CONTRACT.md file exists — BACKLOG.md S2-05 required it as an acceptance criterion.
+
+**Why:** Full documentation audit of all 9 files on 2026-03-15.
+**How to apply:** Reference in future QA passes to track resolution status per finding.

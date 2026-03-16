@@ -1,257 +1,301 @@
-<p align="center">
-  <h1 align="center">MindScrolling</h1>
-  <p align="center">
-    <strong>Replace doom-scrolling with philosophy.</strong><br/>
-    A swipe-based mobile app that delivers curated philosophical wisdom — one card at a time.
-  </p>
-  <p align="center">
-    <img src="https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter" />
-    <img src="https://img.shields.io/badge/Node.js-Fastify-000000?logo=fastify" />
-    <img src="https://img.shields.io/badge/Database-Supabase-3ECF8E?logo=supabase" />
-    <img src="https://img.shields.io/badge/Status-Active-brightgreen" />
-    <img src="https://img.shields.io/badge/License-MIT-blue" />
-  </p>
-</p>
+🧠 MindScrolling
+Replace doom-scrolling with philosophy.
 
----
+MindScrolling is a mobile-first philosophical discovery app designed to transform endless scrolling into intentional reflection.
 
-## The Problem
+Instead of consuming noise, users explore curated philosophical insights through a gesture-based feed that adapts to their thinking patterns.
 
-The average person spends 3–5 hours daily scrolling through content that offers no lasting value. Attention is the most finite resource of the modern era — and it is being consumed at scale by systems optimized for engagement, not growth.
+Scroll less. Think more.
 
-## The Vision
+⭐ Why This Project Exists
 
-MindScrolling hijacks the dopamine loop of social scrolling and replaces it with something that compounds over time: philosophical wisdom, self-reflection, and intellectual growth.
+Most digital platforms optimize for:
 
-Same gesture. Different outcome.
+engagement
 
----
+attention capture
 
-## What It Does
+algorithmic addiction
 
-You swipe cards in 4 directions. Each direction is a category:
+MindScrolling explores the opposite idea.
 
-```
-              ↑ Philosophy / Existential
-              │
-  Stoicism ←──┼──→ Discipline / Growth
-              │
-              ↓ Reflection / Life
-```
+A platform designed to encourage:
 
-The app learns your preferences through every swipe and surfaces content aligned with your intellectual profile. Over time, it builds a **Philosophy Map** — a visual representation of your intellectual evolution.
+reflection
 
----
+intellectual curiosity
 
-## Key Features
+philosophical thinking
 
-| Feature | Description |
-|---|---|
-| **4-direction swipe feed** | Stoicism, Philosophy, Discipline, Reflection |
-| **Adaptive algorithm** | Feed personalizes based on swipe history and onboarding profile |
-| **Philosophy Map** | Visual score of your intellectual categories, evolving over time |
-| **Daily Challenge** | One philosophical challenge per day to build the habit |
-| **Vault** | Save quotes that resonate |
-| **Multilingual** | English and Spanish, auto-detected from device |
-| **Premium tier** | One-time $2.99 unlock — no subscriptions |
-| **Donation support** | Optional support via Buy Me a Coffee |
-| **Offline fallback** | Bundled quote dataset works without internet |
-| **No accounts required** | Anonymous device-based identity |
+🚀 Core Concept
 
----
+MindScrolling introduces a four-direction swipe interface where each direction represents a philosophical dimension.
 
-## Architecture Overview
+Swipe	Category
+↑ Up	Wisdom / Stoicism
+→ Right	Discipline / Growth
+← Left	Reflection / Life
+↓ Down	Existential / Philosophy
 
-```
-┌─────────────────────────────────────────────┐
-│              Flutter Mobile App              │
-│  (iOS + Android, Riverpod, GoRouter)        │
-└───────────────────┬─────────────────────────┘
-                    │ HTTP + X-Device-ID header
-┌───────────────────▼─────────────────────────┐
-│           Node.js + Fastify Backend          │
-│  (REST API, rate limiting, device auth)     │
-└───────────────────┬─────────────────────────┘
-                    │ Supabase client
-┌───────────────────▼─────────────────────────┐
-│         PostgreSQL via Supabase              │
-│  (quotes, users, vault, preferences,        │
-│   swipe events, challenges, purchases)      │
-└─────────────────────────────────────────────┘
-```
+Each interaction trains the feed engine.
 
----
+Over time the system builds a map of your thinking.
 
-## Stack
+🧭 Philosophy Map
 
-| Layer | Technology |
-|---|---|
-| Mobile | Flutter 3.x (Dart) |
-| State management | Riverpod 2.x |
-| Navigation | GoRouter 13.x |
-| Backend | Node.js + Fastify 4.x |
-| Database | PostgreSQL via Supabase |
-| Auth | Anonymous device ID (UUID v4) |
-| Storage | SharedPreferences + flutter_secure_storage |
-| Fonts | Playfair Display + DM Sans |
+MindScrolling visualizes how your interests evolve.
 
----
+Example dimensions:
 
-## Project Structure
+wisdom
 
-```
-MindScrolling/
-├── flutter_app/               ← Mobile app (Flutter)
-│   ├── lib/
-│   │   ├── app/               ← Router, theme, localization
-│   │   ├── core/              ← Constants, network, storage, utils
-│   │   ├── data/              ← Models, datasources, repositories
-│   │   ├── features/          ← One folder per screen/feature
-│   │   └── shared/            ← Reusable widgets and extensions
-│   └── pubspec.yaml
+discipline
+
+reflection
+
+existential thinking
+
+The result is a personal intellectual profile.
+
+🧩 Key Features
+🧠 Intelligent Feed
+
+Recommendation engine based on:
+
+swipe behavior
+
+likes
+
+saves
+
+reading time
+
+exploration balance
+
+📚 Vault
+
+Save meaningful quotes and revisit them later.
+
+Build your personal library of ideas.
+
+🧭 Philosophy Map
+
+Visualize how your thinking evolves.
+
+🔥 Daily Philosophy Challenge
+
+Short prompts that encourage deeper reflection.
+
+📤 Share & Export
+
+Export beautiful quote cards and share ideas.
+
+🌍 Multilingual
+
+Automatic language detection.
+
+Currently supports:
+
+English
+
+Spanish
+
+💎 Premium Packs (Optional)
+
+Unlock curated collections like:
+
+Stoicism classics
+
+Eastern philosophy
+
+Modern thinkers
+
+No subscriptions.
+
+☕ Minimal Monetization
+
+MindScrolling avoids ads.
+
+Supported by:
+
+optional premium packs
+
+voluntary donations
+
+🏗 Architecture
+
+MindScrolling is built as a scalable modular platform.
+
+Mobile Client
+
+Flutter
+
+Supports:
+
+Android
+
+iOS
+
+Backend
+
+Node.js + Fastify
+
+Handles:
+
+feed generation
+
+swipe signals
+
+user preference modeling
+
+challenge engine
+
+philosophy analytics
+
+Database
+
+PostgreSQL via Supabase.
+
+Stores:
+
+quotes
+
+swipe events
+
+vault
+
+preference data
+
+philosophy snapshots
+
+challenges
+
+🧠 Feed Engine
+
+The recommendation system combines behavioral signals.
+
+Example distribution:
+
+60% dominant interest
+25% secondary interest
+15% exploration
+
+Additional feed elements may include:
+
+reflection prompts
+
+challenge cards
+
+evolution insights
+
+📂 Project Structure
+MindScrolling
 │
-├── backend/                   ← REST API (Node.js + Fastify)
-│   └── src/
-│       ├── routes/            ← quotes, vault, profile, map, challenges...
-│       ├── plugins/           ← device ID middleware
-│       └── db/
-│           ├── migrations/    ← SQL schema
-│           └── seed.js        ← 5,500 philosophical quotes seeder
+├ backend
+│   ├ routes
+│   ├ services
+│   ├ db
+│   └ plugins
 │
-├── frontend_legacy/           ← Original React/Vite web app (reference only)
+├ flutter_app
+│   └ lib
+│       ├ core
+│       ├ data
+│       ├ features
+│       └ shared
 │
-├── ARCHITECTURE.md            ← Full system architecture
-├── CONTRIBUTING.md            ← How to contribute
-├── ROADMAP.md                 ← Product and technical roadmap
-├── SCRUM.md                   ← Sprint history and backlog
-└── .env.example               ← Environment variables reference
-```
-
----
-
-## Quick Start — Backend
-
-```bash
-# 1. Install dependencies
+├ frontend_legacy
+│
+├ Agents
+├ Agent Memory
+├ cloud
+│
+├ SCRUM.md
+├ BACKLOG.md
+└ README.md
+⚡ Quick Start
+Backend
 cd backend
 npm install
-
-# 2. Configure environment
-cp ../.env.example .env
-# Fill in SUPABASE_URL and SUPABASE_ANON_KEY
-
-# 3. Run the schema migration
-# Open Supabase SQL Editor and run:
-# backend/src/db/migrations/001_initial.sql
-
-# 4. Seed 5,500 philosophical quotes
-node src/db/seed.js
-
-# 5. Start the server
 npm run dev
-# → http://localhost:3000
 
-# 6. Verify
-curl http://localhost:3000/health
-# → { "status": "ok" }
-```
+Server runs at:
 
----
-
-## Quick Start — Flutter App
-
-**Prerequisites:** Flutter SDK 3.x installed ([install guide](https://docs.flutter.dev/get-started/install))
-
-```bash
-# 1. Install dependencies
+http://localhost:3000
+Flutter Mobile App
 cd flutter_app
 flutter pub get
-
-# 2. Check setup
-flutter doctor
-
-# 3. List available devices
-flutter devices
-
-# 4. Run on emulator or physical device
 flutter run
 
-# Build release APK
-flutter build apk --release
+Supported platforms:
 
-# Build for iOS (requires macOS + Xcode)
-flutter build ios --release
-```
+Android
 
----
+iOS
 
-## Environment Variables
+🔧 Environment Variables
 
-Copy `.env.example` to `.env` in the root and in `backend/`:
+Backend .env
 
-| Variable | Description |
-|---|---|
-| `SUPABASE_URL` | Your Supabase project URL |
-| `SUPABASE_ANON_KEY` | Supabase anon/public API key |
-| `PORT` | Backend port (default: 3000) |
-| `ALLOWED_ORIGIN` | CORS allowed origin |
-| `API_BASE_URL` | Backend URL used by Flutter |
-| `PREMIUM_BASE_PRICE_USD` | Base price for premium unlock |
-| `DONATION_LINK` | External donation URL |
-| `APP_DEFAULT_LANGUAGE` | Default language (`en` or `es`) |
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+DONATION_LINK=
+🧪 Development Workflow
 
----
+MindScrolling follows a lightweight Scrum process.
 
-## API Endpoints
+Key documents:
 
-| Method | Path | Description |
-|---|---|---|
-| GET | `/health` | Server health check |
-| GET | `/quotes/feed` | Adaptive philosophical feed |
-| POST | `/quotes/:id/like` | Like or unlike a quote |
-| GET | `/vault` | User's saved quotes |
-| POST | `/vault` | Save a quote to vault |
-| DELETE | `/vault/:id` | Remove from vault |
-| GET | `/stats` | Streak and reflection counts |
-| POST | `/profile` | Save onboarding profile |
-| GET | `/profile` | Get user profile |
-| POST | `/swipes` | Record swipe event |
-| GET | `/challenges/today` | Today's daily challenge |
-| POST | `/challenges/:id/progress` | Update challenge progress |
-| GET | `/map` | Philosophy map scores |
-| POST | `/map/snapshot` | Save evolution snapshot |
-| GET | `/premium/status` | Premium status |
-| POST | `/premium/unlock` | Unlock premium |
+SCRUM.md
 
----
+BACKLOG.md
 
-## Roadmap Summary
+Focus areas:
 
-- **Phase 1–3** ✅ MVP, backend, Flutter migration
-- **Phase 4** 🔄 Philosophy map, evolution tracking
-- **Phase 5** 🔜 Premium, donations, content packs
-- **Phase 6** 📅 Scale to 100k users
-- **Phase 7** 📅 Scale to 1M+ users
+feed intelligence
 
-See [ROADMAP.md](ROADMAP.md) for the full plan.
+mobile UX
 
----
+scalability
 
-## Contributing
+philosophical content quality
 
-We welcome contributions from developers, content curators, and philosophers.
+🛣 Roadmap
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, branch conventions, and code standards.
+Planned improvements include:
 
----
+philosophy evolution analytics
 
-## License
+push notifications for reflection
 
-MIT License — see [LICENSE](LICENSE) for details.
+curated knowledge packs
 
----
+offline quote cache
 
-<p align="center">
-  <em>"The impediment to action advances action. What stands in the way becomes the way."</em><br/>
-  <strong>— Marcus Aurelius</strong>
-</p>
+improved recommendation engine
+
+🤝 Contributing
+
+Contributions are welcome.
+
+Future contributors will help expand:
+
+philosophical datasets
+
+feed intelligence
+
+UI/UX improvements
+
+language support
+
+📜 License
+
+MIT License
+
+🧠 Final Thought
+
+Most apps optimize for attention.
+
+MindScrolling tries to optimize for thought.
+
+⭐ If you like the idea, consider starring the project.

@@ -39,10 +39,10 @@ User
  ▼
 Swipe Gesture (4 directions)
  │
- ├── LEFT  → Stoicism
- ├── RIGHT → Discipline
- ├── UP    → Philosophy
- └── DOWN  → Reflection
+ ├── UP    → Stoicism / Wisdom
+ ├── RIGHT → Discipline / Growth
+ ├── LEFT  → Reflection / Life
+ └── DOWN  → Philosophy / Existential
  │
  ▼
 Swipe Event Recorded
@@ -202,7 +202,7 @@ user_preferences    ← Category weights (like + swipe counts + scores)
 seen_quotes         ← Feed exclusion list per device
 user_profiles       ← Onboarding data (age, interest, goal, lang)
 swipe_events        ← Raw swipe log with dwell time
-user_pref_snapshots ← Weekly evolution snapshots
+user_preference_snapshots ← Weekly evolution snapshots
 daily_challenges    ← One challenge per calendar date
 challenge_progress  ← Per-device progress per challenge
 purchases           ← Premium unlock records
@@ -252,69 +252,123 @@ PhilosophyMapModel
 
 ---
 
-## 8. Adaptive Philosophical Feed Engine
+## 8. AI-Enhanced Philosophical Feed Engine
 
-### Scoring Formula
+Full specification: [FEED_ALGORITHM.md](FEED_ALGORITHM.md)
+
+The feed operates in two modes determined by the device's interaction history:
+
+| Mode | Condition | Retrieval |
+|---|---|---|
+| **Behavioural** | New user — no preference vector | Category affinity → `get_feed_candidates` RPC |
+| **Hybrid (AI)** | Returning user — preference vector built | Semantic ANN search → `match_quotes` RPC |
+
+Transition from behavioural → hybrid is silent and automatic after the first like, vault save, or 5-second dwell.
+
+### Dual Signal Model
 
 ```
-score(quote) =
-  (category_affinity   × 0.35)   // weighted by like×3 + swipe + base_5
-  + (onboarding_boost  × 0.15)   // interest match from profile
-  + (goal_match        × 0.10)   // goal-to-category affinity
-  + (like_history      × 0.10)   // category liked most historically
-  + (random_novelty    × 0.05)   // exploration factor
-  - author_repeat_penalty        // -0.1 if same author in last 3 seen
-  - premium_gate                 // exclude is_premium=true for free users
+Behavioural Layer                    Semantic Layer
+─────────────────                    ──────────────
+user_preferences table               user_preference_vectors table
+  like_count    × 3                  512-dim EMA vector
+  vault_count   × 5  (strongest)     Updated by: like (α=0.20)
+  swipe_count   × 1                             vault (α=0.25)
+  skip_count    × −2                            dwell ≥5s (α=0.10)
+  total_dwell_ms                     Voyage AI voyage-3-lite embeddings
+```
+
+### EMA Preference Vector Update
+
+```
+v_new = L2_normalize( (1−α) × v_current  +  α × v_quote )
+
+α:  vault save = 0.25  (strongest intent signal)
+    like       = 0.20
+    long dwell = 0.10  (≥ 5 seconds reading time)
+```
+
+All vector updates are **fire-and-forget** — never block the API response.
+
+### Scoring Formulas
+
+**Hybrid (returning user):**
+```
+score(q) = semantic_similarity(q)      × 0.45   // cosine sim via HNSW index
+         + normalised_affinity(q.cat)  × 0.30   // behavioural category weight
+         + dwell_signal(q.cat)         × 0.10   // avg_dwell / 4000ms, 0-1
+         + random()                    × 0.10   // exploration noise
+         + challenge_boost(q)          × 0.05   // 1 if category = today's challenge
+         − author_penalty(q)                    // −0.15 for recent author repeat
+
+// Weights sum to 1.0
+```
+
+**Behavioural (new user):**
+```
+score(q) = normalised_affinity(q.cat) × 0.50
+         + dwell_signal(q.cat)        × 0.20
+         + random()                   × 0.15
+         + challenge_boost(q)         × 0.10
+         − author_penalty(q)
+
+// Weights sum to 0.95 + up to 0.10 challenge
 ```
 
 ### Algorithm Flow
 
 ```
-User Signals (swipes, likes, dwell time)
-            │
-            ▼
-    Preference Model
-    ┌─────────────────────────────┐
-    │ user_preferences table      │
-    │ like_count × 3 per category │
-    │ swipe_count × 1 per category│
-    │ base weight = 5             │
-    └────────────┬────────────────┘
-                 │
-                 ▼
-    Onboarding Boost
-    ┌─────────────────────────────┐
-    │ user_profiles.interest      │
-    │ match → +10 to affinity     │
-    │ user_profiles.goal          │
-    │ match → +8 to affinity      │
-    └────────────┬────────────────┘
-                 │
-                 ▼
-    Feed Ranking (SQL + Node scoring)
-    ┌─────────────────────────────┐
-    │ Exclude seen_quotes         │
-    │ Apply premium gate          │
-    │ Score each candidate        │
-    │ Sort by score DESC          │
-    │ Apply author repeat penalty │
-    │ Paginate with cursor        │
-    └────────────┬────────────────┘
-                 │
-                 ▼
-    Quote Delivery (20 per batch)
-                 │
-                 ▼
-    New Signals → loop
+Device Signals (swipes, likes, vault saves, dwell time)
+                         │
+                         │  fire-and-forget: updatePreferenceVector()
+                         ├──────────────────────────────────────────►  user_preference_vectors
+                         │
+                         ▼
+                  parallel Promise.all
+        ┌──────────────────────────────────┐
+        │  user_profiles  (onboarding)     │
+        │  user_preferences (signals)      │
+        │  users           (is_premium)    │
+        │  daily_challenges (today cat)    │
+        │  user_preference_vectors (vec?)  │
+        └──────────────┬───────────────────┘
+                       │
+            has preference vector?
+               /                \
+             YES                 NO
+              │                  │
+    match_quotes RPC    get_feed_candidates RPC
+    (ANN cosine sim +   (category filter +
+     NOT EXISTS)         NOT EXISTS)
+    returns similarity   returns pool
+              │                  │
+              └─────────┬────────┘
+                        │
+                   JS Scoring
+                   Sort DESC
+                   Diversity cap (≤ 60%/cat)
+                   Shuffle
+                        │
+                   upsert seen_quotes
+                        │
+                   Response { data, algorithm }
 ```
+
+### AI Weekly Insight: GET /insights/weekly
+
+**Model:** `claude-haiku-4-5-20251001`
+**Cache:** 24-hour TTL in `ai_insights` table
+
+Input context: dominant category, philosophy map scores, 3 recently liked quotes, streak + total reflections.
+
+Output: 2–3 sentences of personalised philosophical guidance generated by Claude. Cached per device for 24 hours. Gracefully absent if `ANTHROPIC_API_KEY` not configured.
 
 ### Feed Composition (per batch of 20)
 
 ```
-12 quotes  → dominant category (highest affinity)
- 4 quotes  → secondary category
- 2 quotes  → exploration (lowest affinity, random)
- 2 slots   → special cards (challenge card / evolution card)
+≤ 12 quotes  → dominant categories (60% cap per category)
+≥  3 quotes  → low-affinity categories (diversity floor via overflow)
+   noise     → random() component ensures non-dominant quotes always surface
 ```
 
 ---
@@ -443,7 +497,7 @@ GET /premium/status
 ### Donation Flow
 
 ```
-User taps "Support MindScroll"
+User taps "Support MindScrolling"
       │
       ▼
 url_launcher opens DONATION_LINK
@@ -485,21 +539,83 @@ Price localization (display only):
 
 ## 14. Scalability Plan
 
-| Stage | DAU | Architecture change |
-|---|---|---|
-| Current | 0–500 | Supabase free tier, Railway starter |
-| Phase 6 | 10k–100k | Supabase Pro, connection pooling (pgBouncer), CDN for quote assets |
-| Phase 7 | 100k–1M | Read replicas, Redis cache for feed, background job queue, push notifications |
+> Full stress test analysis with code-level findings: [SCALABILITY.md](SCALABILITY.md)
 
-### Bottlenecks to address at scale
+| Stage | DAU | Rating | Primary action |
+|---|---|---|---|
+| Phase 1 | 0–1k | ✅ Ready | No changes needed |
+| Phase 2 | 1k–10k | ⚠️ Optimize | Parallelize feed queries (Promise.all), fix UUID cursor |
+| Phase 3 | 10k–100k | ❌ Requires work | Replace NOT IN with NOT EXISTS RPC, partition swipe_events, add Redis |
+| Phase 4 | 100k–1M | ❌ Major changes | Precomputed feed, read replicas, swipe event queue, service decomposition |
 
-1. **Feed query** — currently full-table scan with exclusion. At 100k users: partition seen_quotes by device, add partial indexes, consider Redis for hot feeds.
-2. **Swipe events** — high write volume. At 100k DAU: batch writes, async queue (BullMQ or similar).
-3. **Philosophy map** — computed on every request. At scale: materialize scores via cron job, serve from cache.
+### Concrete bottlenecks identified in code
+
+1. **`GET /quotes/feed` makes 7 sequential DB round-trips** — queries 1–4 are independent and can be parallelized with `Promise.all()`. Saves ~30ms per request.
+2. **Cursor uses UUID `gt()` comparison** — UUIDs are random strings; lexicographic comparison is non-deterministic. Bug at every scale. Fix: use `created_at` timestamp cursor.
+3. **NOT IN with 500 UUIDs in URL** — causes `414 URI Too Long` once a user has 300+ seen quotes. Fix: server-side `NOT EXISTS` subquery via Supabase RPC.
+4. **`POST /swipes` makes 5 sequential DB round-trips** — queries 1 and 4 (user read, prefs read) can be parallelized.
+5. **`swipe_events` grows unbounded** — 100k DAU generates 1.1B rows/year. Requires monthly partitioning before Phase 3.
+6. **Rate limiting is IP-based** — shared mobile carrier NAT blocks legitimate users at scale. Fix: key by `X-Device-ID`.
+7. **No caching** — every feed request hits the database. At Phase 3, precompute ranked feed per user via background job and serve from a `pre_computed_feed` table.
 
 ---
 
-## 15. Future Evolution
+## 15. API Error Contract
+
+> Full endpoint specification: [API_CONTRACT.md](API_CONTRACT.md)
+
+All backend endpoints return errors in a consistent JSON envelope:
+
+```json
+{
+  "error": "Human-readable message",
+  "code": "MACHINE_READABLE_CODE"
+}
+```
+
+### Error codes
+
+| HTTP | Code | Meaning |
+|---|---|---|
+| 400 | `INVALID_BODY` | Request body failed validation |
+| 400 | `MISSING_FIELD` | Required field absent from body |
+| 400 | `INVALID_DIRECTION` | `direction` not in `{up, down, left, right}` |
+| 401 | `MISSING_DEVICE_ID` | `X-Device-ID` header absent |
+| 404 | `NOT_FOUND` | Resource does not exist |
+| 409 | `ALREADY_EXISTS` | Duplicate resource (e.g. vault duplicate) |
+| 429 | `RATE_LIMITED` | Exceeded 60 requests per minute |
+| 500 | `INTERNAL_ERROR` | Unexpected server error |
+
+### Special cases
+
+- `POST /vault` with an already-saved quote returns `200` (not `409`) with `{ "status": "already_saved" }`.
+- `POST /premium/unlock` is idempotent — calling it twice for the same device returns `200` both times.
+- `GET /profile` returns `null` (not 404) when no profile exists yet.
+- `GET /challenges/today` returns a hardcoded default challenge (not 404) when no challenge is scheduled.
+
+---
+
+## 16. Canonical Swipe Direction Reference
+
+This table is the **single source of truth** for direction → category mapping across all layers.
+
+| Direction | Category | `swipe_dir` in DB | Flutter `directionToCategory` |
+|---|---|---|---|
+| ↑ up | stoicism | `up` | `'up' → 'stoicism'` |
+| → right | discipline | `right` | `'right' → 'discipline'` |
+| ← left | reflection | `left` | `'left' → 'reflection'` |
+| ↓ down | philosophy | `down` | `'down' → 'philosophy'` |
+
+**Implementation locations:**
+- Flutter: `flutter_app/lib/core/constants/feed_constants.dart` → `directionToCategory`
+- Backend seed: `backend/src/db/seed.js` → `CAT_TO_DIR`
+- DB migration: `backend/src/db/migrations/002_fix_swipe_dir.sql`
+
+> Any change to this mapping requires updating all three locations simultaneously.
+
+---
+
+## 17. Future Evolution
 
 | Area | Planned direction |
 |---|---|
