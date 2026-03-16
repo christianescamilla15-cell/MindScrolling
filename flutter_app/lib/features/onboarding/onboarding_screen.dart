@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'onboarding_controller.dart';
 import 'widgets/onboarding_intro.dart';
 import 'widgets/age_selector.dart';
@@ -103,7 +104,7 @@ class _Page0 extends StatelessWidget {
           const OnboardingIntro(),
           const SizedBox(height: 40),
           _PrimaryButton(
-            label: 'Next',
+            label: context.tr.onboardingNext,
             onPressed: onNext,
           ),
           const SizedBox(height: 24),
@@ -131,13 +132,13 @@ class _Page1 extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           Text(
-            'Tell us about yourself',
+            context.tr.tellUsAboutYourself,
             style: AppTypography.displaySmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'All fields are optional.',
+            context.tr.allFieldsOptional,
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.textMuted,
             ),
@@ -165,7 +166,7 @@ class _Page1 extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           _PrimaryButton(
-            label: 'Begin Scrolling',
+            label: context.tr.beginScrolling,
             onPressed: onNext,
           ),
           const SizedBox(height: 24),
@@ -200,7 +201,7 @@ class _Page2 extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            "You're all set.",
+            context.tr.youreAllSet,
             style: AppTypography.displayLarge.copyWith(
               fontStyle: FontStyle.italic,
             ),
@@ -208,7 +209,7 @@ class _Page2 extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Wisdom awaits in every direction.',
+            context.tr.wisdomAwaits,
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -216,7 +217,7 @@ class _Page2 extends StatelessWidget {
           ),
           const SizedBox(height: 56),
           _PrimaryButton(
-            label: isCompleting ? 'Starting…' : 'Start Scrolling',
+            label: isCompleting ? context.tr.starting : context.tr.startScrolling,
             onPressed: isCompleting ? null : onStart,
           ),
         ],
@@ -240,7 +241,7 @@ class _LangToggle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Language',
+          context.tr.language,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textSecondary,
           ),

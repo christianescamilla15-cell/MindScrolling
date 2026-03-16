@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// Animated swipe direction hint overlay. Shown on first launch, fades out
 /// after 2.5 seconds.
@@ -46,6 +47,8 @@ class _SwipeHintState extends State<SwipeHint>
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+
     return FadeTransition(
       opacity: _opacity,
       child: Container(
@@ -53,19 +56,35 @@ class _SwipeHintState extends State<SwipeHint>
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
-              _DirectionHint(icon: Icons.arrow_upward, label: 'PHILOSOPHY', color: AppColors.philosophy),
-              SizedBox(height: 32),
+            children: [
+              _DirectionHint(
+                icon: Icons.arrow_upward,
+                label: tr.hintStoicism,
+                color: AppColors.stoicism,
+              ),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _DirectionHint(icon: Icons.arrow_back, label: 'STOICISM', color: AppColors.stoicism),
-                  SizedBox(width: 64),
-                  _DirectionHint(icon: Icons.arrow_forward, label: 'DISCIPLINE', color: AppColors.discipline),
+                  _DirectionHint(
+                    icon: Icons.arrow_back,
+                    label: tr.hintReflection,
+                    color: AppColors.reflection,
+                  ),
+                  const SizedBox(width: 64),
+                  _DirectionHint(
+                    icon: Icons.arrow_forward,
+                    label: tr.hintDiscipline,
+                    color: AppColors.discipline,
+                  ),
                 ],
               ),
-              SizedBox(height: 32),
-              _DirectionHint(icon: Icons.arrow_downward, label: 'REFLECTION', color: AppColors.reflection),
+              const SizedBox(height: 32),
+              _DirectionHint(
+                icon: Icons.arrow_downward,
+                label: tr.hintPhilosophy,
+                color: AppColors.philosophy,
+              ),
             ],
           ),
         ),

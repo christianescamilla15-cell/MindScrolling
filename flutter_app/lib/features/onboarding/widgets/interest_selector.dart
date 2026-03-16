@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// Vertical list of 5 selectable interest tiles.
 ///
@@ -16,31 +17,47 @@ class InterestSelector extends StatelessWidget {
   final String? selected;
   final ValueChanged<String> onSelected;
 
-  static const List<({String value, String label, String emoji})> _options = [
-    (value: 'philosophy', label: 'Philosophy', emoji: '📚'),
-    (value: 'stoicism', label: 'Stoicism', emoji: '🌿'),
-    (value: 'personal_growth', label: 'Personal Growth', emoji: '📈'),
-    (value: 'mindfulness', label: 'Mindfulness', emoji: '🧘'),
-    (value: 'curiosity', label: 'Curiosity', emoji: '💡'),
+  // Values and emojis are locale-independent; labels are resolved at build time.
+  static const List<({String value, String emoji})> _optionBases = [
+    (value: 'philosophy', emoji: '📚'),
+    (value: 'stoicism', emoji: '🌿'),
+    (value: 'personal_growth', emoji: '📈'),
+    (value: 'mindfulness', emoji: '🧘'),
+    (value: 'curiosity', emoji: '💡'),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+
+    final labels = [
+      tr.optPhilosophy,
+      tr.optStoicism,
+      tr.optPersonalGrowth,
+      tr.optMindfulness,
+      tr.optCuriosity,
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Primary interest',
+          tr.primaryInterest,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textSecondary,
           ),
         ),
         const SizedBox(height: 10),
-        ...(_options.map((opt) => _InterestTile(
-              option: opt,
-              isSelected: selected == opt.value,
-              onTap: () => onSelected(opt.value),
-            ))),
+        ...List.generate(_optionBases.length, (i) {
+          final base = _optionBases[i];
+          return _InterestTile(
+            value: base.value,
+            label: labels[i],
+            emoji: base.emoji,
+            isSelected: selected == base.value,
+            onTap: () => onSelected(base.value),
+          );
+        }),
       ],
     );
   }
@@ -48,12 +65,16 @@ class InterestSelector extends StatelessWidget {
 
 class _InterestTile extends StatelessWidget {
   const _InterestTile({
-    required this.option,
+    required this.value,
+    required this.label,
+    required this.emoji,
     required this.isSelected,
     required this.onTap,
   });
 
-  final ({String value, String label, String emoji}) option;
+  final String value;
+  final String label;
+  final String emoji;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -77,10 +98,10 @@ class _InterestTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(option.emoji, style: const TextStyle(fontSize: 20)),
+            Text(emoji, style: const TextStyle(fontSize: 20)),
             const SizedBox(width: 12),
             Text(
-              option.label,
+              label,
               style: AppTypography.bodyMedium.copyWith(
                 color: isSelected ? AppColors.stoicism : AppColors.textPrimary,
                 fontWeight:

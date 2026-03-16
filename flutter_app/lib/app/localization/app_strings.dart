@@ -87,4 +87,154 @@ abstract class AppStrings {
   // Category labels map — keyed by category slug
   // ------------------------------------------------------------------
   Map<String, String> get categoryLabels;
+
+  // ------------------------------------------------------------------
+  // Navigation bottom bar
+  // ------------------------------------------------------------------
+  String get feed;
+  String get map;
+  String get insight;
+
+  // ------------------------------------------------------------------
+  // Settings screen
+  // ------------------------------------------------------------------
+  String get navigateTo;
+  String get about;
+  String get reset;
+  String get philosophyMap;
+  String get dailyChallenge;
+  String get premium;
+  String get donations;
+  String get appVersion;
+  String get privacyPolicy;
+  String get resetOnboarding;
+  String get resetOnboardingTitle;
+  String get resetOnboardingMsg;
+  String get cancel;
+  String get onboardingResetDone;
+  String get couldNotOpenPrivacy;
+
+  // ------------------------------------------------------------------
+  // Feed screen
+  // ------------------------------------------------------------------
+  String get couldNotLoadQuotes;
+  String get noQuotesAvailable;
+  String get noMoreQuotes;
+  String get tryAgain;
+
+  // ------------------------------------------------------------------
+  // Onboarding screen
+  // ------------------------------------------------------------------
+  String get tellUsAboutYourself;
+  String get allFieldsOptional;
+  String get beginScrolling;
+  String get youreAllSet;
+  String get wisdomAwaits;
+  String get starting;
+  String get startScrolling;
+  String get welcomeTitle;
+  String get welcomeSubtitle;
+  String get swipeToExplore;
+  String get primaryInterest;
+  String get yourGoal;
+
+  // ------------------------------------------------------------------
+  // Onboarding options
+  // ------------------------------------------------------------------
+  String get optPhilosophy;
+  String get optStoicism;
+  String get optPersonalGrowth;
+  String get optMindfulness;
+  String get optCuriosity;
+  String get optCalmMind;
+  String get optDiscipline;
+  String get optFindingMeaning;
+  String get optEmotionalClarity;
+
+  // ------------------------------------------------------------------
+  // Insights screen
+  // ------------------------------------------------------------------
+  String get weeklyInsight;
+  String get aiBadge;
+  String get refreshInsight;
+  String get insightForming;
+  String get insightFormingBody;
+  String get insightTip1;
+  String get insightTip2;
+  String get insightTip3;
+  String get generatedByAI;
+  String get couldNotRefresh;
+  String get justGenerated;
+  String get yesterday;
+  String get daysAgo;
+
+  // ------------------------------------------------------------------
+  // Vault screen
+  // ------------------------------------------------------------------
+  String get emptyVaultMsg;
+
+  // ------------------------------------------------------------------
+  // Challenges screen
+  // ------------------------------------------------------------------
+  String get dailyReflection;
+  String get defaultChallengeDesc;
+  String get offlineChallenge;
+  String get logOneStep;
+  String get completeChallenge;
+  String get challengeCompleted;
+  String get complete;
+  String get progress;
+  String get dailyChallengeLabel;
+  String get percentComplete;
+  String get trackThis;
+
+  // ------------------------------------------------------------------
+  // Premium screen
+  // ------------------------------------------------------------------
+  String get unlockFullExperience;
+  String get premiumSubtitle;
+  String get alreadyPremium;
+  String get featureColumn;
+  String get freeColumn;
+  String get premiumColumn;
+  String get dailyFeed;
+  String get limitedQuotes;
+  String get unlimited;
+  String get ads;
+  String get occasional;
+  String get none;
+  String get vaultSize;
+  String get savedQuotes20;
+  String get dailyChallenges;
+  String get viewOnly;
+  String get fullAccess;
+  String get basic;
+  String get fullPlusHistory;
+  String get oneTime;
+  String get oneTimePurchase;
+
+  // ------------------------------------------------------------------
+  // Philosophy Map screen
+  // ------------------------------------------------------------------
+  String get mapSubtitle;
+  String get saveSnapshot;
+  String get snapshotSaved;
+  String get snapshotError;
+
+  // ------------------------------------------------------------------
+  // Donations screen
+  // ------------------------------------------------------------------
+  String get supportMindScroll;
+  String get donationDescription;
+  String get everyContribution;
+  String get buyMeCoffee;
+  String get couldNotOpenDonation;
+
+  // ------------------------------------------------------------------
+  // Swipe hint overlay
+  // ------------------------------------------------------------------
+  String get hintPhilosophy;
+  String get hintStoicism;
+  String get hintDiscipline;
+  String get hintReflection;
 }

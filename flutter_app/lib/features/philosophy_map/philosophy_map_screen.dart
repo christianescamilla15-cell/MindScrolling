@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'philosophy_map_controller.dart';
 
 // Category accent colors as specified (map-specific palette distinct from
@@ -36,16 +37,16 @@ class _PhilosophyMapScreenState extends ConsumerState<PhilosophyMapScreen> {
     final s = ref.read(philosophyMapStateProvider);
     if (s.snapshotSaved) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Snapshot saved'),
-          backgroundColor: Color(0xFF1C1C22),
+        SnackBar(
+          content: Text(context.tr.snapshotSaved),
+          backgroundColor: const Color(0xFF1C1C22),
           behavior: SnackBarBehavior.floating,
         ),
       );
     } else if (s.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to save snapshot: ${s.error}'),
+          content: Text('${context.tr.snapshotError}: ${s.error}'),
           backgroundColor: Colors.red.shade900,
           behavior: SnackBarBehavior.floating,
         ),
@@ -69,7 +70,7 @@ class _PhilosophyMapScreenState extends ConsumerState<PhilosophyMapScreen> {
               context.canPop() ? context.pop() : context.go('/feed'),
         ),
         title: Text(
-          'Philosophy Map',
+          context.tr.mapTitle,
           style: AppTypography.displaySmall,
         ),
         centerTitle: false,
@@ -135,35 +136,35 @@ class _MapBody extends StatelessWidget {
         children: [
           // ── Subtitle ────────────────────────────────────────────────────
           Text(
-            'Your philosophical tendencies based on your swipe history.',
+            context.tr.mapSubtitle,
             style: AppTypography.bodySmall,
           ),
           const SizedBox(height: 28),
 
           // ── Score bars ──────────────────────────────────────────────────
           _ScoreBar(
-            label: 'Stoicism',
+            label: context.tr.stoicism,
             score: stoicismPct,
             color: _stoicismColor,
             previousScore: _snapPct(snap?.wisdom),
           ),
           const SizedBox(height: 20),
           _ScoreBar(
-            label: 'Philosophy',
+            label: context.tr.philosophy,
             score: philosophyPct,
             color: _philosophyColor,
             previousScore: _snapPct(snap?.philosophy),
           ),
           const SizedBox(height: 20),
           _ScoreBar(
-            label: 'Discipline',
+            label: context.tr.discipline,
             score: disciplinePct,
             color: _disciplineColor,
             previousScore: _snapPct(snap?.discipline),
           ),
           const SizedBox(height: 20),
           _ScoreBar(
-            label: 'Reflection',
+            label: context.tr.reflection,
             score: reflectionPct,
             color: _reflectionColor,
             previousScore: _snapPct(snap?.reflection),
@@ -376,8 +377,8 @@ class _SaveSnapshotButton extends StatelessWidget {
                   color: Color(0xFF6B8F71),
                 ),
               )
-            : const Text(
-                'Save Snapshot',
+            : Text(
+                context.tr.saveSnapshot,
                 style: AppTypography.buttonLabel,
               ),
       ),
@@ -436,7 +437,7 @@ class _ErrorView extends StatelessWidget {
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.vault,
               ),
-              child: const Text('Retry'),
+              child: Text(context.tr.retry),
             ),
           ],
         ),

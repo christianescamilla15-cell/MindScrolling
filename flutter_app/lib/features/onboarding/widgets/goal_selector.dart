@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// 4 selectable goal cards.
 ///
@@ -16,20 +17,30 @@ class GoalSelector extends StatelessWidget {
   final String? selected;
   final ValueChanged<String> onSelected;
 
-  static const List<({String value, String label, String emoji})> _options = [
-    (value: 'calm_mind', label: 'Calm Mind', emoji: '🧘'),
-    (value: 'discipline', label: 'Discipline', emoji: '⚡'),
-    (value: 'meaning', label: 'Finding Meaning', emoji: '✨'),
-    (value: 'emotional_clarity', label: 'Emotional Clarity', emoji: '💎'),
+  // Values and emojis are locale-independent; labels are resolved at build time.
+  static const List<({String value, String emoji})> _optionBases = [
+    (value: 'calm_mind', emoji: '🧘'),
+    (value: 'discipline', emoji: '⚡'),
+    (value: 'meaning', emoji: '✨'),
+    (value: 'emotional_clarity', emoji: '💎'),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+
+    final labels = [
+      tr.optCalmMind,
+      tr.optDiscipline,
+      tr.optFindingMeaning,
+      tr.optEmotionalClarity,
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your goal',
+          tr.yourGoal,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -42,10 +53,11 @@ class GoalSelector extends StatelessWidget {
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
           childAspectRatio: 1.7,
-          children: _options.map((opt) {
-            final isSelected = selected == opt.value;
+          children: List.generate(_optionBases.length, (i) {
+            final base = _optionBases[i];
+            final isSelected = selected == base.value;
             return GestureDetector(
-              onTap: () => onSelected(opt.value),
+              onTap: () => onSelected(base.value),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(14),
@@ -66,12 +78,12 @@ class GoalSelector extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      opt.emoji,
+                      base.emoji,
                       style: const TextStyle(fontSize: 22),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      opt.label,
+                      labels[i],
                       style: AppTypography.bodySmall.copyWith(
                         color: isSelected
                             ? AppColors.discipline
@@ -85,7 +97,7 @@ class GoalSelector extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ),
       ],
     );

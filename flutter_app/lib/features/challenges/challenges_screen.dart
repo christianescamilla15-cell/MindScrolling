@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'challenges_controller.dart';
 
 /// Screen showing today's daily philosophy challenge with a progress ring,
@@ -34,7 +35,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
         elevation: 0,
         centerTitle: false,
         title: Text(
-          'Daily Challenge',
+          context.tr.dailyChallenge,
           style: AppTypography.displaySmall,
         ),
       ),
@@ -77,9 +78,9 @@ class _ChallengeBody extends ConsumerWidget {
 
           // ── Challenge card ─────────────────────────────────────────────
           _ChallengeCard(
-            title: challenge?.title ?? 'Daily Reflection',
+            title: challenge?.title ?? context.tr.dailyReflection,
             description: challenge?.description ??
-                'Reflect on one Stoic principle today.',
+                context.tr.defaultChallengeDesc,
             activeDate: challenge?.activeDate ?? '',
           ),
 
@@ -96,7 +97,7 @@ class _ChallengeBody extends ConsumerWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Showing offline challenge',
+                      context.tr.offlineChallenge,
                       style: AppTypography.caption,
                     ),
                   ),
@@ -123,7 +124,7 @@ class _ChallengeBody extends ConsumerWidget {
                   .read(challengesControllerProvider.notifier)
                   .incrementProgress(),
               child: Text(
-                'Log one step (+1)',
+                context.tr.logOneStep,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.stoicism,
                 ),
@@ -187,7 +188,7 @@ class _ProgressRing extends StatelessWidget {
                 ),
               const SizedBox(height: 4),
               Text(
-                completed ? 'Complete!' : 'Progress',
+                completed ? context.tr.complete : context.tr.progress,
                 style: AppTypography.caption,
               ),
             ],
@@ -292,7 +293,7 @@ class _ActionButton extends StatelessWidget {
           disabledForegroundColor: AppColors.textSecondary,
         ),
         child: Text(
-          completed ? 'Challenge Completed' : 'Complete Challenge',
+          completed ? context.tr.challengeCompleted : context.tr.completeChallenge,
           style: AppTypography.buttonLabel,
         ),
       ),

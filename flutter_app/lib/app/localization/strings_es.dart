@@ -102,7 +102,7 @@ class StringsEs implements AppStrings {
   String get premiumUnlock => 'Desbloquear Premium';
 
   @override
-  String get premiumPrice => '\$59 MXN una vez — para siempre';
+  String get premiumPrice => r'$59 MXN una vez — para siempre';
 
   @override
   String get premiumFeature => 'Función Premium';
@@ -176,4 +176,357 @@ class StringsEs implements AppStrings {
         'discipline': 'Disciplina',
         'reflection': 'Reflexión',
       };
+
+  // ------------------------------------------------------------------
+  // Navigation bottom bar
+  // ------------------------------------------------------------------
+  @override
+  String get feed => 'Inicio';
+
+  @override
+  String get map => 'Mapa';
+
+  @override
+  String get insight => 'Reflexión';
+
+  // ------------------------------------------------------------------
+  // Settings screen
+  // ------------------------------------------------------------------
+  @override
+  String get navigateTo => 'Ir a';
+
+  @override
+  String get about => 'Acerca de';
+
+  @override
+  String get reset => 'Restablecer';
+
+  @override
+  String get philosophyMap => 'Mapa filosófico';
+
+  @override
+  String get dailyChallenge => 'Reto diario';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get donations => 'Donaciones';
+
+  @override
+  String get appVersion => 'Versión de la app';
+
+  @override
+  String get privacyPolicy => 'Política de privacidad';
+
+  @override
+  String get resetOnboarding => 'Reiniciar introducción';
+
+  @override
+  String get resetOnboardingTitle => '¿Reiniciar introducción?';
+
+  @override
+  String get resetOnboardingMsg =>
+      'La introducción se mostrará de nuevo al reiniciar la app.';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get onboardingResetDone =>
+      'Introducción reiniciada. Reinicia la app para verla de nuevo.';
+
+  @override
+  String get couldNotOpenPrivacy => 'No se pudo abrir la política de privacidad';
+
+  // ------------------------------------------------------------------
+  // Feed screen
+  // ------------------------------------------------------------------
+  @override
+  String get couldNotLoadQuotes => 'No se pudieron cargar las frases.';
+
+  @override
+  String get noQuotesAvailable => 'No hay frases disponibles.';
+
+  @override
+  String get noMoreQuotes =>
+      'No hay más frases por ahora.\nRevisa tu conexión o actualiza para obtener más.';
+
+  @override
+  String get tryAgain => 'Reintentar';
+
+  // ------------------------------------------------------------------
+  // Onboarding screen
+  // ------------------------------------------------------------------
+  @override
+  String get tellUsAboutYourself => 'Cuéntanos sobre ti';
+
+  @override
+  String get allFieldsOptional => 'Todos los campos son opcionales.';
+
+  @override
+  String get beginScrolling => 'Comenzar';
+
+  @override
+  String get youreAllSet => 'Todo listo.';
+
+  @override
+  String get wisdomAwaits => 'La sabiduría te espera en cada dirección.';
+
+  @override
+  String get starting => 'Iniciando…';
+
+  @override
+  String get startScrolling => 'Empezar a explorar';
+
+  @override
+  String get welcomeTitle => 'Bienvenido a MindScroll';
+
+  @override
+  String get welcomeSubtitle => 'Sabiduría filosófica para tu día a día';
+
+  @override
+  String get swipeToExplore => 'Desliza en cualquier dirección para explorar.';
+
+  @override
+  String get primaryInterest => 'Interés principal';
+
+  @override
+  String get yourGoal => 'Tu meta';
+
+  // ------------------------------------------------------------------
+  // Onboarding options
+  // ------------------------------------------------------------------
+  @override
+  String get optPhilosophy => 'Filosofía';
+
+  @override
+  String get optStoicism => 'Estoicismo';
+
+  @override
+  String get optPersonalGrowth => 'Crecimiento personal';
+
+  @override
+  String get optMindfulness => 'Atención plena';
+
+  @override
+  String get optCuriosity => 'Curiosidad';
+
+  @override
+  String get optCalmMind => 'Mente tranquila';
+
+  @override
+  String get optDiscipline => 'Disciplina';
+
+  @override
+  String get optFindingMeaning => 'Encontrar sentido';
+
+  @override
+  String get optEmotionalClarity => 'Claridad emocional';
+
+  // ------------------------------------------------------------------
+  // Insights screen
+  // ------------------------------------------------------------------
+  @override
+  String get weeklyInsight => 'Reflexión semanal';
+
+  @override
+  String get aiBadge => 'IA';
+
+  @override
+  String get refreshInsight => 'Actualizar reflexión';
+
+  @override
+  String get insightForming => 'Tu reflexión se está formando';
+
+  @override
+  String get insightFormingBody =>
+      'Sigue explorando ideas filosóficas y tu reflexión semanal con IA aparecerá aquí.';
+
+  @override
+  String get insightTip1 =>
+      'Desliza frases filosóficas para construir tu perfil.';
+
+  @override
+  String get insightTip2 => 'Da me gusta a las frases que resuenen contigo.';
+
+  @override
+  String get insightTip3 => 'Guarda tus favoritas en la Bóveda.';
+
+  @override
+  String get generatedByAI =>
+      'Generado por Claude basado en tu recorrido filosófico esta semana.';
+
+  @override
+  String get couldNotRefresh =>
+      'No se pudo actualizar. Mostrando la última reflexión conocida.';
+
+  @override
+  String get justGenerated => 'Recién generado';
+
+  @override
+  String get yesterday => 'ayer';
+
+  @override
+  String get daysAgo => 'días atrás';
+
+  // ------------------------------------------------------------------
+  // Vault screen
+  // ------------------------------------------------------------------
+  @override
+  String get emptyVaultMsg => 'Guarda frases para construir tu bóveda';
+
+  // ------------------------------------------------------------------
+  // Challenges screen
+  // ------------------------------------------------------------------
+  @override
+  String get dailyReflection => 'Reflexión diaria';
+
+  @override
+  String get defaultChallengeDesc =>
+      'Reflexiona sobre un principio estoico hoy.';
+
+  @override
+  String get offlineChallenge => 'Mostrando reto sin conexión';
+
+  @override
+  String get logOneStep => 'Registrar un paso (+1)';
+
+  @override
+  String get completeChallenge => 'Completar reto';
+
+  @override
+  String get challengeCompleted => 'Reto completado';
+
+  @override
+  String get complete => '¡Completo!';
+
+  @override
+  String get progress => 'Progreso';
+
+  @override
+  String get dailyChallengeLabel => 'RETO DIARIO';
+
+  @override
+  String get percentComplete => '% completo';
+
+  @override
+  String get trackThis => 'Seguir este';
+
+  // ------------------------------------------------------------------
+  // Premium screen
+  // ------------------------------------------------------------------
+  @override
+  String get unlockFullExperience => 'Desbloquea la experiencia completa';
+
+  @override
+  String get premiumSubtitle =>
+      'Elimina todos los límites y distracciones.\nUn solo pago, para siempre.';
+
+  @override
+  String get alreadyPremium => 'Ya eres Premium';
+
+  @override
+  String get featureColumn => 'Función';
+
+  @override
+  String get freeColumn => 'Gratis';
+
+  @override
+  String get premiumColumn => 'Premium';
+
+  @override
+  String get dailyFeed => 'Feed diario';
+
+  @override
+  String get limitedQuotes => 'Limitado (20 frases)';
+
+  @override
+  String get unlimited => 'Ilimitado';
+
+  @override
+  String get ads => 'Anuncios';
+
+  @override
+  String get occasional => 'Ocasionales';
+
+  @override
+  String get none => 'Ninguno';
+
+  @override
+  String get vaultSize => 'Tamaño de bóveda';
+
+  @override
+  String get savedQuotes20 => '20 frases guardadas';
+
+  @override
+  String get dailyChallenges => 'Retos diarios';
+
+  @override
+  String get viewOnly => 'Solo ver';
+
+  @override
+  String get fullAccess => 'Acceso completo';
+
+  @override
+  String get basic => 'Básico';
+
+  @override
+  String get fullPlusHistory => 'Completo + historial';
+
+  @override
+  String get oneTime => 'pago único';
+
+  @override
+  String get oneTimePurchase => 'Compra única — sin suscripción, nunca.';
+
+  // ------------------------------------------------------------------
+  // Philosophy Map screen
+  // ------------------------------------------------------------------
+  @override
+  String get mapSubtitle =>
+      'Tus tendencias filosóficas basadas en tu historial de deslizamiento.';
+
+  @override
+  String get saveSnapshot => 'Guardar captura';
+
+  @override
+  String get snapshotSaved => 'Captura guardada';
+
+  @override
+  String get snapshotError => 'Error al guardar la captura';
+
+  // ------------------------------------------------------------------
+  // Donations screen
+  // ------------------------------------------------------------------
+  @override
+  String get supportMindScroll => 'Apoya MindScroll';
+
+  @override
+  String get donationDescription =>
+      'MindScroll es un proyecto de pasión creado para llevar la filosofía atemporal a la vida cotidiana. Si te ha brindado un momento de claridad o calma, considera invitar un café — eso mantiene el proyecto vivo y en crecimiento.';
+
+  @override
+  String get everyContribution => 'Cada contribución es profundamente apreciada.';
+
+  @override
+  String get buyMeCoffee => 'Invítame un café';
+
+  @override
+  String get couldNotOpenDonation => 'No se pudo abrir la página de donación.';
+
+  // ------------------------------------------------------------------
+  // Swipe hint overlay
+  // ------------------------------------------------------------------
+  @override
+  String get hintPhilosophy => 'FILOSOFÍA';
+
+  @override
+  String get hintStoicism => 'ESTOICISMO';
+
+  @override
+  String get hintDiscipline => 'DISCIPLINA';
+
+  @override
+  String get hintReflection => 'REFLEXIÓN';
 }

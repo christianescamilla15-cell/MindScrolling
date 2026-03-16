@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/constants/app_constants.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'settings_controller.dart';
 
 // Teal accent used throughout the settings screen.
@@ -28,7 +29,7 @@ class SettingsScreen extends ConsumerWidget {
               size: 18, color: AppColors.textSecondary),
           onPressed: () => context.canPop() ? context.pop() : context.go('/feed'),
         ),
-        title: Text('Settings', style: AppTypography.displaySmall),
+        title: Text(context.tr.settings, style: AppTypography.displaySmall),
         centerTitle: false,
       ),
       body: SafeArea(
@@ -36,7 +37,7 @@ class SettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           children: [
             // ── Section: Language ──────────────────────────────────────────
-            _SectionHeader(title: 'Language'),
+            _SectionHeader(title: context.tr.language),
             _SettingsCard(
               children: [
                 _LanguageToggle(
@@ -50,30 +51,30 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // ── Section: Navigate to ───────────────────────────────────────
-            _SectionHeader(title: 'Navigate to'),
+            _SectionHeader(title: context.tr.navigateTo),
             _SettingsCard(
               children: [
                 _NavTile(
                   icon: Icons.map_outlined,
-                  label: 'Philosophy Map',
+                  label: context.tr.philosophyMap,
                   onTap: () => context.push('/philosophy-map'),
                 ),
                 _Divider(),
                 _NavTile(
                   icon: Icons.flag_outlined,
-                  label: 'Daily Challenge',
+                  label: context.tr.dailyChallenge,
                   onTap: () => context.push('/challenges'),
                 ),
                 _Divider(),
                 _NavTile(
                   icon: Icons.star_border_rounded,
-                  label: 'Premium',
+                  label: context.tr.premium,
                   onTap: () => context.push('/premium'),
                 ),
                 _Divider(),
                 _NavTile(
                   icon: Icons.favorite_border_rounded,
-                  label: 'Donations',
+                  label: context.tr.donations,
                   onTap: () => context.push('/donations'),
                 ),
               ],
@@ -82,12 +83,12 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // ── Section: About ─────────────────────────────────────────────
-            _SectionHeader(title: 'About'),
+            _SectionHeader(title: context.tr.about),
             _SettingsCard(
               children: [
                 _InfoTile(
                   icon: Icons.info_outline,
-                  label: 'App Version',
+                  label: context.tr.appVersion,
                   trailing: Text(
                     '1.0.0',
                     style: AppTypography.bodySmall,
@@ -96,7 +97,7 @@ class SettingsScreen extends ConsumerWidget {
                 _Divider(),
                 _NavTile(
                   icon: Icons.privacy_tip_outlined,
-                  label: 'Privacy Policy',
+                  label: context.tr.privacyPolicy,
                   onTap: () => _launchPrivacyPolicy(context),
                 ),
               ],
@@ -105,12 +106,12 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // ── Section: Reset ─────────────────────────────────────────────
-            _SectionHeader(title: 'Reset'),
+            _SectionHeader(title: context.tr.reset),
             _SettingsCard(
               children: [
                 _ActionTile(
                   icon: Icons.restart_alt_rounded,
-                  label: 'Reset Onboarding',
+                  label: context.tr.resetOnboarding,
                   color: Colors.redAccent,
                   onTap: () => _confirmResetOnboarding(context, ref),
                 ),
@@ -131,9 +132,9 @@ class SettingsScreen extends ConsumerWidget {
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not open privacy policy'),
-            backgroundColor: Color(0xFF1C1C22),
+          SnackBar(
+            content: Text(context.tr.couldNotOpenPrivacy),
+            backgroundColor: const Color(0xFF1C1C22),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -148,23 +149,23 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: Text(
-          'Reset Onboarding?',
+          context.tr.resetOnboardingTitle,
           style: AppTypography.displaySmall,
         ),
         content: Text(
-          'The onboarding flow will be shown again on the next app restart.',
+          context.tr.resetOnboardingMsg,
           style: AppTypography.bodySmall,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancel',
+            child: Text(context.tr.cancel,
                 style:
                     AppTypography.buttonLabel.copyWith(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Reset',
+            child: Text(context.tr.reset,
                 style:
                     AppTypography.buttonLabel.copyWith(color: Colors.redAccent)),
           ),
@@ -176,9 +177,9 @@ class SettingsScreen extends ConsumerWidget {
       await ref.read(settingsControllerProvider.notifier).resetOnboarding();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Onboarding reset. Restart the app to re-run it.'),
-            backgroundColor: Color(0xFF1C1C22),
+          SnackBar(
+            content: Text(context.tr.onboardingResetDone),
+            backgroundColor: const Color(0xFF1C1C22),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -206,7 +207,7 @@ class _LanguageToggle extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: const Icon(Icons.language, color: _accent, size: 22),
       title:
-          Text('Language', style: AppTypography.bodyMedium),
+          Text(context.tr.language, style: AppTypography.bodyMedium),
       trailing: _LangToggleButtons(
         currentLang: currentLang,
         onChanged: onChanged,

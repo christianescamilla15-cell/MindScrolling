@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// Special feed card showing today's philosophical challenge.
 class ChallengeCard extends StatelessWidget {
@@ -56,7 +57,7 @@ class ChallengeCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'DAILY CHALLENGE',
+                context.tr.dailyChallengeLabel,
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.philosophy,
                   fontSize: 10,
@@ -84,7 +85,7 @@ class ChallengeCard extends StatelessWidget {
             _ProgressBar(ratio: progressRatio),
             const SizedBox(height: 8),
             Text(
-              '${(progressRatio * 100).round()}% complete',
+              '${(progressRatio * 100).round()}${context.tr.percentComplete}',
               style: AppTypography.caption,
             ),
             const SizedBox(height: 24),
@@ -103,7 +104,7 @@ class ChallengeCard extends StatelessWidget {
                 ),
                 onPressed: onTrack,
                 child: Text(
-                  'Track this',
+                  context.tr.trackThis,
                   style: AppTypography.buttonLabel.copyWith(
                     color: AppColors.background,
                   ),

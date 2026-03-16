@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/feed_item_model.dart';
+import '../../shared/extensions/context_extensions.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
 import '../settings/settings_controller.dart';
@@ -122,7 +123,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
     if (state.hasError && state.items.isEmpty) {
       return _ErrorView(
-        message: state.errorMessage ?? 'Could not load quotes.',
+        message: state.errorMessage ?? context.tr.couldNotLoadQuotes,
         onRetry: () {
           final lang = ref.read(settingsStateProvider).lang;
           ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
@@ -130,13 +131,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
     if (state.isEmpty) {
-      return const Center(
-        child: Text('No quotes available.', style: AppTypography.bodyMedium),
+      return Center(
+        child: Text(context.tr.noQuotesAvailable, style: AppTypography.bodyMedium),
       );
     }
     if (state.items.isNotEmpty && state.currentIndex >= state.items.length) {
       return _ErrorView(
-        message: 'No more quotes right now.\nCheck your connection or refresh to fetch more.',
+        message: context.tr.noMoreQuotes,
         onRetry: () {
           final lang = ref.read(settingsStateProvider).lang;
           ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
@@ -323,28 +324,28 @@ class _BottomNav extends StatelessWidget {
           _NavItem(
             icon: Icons.home_outlined,
             activeIcon: Icons.home,
-            label: 'Feed',
+            label: context.tr.feed,
             isActive: currentIndex == 0,
             onTap: () => context.go('/feed'),
           ),
           _NavItem(
             icon: Icons.bookmark_border,
             activeIcon: Icons.bookmark,
-            label: 'Vault',
+            label: context.tr.vault,
             isActive: currentIndex == 1,
             onTap: () => context.push('/vault'),
           ),
           _NavItem(
             icon: Icons.map_outlined,
             activeIcon: Icons.map,
-            label: 'Map',
+            label: context.tr.map,
             isActive: currentIndex == 2,
             onTap: () => context.push('/philosophy-map'),
           ),
           _NavItem(
             icon: Icons.auto_awesome_outlined,
             activeIcon: Icons.auto_awesome,
-            label: 'Insight',
+            label: context.tr.insight,
             isActive: currentIndex == 3,
             activeColor: AppColors.philosophy,
             onTap: () => context.push('/insights'),
@@ -352,7 +353,7 @@ class _BottomNav extends StatelessWidget {
           _NavItem(
             icon: Icons.settings_outlined,
             activeIcon: Icons.settings,
-            label: 'Settings',
+            label: context.tr.settings,
             isActive: currentIndex == 4,
             onTap: () => context.push('/settings'),
           ),
@@ -448,7 +449,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 24),
             TextButton(
               onPressed: onRetry,
-              child: const Text('Try again', style: TextStyle(color: AppColors.stoicism)),
+              child: Text(context.tr.tryAgain, style: const TextStyle(color: AppColors.stoicism)),
             ),
           ],
         ),

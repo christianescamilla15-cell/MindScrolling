@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// Page 1 of onboarding: explains the 4-direction swipe mechanics.
 ///
@@ -19,37 +20,17 @@ class _OnboardingIntroState extends State<OnboardingIntro>
   final List<AnimationController> _pulseControllers = [];
   final List<Animation<double>> _scaleAnims = [];
 
-  static const _directions = [
-    _DirectionInfo(
-      arrow: '↑',
-      label: 'Wisdom',
-      category: 'stoicism',
-      color: AppColors.stoicism,
-    ),
-    _DirectionInfo(
-      arrow: '→',
-      label: 'Discipline',
-      category: 'discipline',
-      color: AppColors.discipline,
-    ),
-    _DirectionInfo(
-      arrow: '←',
-      label: 'Reflection',
-      category: 'reflection',
-      color: AppColors.reflection,
-    ),
-    _DirectionInfo(
-      arrow: '↓',
-      label: 'Philosophy',
-      category: 'philosophy',
-      color: AppColors.philosophy,
-    ),
+  static const _directionBases = [
+    _DirectionBase(arrow: '↑', category: 'stoicism', color: AppColors.stoicism),
+    _DirectionBase(arrow: '→', category: 'discipline', color: AppColors.discipline),
+    _DirectionBase(arrow: '←', category: 'reflection', color: AppColors.reflection),
+    _DirectionBase(arrow: '↓', category: 'philosophy', color: AppColors.philosophy),
   ];
 
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < _directions.length; i++) {
+    for (int i = 0; i < _directionBases.length; i++) {
       final ctrl = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 1200),
@@ -77,17 +58,43 @@ class _OnboardingIntroState extends State<OnboardingIntro>
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+
+    // Build localised direction labels from the static base data.
+    final directions = [
+      _DirectionInfo(
+        arrow: _directionBases[0].arrow,
+        label: tr.swipeUpLabel,
+        color: _directionBases[0].color,
+      ),
+      _DirectionInfo(
+        arrow: _directionBases[1].arrow,
+        label: tr.swipeRightLabel,
+        color: _directionBases[1].color,
+      ),
+      _DirectionInfo(
+        arrow: _directionBases[2].arrow,
+        label: tr.swipeLeftLabel,
+        color: _directionBases[2].color,
+      ),
+      _DirectionInfo(
+        arrow: _directionBases[3].arrow,
+        label: tr.swipeDownLabel,
+        color: _directionBases[3].color,
+      ),
+    ];
+
     return Column(
       children: [
         // Title
         Text(
-          'Welcome to MindScroll',
+          tr.welcomeTitle,
           style: AppTypography.displayMedium,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         Text(
-          'Philosophical wisdom for your daily mind',
+          tr.welcomeSubtitle,
           style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
           textAlign: TextAlign.center,
         ),
@@ -101,11 +108,11 @@ class _OnboardingIntroState extends State<OnboardingIntro>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _DirectionCard(
-                    info: _directions[0],
+                    info: directions[0],
                     scaleAnim: _scaleAnims[0],
                   ),
                   _DirectionCard(
-                    info: _directions[1],
+                    info: directions[1],
                     scaleAnim: _scaleAnims[1],
                   ),
                 ],
@@ -115,11 +122,11 @@ class _OnboardingIntroState extends State<OnboardingIntro>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _DirectionCard(
-                    info: _directions[2],
+                    info: directions[2],
                     scaleAnim: _scaleAnims[2],
                   ),
                   _DirectionCard(
-                    info: _directions[3],
+                    info: directions[3],
                     scaleAnim: _scaleAnims[3],
                   ),
                 ],
@@ -129,7 +136,7 @@ class _OnboardingIntroState extends State<OnboardingIntro>
         ),
         const SizedBox(height: 32),
         Text(
-          'Swipe any direction to explore.',
+          tr.swipeToExplore,
           style: AppTypography.caption,
           textAlign: TextAlign.center,
         ),
@@ -186,16 +193,28 @@ class _DirectionCard extends StatelessWidget {
   }
 }
 
+/// Static base data (arrow + category + color) — locale-independent.
+class _DirectionBase {
+  final String arrow;
+  final String category;
+  final Color color;
+
+  const _DirectionBase({
+    required this.arrow,
+    required this.category,
+    required this.color,
+  });
+}
+
+/// Runtime data including the localised label.
 class _DirectionInfo {
   final String arrow;
   final String label;
-  final String category;
   final Color color;
 
   const _DirectionInfo({
     required this.arrow,
     required this.label,
-    required this.category,
     required this.color,
   });
 }

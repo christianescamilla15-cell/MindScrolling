@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// A row of 4 selectable age-range chips.
 ///
@@ -25,7 +26,7 @@ class AgeSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Age range',
+          context.tr.ageRange,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textSecondary,
           ),

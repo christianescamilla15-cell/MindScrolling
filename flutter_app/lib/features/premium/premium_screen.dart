@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/constants/monetization_constants.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'premium_controller.dart';
 
 /// Premium upgrade screen.
@@ -36,7 +37,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
         backgroundColor: const Color(0xFF0D0D1A),
         elevation: 0,
         centerTitle: false,
-        title: Text('Premium', style: AppTypography.displaySmall),
+        title: Text(context.tr.premium, style: AppTypography.displaySmall),
       ),
       body: ps.isLoading
           ? const Center(
@@ -108,7 +109,7 @@ class _PremiumBody extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'One-time purchase — no subscription, ever.',
+              context.tr.oneTimePurchase,
               style: AppTypography.caption,
               textAlign: TextAlign.center,
             ),
@@ -143,13 +144,13 @@ class _HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         Text(
-          'Unlock the Full Experience',
+          context.tr.unlockFullExperience,
           style: AppTypography.displayMedium,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          'Remove all limits and distractions.\nOne small price, forever.',
+          context.tr.premiumSubtitle,
           style: AppTypography.bodyMedium.copyWith(
             color: AppColors.textSecondary,
             height: 1.6,
@@ -183,7 +184,7 @@ class _PremiumBadge extends StatelessWidget {
               color: AppColors.stoicism, size: 24),
           const SizedBox(width: 10),
           Text(
-            'Already Premium',
+            context.tr.alreadyPremium,
             style: AppTypography.displaySmall.copyWith(
               color: AppColors.stoicism,
             ),
@@ -199,36 +200,38 @@ class _PremiumBadge extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ComparisonTable extends StatelessWidget {
-  static const _rows = [
-    _ComparisonRow(
-      feature: 'Daily feed',
-      free: 'Limited (20 quotes)',
-      premium: 'Unlimited',
-    ),
-    _ComparisonRow(
-      feature: 'Ads',
-      free: 'Occasional',
-      premium: 'None',
-    ),
-    _ComparisonRow(
-      feature: 'Vault size',
-      free: '20 saved quotes',
-      premium: 'Unlimited',
-    ),
-    _ComparisonRow(
-      feature: 'Daily challenges',
-      free: 'View only',
-      premium: 'Full access',
-    ),
-    _ComparisonRow(
-      feature: 'Philosophy map',
-      free: 'Basic',
-      premium: 'Full + history',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+
+    final rows = [
+      _ComparisonRow(
+        feature: tr.dailyFeed,
+        free: tr.limitedQuotes,
+        premium: tr.unlimited,
+      ),
+      _ComparisonRow(
+        feature: tr.ads,
+        free: tr.occasional,
+        premium: tr.none,
+      ),
+      _ComparisonRow(
+        feature: tr.vaultSize,
+        free: tr.savedQuotes20,
+        premium: tr.unlimited,
+      ),
+      _ComparisonRow(
+        feature: tr.dailyChallenges,
+        free: tr.viewOnly,
+        premium: tr.fullAccess,
+      ),
+      _ComparisonRow(
+        feature: tr.philosophyMap,
+        free: tr.basic,
+        premium: tr.fullPlusHistory,
+      ),
+    ];
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A2E),
@@ -247,7 +250,7 @@ class _ComparisonTable extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    'Feature',
+                    tr.featureColumn,
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -256,7 +259,7 @@ class _ComparisonTable extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    'Free',
+                    tr.freeColumn,
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -266,7 +269,7 @@ class _ComparisonTable extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    'Premium',
+                    tr.premiumColumn,
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.stoicism,
                     ),
@@ -278,11 +281,11 @@ class _ComparisonTable extends StatelessWidget {
           ),
           const Divider(height: 1, color: AppColors.border),
           ...List.generate(
-            _rows.length,
+            rows.length,
             (index) => Column(
               children: [
-                _TableRow(row: _rows[index]),
-                if (index < _rows.length - 1)
+                _TableRow(row: rows[index]),
+                if (index < rows.length - 1)
                   const Divider(height: 1, color: AppColors.border),
               ],
             ),
@@ -378,7 +381,7 @@ class _PriceLabel extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          'one-time',
+          context.tr.oneTime,
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -424,7 +427,7 @@ class _UnlockButton extends StatelessWidget {
                   color: Color(0xFF0D0D1A),
                 ),
               )
-            : Text('Unlock Premium', style: AppTypography.buttonLabel),
+            : Text(context.tr.premiumUnlock, style: AppTypography.buttonLabel),
       ),
     );
   }

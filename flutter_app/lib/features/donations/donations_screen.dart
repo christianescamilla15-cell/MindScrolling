@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/constants/monetization_constants.dart';
+import '../../shared/extensions/context_extensions.dart';
 
 /// Simple donation screen with a "Buy Me a Coffee" button that opens the
 /// donation URL via url_launcher.
@@ -21,7 +22,7 @@ class DonationsScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Could not open donation page.',
+              context.tr.couldNotOpenDonation,
               style: AppTypography.bodySmall,
             ),
             backgroundColor: const Color(0xFF1A1A2E),
@@ -39,7 +40,7 @@ class DonationsScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFF0D0D1A),
         elevation: 0,
         centerTitle: false,
-        title: Text('Support', style: AppTypography.displaySmall),
+        title: Text(context.tr.supportMindScroll, style: AppTypography.displaySmall),
       ),
       body: SafeArea(
         child: Padding(
@@ -68,7 +69,7 @@ class DonationsScreen extends ConsumerWidget {
 
               // ── Heading ───────────────────────────────────────────────
               Text(
-                'Support MindScroll',
+                context.tr.supportMindScroll,
                 style: AppTypography.displayMedium,
                 textAlign: TextAlign.center,
               ),
@@ -77,10 +78,7 @@ class DonationsScreen extends ConsumerWidget {
 
               // ── Description ───────────────────────────────────────────
               Text(
-                'MindScroll is a passion project built to bring timeless '
-                'philosophy into everyday life. If it has brought you a '
-                'moment of clarity or calm, consider buying a coffee — it '
-                'keeps the project alive and growing.',
+                context.tr.donationDescription,
                 style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.textSecondary,
                   height: 1.65,
@@ -91,7 +89,7 @@ class DonationsScreen extends ConsumerWidget {
               const SizedBox(height: 12),
 
               Text(
-                'Every contribution is deeply appreciated.',
+                context.tr.everyContribution,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.stoicism.withOpacity(0.8),
                 ),
@@ -108,7 +106,7 @@ class DonationsScreen extends ConsumerWidget {
                   onPressed: () => _openDonationUrl(context),
                   icon: const Icon(Icons.coffee_rounded, size: 22),
                   label: Text(
-                    'Buy Me a Coffee',
+                    context.tr.buyMeCoffee,
                     style: AppTypography.buttonLabel,
                   ),
                   style: ElevatedButton.styleFrom(

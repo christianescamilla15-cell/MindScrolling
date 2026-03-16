@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/quote_model.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'vault_controller.dart';
 
 /// Bottom-sheet style screen displaying the user's saved quotes.
@@ -67,7 +68,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                Text('Vault', style: AppTypography.displayMedium),
+                Text(context.tr.vault, style: AppTypography.displayMedium),
                 const SizedBox(width: 10),
                 _CountBadge(count: vaultState.items.length),
                 const Spacer(),
@@ -190,7 +191,7 @@ class _EmptyView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
       child: Center(
         child: Text(
-          '🔮 Save quotes to build your vault',
+          '🔮 ${context.tr.emptyVaultMsg}',
           textAlign: TextAlign.center,
           style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
         ),
