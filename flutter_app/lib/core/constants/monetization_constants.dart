@@ -8,16 +8,19 @@ class MonetizationConstants {
 
   /// Base price in USD (used as a reference; localised prices are in
   /// [priceDisplay]).
-  static const double basePriceUsd = 2.99;
+  static const double basePriceUsd = 4.99;
 
   /// Human-readable price strings keyed by ISO 4217 currency code.
   static const Map<String, String> priceDisplay = {
-    'USD': r'$2.99',
-    'MXN': r'$59',
-    'BRL': 'R\$14,90',
-    'ARS': r'$299',
-    'EUR': '€2.79',
+    'USD': r'$4.99',
+    'MXN': r'$99',
+    'BRL': 'R\$24,90',
+    'ARS': r'$499',
+    'EUR': '€4.59',
   };
+
+  /// In-app purchase product ID (same for Android and iOS).
+  static const String iapProductId = 'com.mindscrolling.inside';
 
   // ------------------------------------------------------------------
   // In-app purchase

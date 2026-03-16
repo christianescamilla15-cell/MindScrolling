@@ -549,4 +549,22 @@ class StringsEs implements AppStrings {
   String get premiumRequired => 'Esta función requiere MindScrolling Inside';
   @override
   String get purchasing => 'Procesando compra...';
+
+  // Vault limit
+  @override
+  String get vaultLimitReached => 'Límite de bóveda alcanzado. Actualiza a MindScrolling Inside para almacenamiento ilimitado.';
+
+  // Reset experience
+  @override
+  String get resetExperience => 'Reiniciar experiencia';
+  @override
+  String get resetExperienceTitle => '¿Reiniciar experiencia?';
+  @override
+  String get resetExperienceMsg => 'Esto eliminará todos tus datos incluyendo bóveda, me gusta, preferencias y mapa filosófico. Esta acción no se puede deshacer.';
+  @override
+  String get resetExperienceDone => 'Experiencia reiniciada. Reinicia la app.';
+
+  // Feed limit
+  @override
+  String get feedLimitReached => 'Alcanzaste el límite gratuito de hoy. Actualiza para frases ilimitadas.';
 }

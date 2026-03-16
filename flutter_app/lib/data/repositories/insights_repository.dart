@@ -16,9 +16,9 @@ class InsightsRepository {
   ///
   /// Returns [ApiSuccess(null)] when the backend has no insight yet
   /// (API key not configured or user has too little history).
-  Future<ApiResult<InsightModel?>> getWeeklyInsight() async {
+  Future<ApiResult<InsightModel?>> getWeeklyInsight({String lang = 'en'}) async {
     try {
-      final json = await _remote.getWeeklyInsight();
+      final json = await _remote.getWeeklyInsight(lang: lang);
       final insightText = json['insight'] as String?;
       if (insightText == null || insightText.trim().isEmpty) {
         return const ApiSuccess(null);

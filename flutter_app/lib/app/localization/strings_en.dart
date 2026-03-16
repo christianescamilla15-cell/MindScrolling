@@ -548,4 +548,22 @@ class StringsEn implements AppStrings {
   String get premiumRequired => 'This feature requires MindScrolling Inside';
   @override
   String get purchasing => 'Processing purchase...';
+
+  // Vault limit
+  @override
+  String get vaultLimitReached => 'Vault limit reached. Upgrade to MindScrolling Inside for unlimited storage.';
+
+  // Reset experience
+  @override
+  String get resetExperience => 'Reset Experience';
+  @override
+  String get resetExperienceTitle => 'Reset Experience?';
+  @override
+  String get resetExperienceMsg => 'This will clear all your data including vault, likes, preferences, and philosophical map. This action cannot be undone.';
+  @override
+  String get resetExperienceDone => 'Experience reset. Restart the app.';
+
+  // Feed limit
+  @override
+  String get feedLimitReached => "You've reached today's free limit. Upgrade for unlimited quotes.";
 }

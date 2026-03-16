@@ -20,22 +20,38 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
-function buildPrompt({ topCategory, scores, recentQuotes, streak, totalReflections }) {
-  const catLabels = {
+function buildPrompt({ topCategory, scores, recentQuotes, streak, totalReflections, lang }) {
+  const isSpanish = lang === "es";
+
+  const catLabelsEn = {
     stoicism:    "Stoic resilience and virtue",
     discipline:  "discipline and personal growth",
     reflection:  "reflection and life meaning",
     philosophy:  "existential philosophy and ideas",
   };
 
+  const catLabelsEs = {
+    stoicism:    "resiliencia estoica y virtud",
+    discipline:  "disciplina y crecimiento personal",
+    reflection:  "reflexión y sentido de vida",
+    philosophy:  "filosofía existencial e ideas",
+  };
+
+  const catLabels = isSpanish ? catLabelsEs : catLabelsEn;
+
   const quoteSamples = recentQuotes.length > 0
     ? recentQuotes
         .slice(0, 3)
         .map(q => `• "${q.text}" — ${q.author}`)
         .join("\n")
-    : "No quotes saved this week yet.";
+    : isSpanish ? "Aún no hay frases guardadas esta semana." : "No quotes saved this week yet.";
+
+  const langInstruction = isSpanish
+    ? "IMPORTANT: Write the entire response in Spanish."
+    : "";
 
   return `You are a philosophical guide in MindScrolling, a mindfulness app for philosophical reflection.
+${langInstruction}
 
 A user's reading patterns this week reveal:
 

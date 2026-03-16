@@ -111,7 +111,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 _ActionTile(
                   icon: Icons.restart_alt_rounded,
-                  label: context.tr.resetOnboarding,
+                  label: context.tr.resetExperience,
                   color: Colors.redAccent,
                   onTap: () => _confirmResetOnboarding(context, ref),
                 ),
@@ -149,11 +149,11 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: Text(
-          context.tr.resetOnboardingTitle,
+          context.tr.resetExperienceTitle,
           style: AppTypography.displaySmall,
         ),
         content: Text(
-          context.tr.resetOnboardingMsg,
+          context.tr.resetExperienceMsg,
           style: AppTypography.bodySmall,
         ),
         actions: [
@@ -174,11 +174,11 @@ class SettingsScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(settingsControllerProvider.notifier).resetOnboarding();
+      await ref.read(settingsControllerProvider.notifier).resetExperience();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.tr.onboardingResetDone),
+            content: Text(context.tr.resetExperienceDone),
             backgroundColor: const Color(0xFF1C1C22),
             behavior: SnackBarBehavior.floating,
           ),

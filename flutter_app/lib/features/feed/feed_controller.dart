@@ -125,7 +125,7 @@ class FeedController extends StateNotifier<FeedState> {
       reflections: newReflections,
       streak: newStreak,
       streakPulse: triggerStreak,
-      toastMessage: triggerStreak ? 'Streak extended! 🔥' : null,
+      toastMessage: triggerStreak ? 'streakExtended' : null,
       toastColor: triggerStreak ? '#F59E0B' : null,
     );
 
@@ -165,7 +165,7 @@ class FeedController extends StateNotifier<FeedState> {
     }
     state = state.copyWith(
       likedIds: updated,
-      toastMessage: wasLiked ? 'Removed like' : 'Liked ✦',
+      toastMessage: wasLiked ? 'removedLike' : 'liked',
       toastColor: wasLiked ? null : '#F97316',
     );
     _repository.likeQuote(quoteId, !wasLiked).ignore();
@@ -175,11 +175,18 @@ class FeedController extends StateNotifier<FeedState> {
   // Vault
   // -------------------------------------------------------------------------
 
-  void onVaultSave(QuoteModel quote) {
+  void onVaultSave(QuoteModel quote, {bool isPremium = false}) {
+    if (!isPremium && state.vault.length >= 20) {
+      state = state.copyWith(
+        toastMessage: 'vaultLimitReached',
+        toastColor: null,
+      );
+      return;
+    }
     final alreadySaved = state.vault.any((q) => q.id == quote.id);
     if (alreadySaved) {
       state = state.copyWith(
-        toastMessage: 'Already in vault',
+        toastMessage: 'alreadyVault',
         toastColor: null,
       );
       return;
@@ -187,7 +194,7 @@ class FeedController extends StateNotifier<FeedState> {
     final updated = List<QuoteModel>.from(state.vault)..add(quote);
     state = state.copyWith(
       vault: updated,
-      toastMessage: 'Saved to vault ✦',
+      toastMessage: 'savedVault',
       toastColor: '#14B8A6',
     );
     _repository.saveToVault(quote.id).ignore();

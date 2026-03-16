@@ -4,6 +4,7 @@ import '../../core/providers/core_providers.dart';
 import '../../data/datasources/remote/insights_remote_ds.dart';
 import '../../data/models/insight_model.dart';
 import '../../data/repositories/insights_repository.dart';
+import '../settings/settings_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Repository provider
@@ -67,7 +68,8 @@ class InsightsController extends AsyncNotifier<InsightsState> {
     final current = state.valueOrNull ?? const InsightsState();
     state = AsyncData(current.copyWith(isLoading: true, clearError: true));
 
-    final result = await _repo.getWeeklyInsight();
+    final lang = ref.read(settingsStateProvider).lang;
+    final result = await _repo.getWeeklyInsight(lang: lang);
     result.when(
       success: (insight) {
         state = AsyncData(InsightsState(insight: insight));
@@ -88,7 +90,8 @@ class InsightsController extends AsyncNotifier<InsightsState> {
     final current = state.valueOrNull ?? const InsightsState();
     state = AsyncData(current.copyWith(isRefreshing: true, clearError: true));
 
-    final result = await _repo.getWeeklyInsight();
+    final lang = ref.read(settingsStateProvider).lang;
+    final result = await _repo.getWeeklyInsight(lang: lang);
     result.when(
       success: (insight) {
         state = AsyncData(InsightsState(insight: insight));

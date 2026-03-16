@@ -12,6 +12,7 @@ import { getWeeklyInsight } from "../services/insights.js";
 export default async function insightsRoutes(fastify) {
   fastify.get("/weekly", async (request, reply) => {
     const { deviceId } = request;
+    const lang = request.query.lang || request.headers["accept-language"]?.slice(0, 2) || "en";
 
     // ── Parallel fetch: preferences + snapshot scores + liked quotes + user stats ──
     const [
@@ -81,6 +82,7 @@ export default async function insightsRoutes(fastify) {
         recentQuotes,
         streak:           user?.streak            ?? 0,
         totalReflections: user?.total_reflections  ?? 0,
+        lang,
       });
     } catch (err) {
       fastify.log.warn({ err }, "Failed to generate AI insight");

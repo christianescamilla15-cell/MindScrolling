@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/feed_item_model.dart';
+import '../../app/localization/app_strings.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
@@ -84,7 +85,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     ref.listen<FeedState>(feedControllerProvider, (prev, next) {
       if (next.toastMessage != null &&
           next.toastMessage != prev?.toastMessage) {
-        _showToast(context, next.toastMessage!, next.toastColor);
+        final resolved = context.tr.resolveToastKey(next.toastMessage!) ?? next.toastMessage!;
+        _showToast(context, resolved, next.toastColor);
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) {
             ref.read(feedControllerProvider.notifier).clearToast();
@@ -148,6 +150,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final controller = ref.read(feedControllerProvider.notifier);
     final isPremium = ref.watch(premiumStateProvider).isPremium;
 
+    // Free users: 20 quotes per session
+    if (!isPremium && state.currentIndex >= 20) {
+      return _FeedLimitView(onUpgrade: () => context.push('/premium'));
+    }
+
     return CardSwiper(
       controller: _swiperController,
       cardsCount: state.items.length,
@@ -193,7 +200,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         isLiked: state.likedIds.contains(quote.id),
         isSaved: state.vault.any((q) => q.id == quote.id),
         onLike: () => controller.onLike(quote.id),
-        onSave: () => controller.onVaultSave(quote),
+        onSave: () => controller.onVaultSave(quote, isPremium: isPremium),
         onShare: () => ShareExportService.exportQuoteAsImage(context, quote),
         onExport: null,
       );
@@ -450,6 +457,42 @@ class _ErrorView extends StatelessWidget {
             TextButton(
               onPressed: onRetry,
               child: Text(context.tr.tryAgain, style: const TextStyle(color: AppColors.stoicism)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Feed limit view (free users, 20 quotes/session) ─────────────────────────
+
+class _FeedLimitView extends StatelessWidget {
+  const _FeedLimitView({required this.onUpgrade});
+  final VoidCallback onUpgrade;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.lock_outline, color: AppColors.stoicism, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              context.tr.feedLimitReached,
+              style: AppTypography.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: onUpgrade,
+              child: Text(
+                context.tr.premiumUnlock,
+                style: const TextStyle(color: AppColors.stoicism),
+              ),
             ),
           ],
         ),

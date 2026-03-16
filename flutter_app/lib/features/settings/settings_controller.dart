@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/storage/local_storage.dart';
 import '../../core/utils/locale_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ---------------------------------------------------------------------------
 // State
@@ -46,10 +47,18 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     state = AsyncData(current.copyWith(lang: lang));
   }
 
-  /// Clears the onboarding completion flag so the onboarding flow is
-  /// shown again on next app start.
+  /// Clears ALL MindScroll data (vault, likes, preferences, map, onboarding, premium cache).
+  Future<void> resetExperience() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys().where((k) => k.startsWith('mindscroll')).toList();
+    for (final key in keys) {
+      await prefs.remove(key);
+    }
+  }
+
+  /// Legacy alias — delegates to resetExperience.
   Future<void> resetOnboarding() async {
-    await LocalStorage.remove(AppConstants.onboardingKey);
+    await resetExperience();
   }
 }
 

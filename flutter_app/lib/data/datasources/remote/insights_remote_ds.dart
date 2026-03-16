@@ -7,9 +7,12 @@ class InsightsRemoteDataSource {
 
   const InsightsRemoteDataSource(this._apiClient);
 
-  /// GET /insights/weekly
+  /// GET /insights/weekly?lang=en|es
   /// Returns { insight: String | null }
-  Future<Map<String, dynamic>> getWeeklyInsight() async {
-    return _apiClient.get(ApiConstants.insightsWeeklyPath);
+  Future<Map<String, dynamic>> getWeeklyInsight({String lang = 'en'}) async {
+    return _apiClient.get(
+      ApiConstants.insightsWeeklyPath,
+      queryParams: {'lang': lang},
+    );
   }
 }

@@ -250,4 +250,39 @@ abstract class AppStrings {
   String get hintStoicism;
   String get hintDiscipline;
   String get hintReflection;
+
+  // ------------------------------------------------------------------
+  // Vault limit
+  // ------------------------------------------------------------------
+  String get vaultLimitReached;
+
+  // ------------------------------------------------------------------
+  // Reset experience
+  // ------------------------------------------------------------------
+  String get resetExperience;
+  String get resetExperienceTitle;
+  String get resetExperienceMsg;
+  String get resetExperienceDone;
+
+  // ------------------------------------------------------------------
+  // Feed session limit
+  // ------------------------------------------------------------------
+  String get feedLimitReached;
+
+}
+
+/// Resolves controller-emitted toast key strings to localized display text.
+extension AppStringsToastResolver on AppStrings {
+  String? resolveToastKey(String key) {
+    switch (key) {
+      case 'liked':             return liked;
+      case 'removedLike':       return removedLike;
+      case 'savedVault':        return savedVault;
+      case 'alreadyVault':      return alreadyVault;
+      case 'streakExtended':    return streakExtended;
+      case 'vaultLimitReached': return vaultLimitReached;
+      case 'feedLimitReached':  return feedLimitReached;
+      default:                  return null;
+    }
+  }
 }
