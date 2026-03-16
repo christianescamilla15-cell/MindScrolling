@@ -8,6 +8,7 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/feed_item_model.dart';
 import '../../data/models/quote_model.dart';
+import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
 import 'feed_controller.dart';
 import 'feed_state.dart';
@@ -126,7 +127,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
 
     final controller = ref.read(feedControllerProvider.notifier);
-    final isPremium = false; // TODO: wire to premium provider
+    final isPremium = ref.watch(premiumStateProvider).isPremium;
 
     return CardSwiper(
       controller: _swiperController,
@@ -316,10 +317,18 @@ class _BottomNav extends StatelessWidget {
             onTap: () => context.go('/philosophy-map'),
           ),
           _NavItem(
+            icon: Icons.auto_awesome_outlined,
+            activeIcon: Icons.auto_awesome,
+            label: 'Insight',
+            isActive: currentIndex == 3,
+            activeColor: AppColors.philosophy,
+            onTap: () => context.go('/insights'),
+          ),
+          _NavItem(
             icon: Icons.settings_outlined,
             activeIcon: Icons.settings,
             label: 'Settings',
-            isActive: currentIndex == 3,
+            isActive: currentIndex == 4,
             onTap: () => context.go('/settings'),
           ),
         ],
@@ -335,6 +344,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.isActive,
     required this.onTap,
+    this.activeColor,
   });
 
   final IconData icon;
@@ -342,15 +352,18 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
+  final Color? activeColor;
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? AppColors.stoicism : AppColors.textMuted;
+    final color = isActive
+        ? (activeColor ?? AppColors.stoicism)
+        : AppColors.textMuted;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 72,
+        width: 64,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

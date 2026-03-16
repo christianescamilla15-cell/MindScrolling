@@ -14,7 +14,7 @@
 
 import "dotenv/config";
 import { createClient }      from "@supabase/supabase-js";
-import { generateEmbeddingBatch } from "../services/embeddings.js";
+import { generateEmbeddingBatch } from "../../services/embeddings.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -71,18 +71,19 @@ async function run() {
       continue;   // retry same batch
     }
 
-    // Write embeddings back to DB in bulk
-    const updates = quotes.map((q, i) => ({
-      id:        q.id,
-      embedding: embeddings[i],
-    }));
+    // Write embeddings back to DB — update only the embedding column
+    const results = await Promise.all(
+      quotes.map((q, i) =>
+        supabase
+          .from("quotes")
+          .update({ embedding: embeddings[i] })
+          .eq("id", q.id)
+      )
+    );
 
-    const { error: upsertErr } = await supabase
-      .from("quotes")
-      .upsert(updates, { onConflict: "id" });
-
-    if (upsertErr) {
-      console.error(`⚠️  DB upsert failed (offset ${offset}):`, upsertErr.message);
+    const updateErr = results.find(r => r.error)?.error;
+    if (updateErr) {
+      console.error(`⚠️  DB update failed (offset ${offset}):`, updateErr.message);
     } else {
       processed += quotes.length;
       const pct  = ((processed / count) * 100).toFixed(1);

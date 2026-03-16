@@ -94,4 +94,11 @@ class ApiConstants {
 
   /// GET /health
   static const String healthPath = '/health';
+
+  // ------------------------------------------------------------------
+  // Insights
+  // ------------------------------------------------------------------
+
+  /// GET /insights/weekly
+  static const String insightsWeeklyPath = '/insights/weekly';
 }

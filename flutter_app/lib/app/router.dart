@@ -15,6 +15,7 @@ import '../features/philosophy_map/philosophy_map_screen.dart';
 import '../features/premium/premium_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/insights/insights_screen.dart';
 import '../features/vault/vault_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -65,6 +66,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/premium',
         builder: (context, state) => const PremiumScreen(),
+      ),
+      GoRoute(
+        path: '/insights',
+        builder: (context, state) => const InsightsScreen(),
       ),
       GoRoute(
         path: '/donations',
