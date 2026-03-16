@@ -7,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../../data/models/user_profile_model.dart';
 import '../../data/repositories/feed_repository.dart';
 import '../settings/settings_controller.dart';
+import '../../core/utils/locale_utils.dart';
 
 /// Manages onboarding page navigation and profile collection.
 ///
@@ -37,9 +38,7 @@ class OnboardingController extends ChangeNotifier {
   String _lang = _detectDeviceLang();
 
   static String _detectDeviceLang() {
-    final code =
-        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-    return AppConstants.supportedLangs.contains(code) ? code : AppConstants.defaultLang;
+    return LocaleUtils.detectLanguage();
   }
 
   String? get ageRange => _ageRange;

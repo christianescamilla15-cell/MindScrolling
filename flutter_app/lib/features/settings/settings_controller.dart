@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/storage/local_storage.dart';
+import '../../core/utils/locale_utils.dart';
 
 // ---------------------------------------------------------------------------
 // State
@@ -33,11 +34,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       return SettingsState(lang: saved);
     }
     // No preference saved — detect device locale and default to it if supported.
-    final deviceLang =
-        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-    final lang = AppConstants.supportedLangs.contains(deviceLang)
-        ? deviceLang
-        : AppConstants.defaultLang;
+    final lang = LocaleUtils.detectLanguage();
     return SettingsState(lang: lang);
   }
 

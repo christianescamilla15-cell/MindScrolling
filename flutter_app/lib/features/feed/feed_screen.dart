@@ -134,6 +134,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         child: Text('No quotes available.', style: AppTypography.bodyMedium),
       );
     }
+    if (state.items.isNotEmpty && state.currentIndex >= state.items.length) {
+      return _ErrorView(
+        message: 'No more quotes right now.\nCheck your connection or refresh to fetch more.',
+        onRetry: () {
+          final lang = ref.read(settingsStateProvider).lang;
+          ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
+        },
+      );
+    }
 
     final controller = ref.read(feedControllerProvider.notifier);
     final isPremium = ref.watch(premiumStateProvider).isPremium;
