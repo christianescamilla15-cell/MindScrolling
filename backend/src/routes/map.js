@@ -52,6 +52,7 @@ export default async function mapRoutes(fastify) {
       .eq("device_id", deviceId);
 
     if (prefsErr) {
+      request.log.error({ err: prefsErr }, "map: failed to fetch user_preferences");
       return reply.status(500).send({ error: "Failed to fetch preferences", code: "DB_ERROR" });
     }
 
@@ -67,7 +68,8 @@ export default async function mapRoutes(fastify) {
       .maybeSingle();
 
     if (snapErr) {
-      return reply.status(500).send({ error: "Failed to fetch snapshot", code: "DB_ERROR" });
+      // Non-fatal: snapshot table may not exist yet. Return map without history.
+      request.log.warn({ err: snapErr }, "map: snapshot query failed — returning null snapshot");
     }
 
     const snapshot = snapRow

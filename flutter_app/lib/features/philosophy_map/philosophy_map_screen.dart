@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
@@ -64,7 +65,8 @@ class _PhilosophyMapScreenState extends ConsumerState<PhilosophyMapScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new,
               size: 18, color: AppColors.textSecondary),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/feed'),
         ),
         title: Text(
           'Philosophy Map',

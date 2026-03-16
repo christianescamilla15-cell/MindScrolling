@@ -12,12 +12,11 @@ import '../../data/repositories/profile_repository.dart';
 // ---------------------------------------------------------------------------
 
 final profileRepositoryProvider =
-    FutureProvider<ProfileRepository>((ref) async {
-  final api = await ref.watch(apiClientProvider.future);
-  final storage = await ref.watch(localStorageProvider.future);
+    Provider<ProfileRepository>((ref) {
+  final api = ref.watch(apiClientProvider);
   return ProfileRepository(
     remote: ProfileRemoteDataSource(api),
-    local: SettingsLocalDataSource(storage),
+    local: const SettingsLocalDataSource(),
   );
 });
 
@@ -71,12 +70,10 @@ class ProfileState {
 
 class ProfileController extends AsyncNotifier<ProfileState> {
   late ProfileRepository _repo;
-  late LocalStorage _storage;
 
   @override
-  Future<ProfileState> build() async {
-    _repo = await ref.watch(profileRepositoryProvider.future);
-    _storage = await ref.watch(localStorageProvider.future);
+  ProfileState build() {
+    _repo = ref.watch(profileRepositoryProvider);
     return const ProfileState();
   }
 
@@ -84,9 +81,9 @@ class ProfileController extends AsyncNotifier<ProfileState> {
   Future<void> load() async {
     state = const AsyncLoading();
     final result = await _repo.getProfile();
-    final streak = (await _storage.getInt('mindscroll_streak')) ?? 0;
+    final streak = (await LocalStorage.getInt('mindscroll_streak')) ?? 0;
     final reflections =
-        (await _storage.getInt('mindscroll_reflections')) ?? 0;
+        (await LocalStorage.getInt('mindscroll_reflections')) ?? 0;
 
     result.when(
       success: (profile) {
@@ -157,3 +154,4 @@ final profileStateProvider = Provider<ProfileState>((ref) {
         orElse: () => const ProfileState(isLoading: true),
       );
 });
+

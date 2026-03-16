@@ -51,19 +51,19 @@ class FeedRepository {
 
       // Cache the first page (no cursor = first page).
       if (cursor == null && quotes.isNotEmpty) {
-        await _local.cacheFeed(quotes);
+        _local.cacheFeed(quotes);
       }
 
       return ApiSuccess(_buildFeedItems(quotes));
     } catch (e) {
       // Network failed — fall back to cache (first page only).
       if (cursor == null) {
-        final cached = await _local.getCachedFeed();
+        final cached = _local.getCachedFeed();
         if (cached != null && cached.isNotEmpty) {
           return ApiSuccess(_buildFeedItems(cached));
         }
       }
-      return ApiFailure('Failed to load feed: $e', error: e);
+      return ApiError('Failed to load feed: $e');
     }
   }
 
@@ -95,7 +95,7 @@ class FeedRepository {
       final items = await _vault?.getVault() ?? [];
       return ApiSuccess(items);
     } catch (e) {
-      return ApiFailure(e.toString(), error: e);
+      return ApiError(e.toString());
     }
   }
 

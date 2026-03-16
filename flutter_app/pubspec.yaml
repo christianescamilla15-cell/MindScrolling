@@ -38,18 +38,19 @@ dependencies:
 
   # Image (for export)
   screenshot: ^2.3.0
-  image_gallery_saver: ^2.0.3
 
   # Localization
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: ^0.20.2
 
   # Loading indicators
   shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   build_runner: ^2.4.9

@@ -64,29 +64,35 @@ export default async function swipesRoutes(fastify) {
       streak = lastActive === yesterday.toISOString().slice(0, 10) ? streak + 1 : 1;
     }
 
-    // ── Parallel write: upsert user + insert swipe event ─────────────────────
-    const [{ error: userUpsertErr }, { error: swipeErr }] = await Promise.all([
-      supabase.from("users").upsert(
-        {
-          device_id:         deviceId,
-          streak,
-          total_reflections: reflections + 1,
-          last_active:       todayStr,
-        },
-        { onConflict: "device_id" }
-      ),
+    // ── Upsert user first (swipe_events has FK on users.device_id) ───────────
+    const { error: userUpsertErr } = await supabase.from("users").upsert(
+      {
+        device_id:         deviceId,
+        streak,
+        total_reflections: reflections + 1,
+        last_active:       todayStr,
+      },
+      { onConflict: "device_id" }
+    );
 
-      supabase.from("swipe_events").insert({
-        device_id:     deviceId,
-        quote_id,
-        direction,
-        category,
-        dwell_time_ms: dwellMs,
-      }),
-    ]);
+    if (userUpsertErr) {
+      request.log.error({ err: userUpsertErr }, "swipes: failed to upsert user");
+      return reply.status(500).send({ error: "Failed to update user", code: "DB_ERROR" });
+    }
 
-    if (userUpsertErr) return reply.status(500).send({ error: "Failed to update user",  code: "DB_ERROR" });
-    if (swipeErr)      return reply.status(500).send({ error: "Failed to record swipe", code: "DB_ERROR" });
+    // ── Insert swipe event (user row now guaranteed to exist) ─────────────────
+    const { error: swipeErr } = await supabase.from("swipe_events").insert({
+      device_id:     deviceId,
+      quote_id,
+      direction,
+      category,
+      dwell_time_ms: dwellMs,
+    });
+
+    if (swipeErr) {
+      request.log.error({ err: swipeErr }, "swipes: failed to insert swipe_event");
+      return reply.status(500).send({ error: "Failed to record swipe", code: "DB_ERROR" });
+    }
 
     // ── Update behavioural preference signals ─────────────────────────────────
     const prefUpdate = {
@@ -103,6 +109,7 @@ export default async function swipesRoutes(fastify) {
       .upsert(prefUpdate, { onConflict: "device_id,category" });
 
     if (prefErr) {
+      request.log.error({ err: prefErr }, "swipes: failed to upsert user_preferences");
       return reply.status(500).send({ error: "Failed to update preferences", code: "DB_ERROR" });
     }
 

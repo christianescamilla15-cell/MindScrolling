@@ -11,12 +11,11 @@ import '../../data/repositories/premium_repository.dart';
 // ---------------------------------------------------------------------------
 
 final premiumRepositoryProvider =
-    FutureProvider<PremiumRepository>((ref) async {
-  final api = await ref.watch(apiClientProvider.future);
-  final storage = await ref.watch(localStorageProvider.future);
+    Provider<PremiumRepository>((ref) {
+  final api = ref.watch(apiClientProvider);
   return PremiumRepository(
     remote: StatsRemoteDataSource(api),
-    local: SettingsLocalDataSource(storage),
+    local: const SettingsLocalDataSource(),
   );
 });
 
@@ -66,8 +65,8 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
   late PremiumRepository _repo;
 
   @override
-  Future<PremiumUiState> build() async {
-    _repo = await ref.watch(premiumRepositoryProvider.future);
+  PremiumUiState build() {
+    _repo = ref.watch(premiumRepositoryProvider);
     return const PremiumUiState();
   }
 
@@ -152,3 +151,4 @@ final premiumStateProvider = Provider<PremiumUiState>((ref) {
         orElse: () => const PremiumUiState(isLoading: true),
       );
 });
+

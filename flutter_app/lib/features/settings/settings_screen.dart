@@ -26,7 +26,7 @@ class SettingsScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new,
               size: 18, color: AppColors.textSecondary),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/feed'),
         ),
         title: Text('Settings', style: AppTypography.displaySmall),
         centerTitle: false,

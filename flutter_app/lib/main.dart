@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
-import 'core/storage/local_storage.dart';
+import 'core/providers/core_providers.dart';
+import 'core/utils/device_id.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,9 +29,16 @@ Future<void> main() async {
   // Pre-load shared preferences so LocalStorage is ready
   await SharedPreferences.getInstance();
 
+  // Resolve device ID once before the widget tree builds so
+  // apiClientProvider can be a synchronous Provider<ApiClient>.
+  final deviceId = await DeviceIdService.getOrCreate();
+
   runApp(
-    const ProviderScope(
-      child: MindScrollApp(),
+    ProviderScope(
+      overrides: [
+        deviceIdProvider.overrideWithValue(deviceId),
+      ],
+      child: const MindScrollApp(),
     ),
   );
 }

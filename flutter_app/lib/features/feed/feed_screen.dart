@@ -7,12 +7,11 @@ import 'package:shimmer/shimmer.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/feed_item_model.dart';
-import '../../data/models/quote_model.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
+import '../settings/settings_controller.dart';
 import 'feed_controller.dart';
 import 'feed_state.dart';
-import 'widgets/action_bar.dart';
 import 'widgets/challenge_card.dart';
 import 'widgets/quote_card.dart';
 import 'widgets/reflection_card.dart';
@@ -36,9 +35,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   void initState() {
     super.initState();
-    // Load feed on mount
+    // Load feed on mount using the persisted language preference
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(feedControllerProvider.notifier).loadInitialFeed('en');
+      final lang = ref.read(settingsStateProvider).lang;
+      ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
     });
   }
 
@@ -71,6 +71,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(feedControllerProvider);
+
+    // Reload feed when the user changes the language in Settings
+    ref.listen<SettingsState>(settingsStateProvider, (prev, next) {
+      if (prev != null && prev.lang != next.lang) {
+        ref.read(feedControllerProvider.notifier).loadInitialFeed(next.lang);
+      }
+    });
 
     // Show toast when state has message
     ref.listen<FeedState>(feedControllerProvider, (prev, next) {
@@ -116,13 +123,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (state.hasError && state.items.isEmpty) {
       return _ErrorView(
         message: state.errorMessage ?? 'Could not load quotes.',
-        onRetry: () =>
-            ref.read(feedControllerProvider.notifier).loadInitialFeed('en'),
+        onRetry: () {
+          final lang = ref.read(settingsStateProvider).lang;
+          ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
+        },
       );
     }
     if (state.isEmpty) {
       return const Center(
-        child: Text('No quotes available.', style: AppTypography.body),
+        child: Text('No quotes available.', style: AppTypography.bodyMedium),
       );
     }
 
@@ -140,23 +149,32 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       scale: 0.94,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       cardBuilder: (context, index, horizontalOffsetPercentage, verticalOffsetPercentage) {
+        // Guard against CardSwiper pre-rendering beyond the list end
+        if (index >= state.items.length) return const SizedBox.shrink();
         final item = state.items[index];
-        return _buildCard(item, state, controller, isPremium);
+        return _buildCard(context, item, state, controller, isPremium);
       },
     );
   }
 
   Widget _buildCard(
+    BuildContext context,
     FeedItemModel item,
     FeedState state,
     FeedController controller,
     bool isPremium,
   ) {
     if (item.isChallengeCard) {
-      return ChallengeCard(data: item.extra ?? {});
+      final extra = item.extra ?? {};
+      return ChallengeCard(
+        title: extra['title'] as String? ?? 'Daily Challenge',
+        description: extra['description'] as String? ?? '',
+        progressRatio: (extra['progress'] as num?)?.toDouble() ?? 0.0,
+        onTrack: () {},
+      );
     }
-    if (item.isReflectionCard) {
-      return ReflectionCard(swipeCounts: state.swipeCounts);
+    if (item.isReflectionCard || item.isEvolutionCard) {
+      return const ReflectionCard();
     }
     if (item.isQuote && item.quote != null) {
       final quote = item.quote!;
@@ -166,10 +184,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         isSaved: state.vault.any((q) => q.id == quote.id),
         onLike: () => controller.onLike(quote.id),
         onSave: () => controller.onVaultSave(quote),
-        onShare: () => ShareExportService.shareQuote(quote),
-        onExport: isPremium
-            ? () => ShareExportService.exportQuoteAsImage(context, quote)
-            : null,
+        onShare: () => ShareExportService.exportQuoteAsImage(context, quote),
+        onExport: null,
       );
     }
     return const SizedBox.shrink();
@@ -307,14 +323,14 @@ class _BottomNav extends StatelessWidget {
             activeIcon: Icons.bookmark,
             label: 'Vault',
             isActive: currentIndex == 1,
-            onTap: () => context.go('/vault'),
+            onTap: () => context.push('/vault'),
           ),
           _NavItem(
             icon: Icons.map_outlined,
             activeIcon: Icons.map,
             label: 'Map',
             isActive: currentIndex == 2,
-            onTap: () => context.go('/philosophy-map'),
+            onTap: () => context.push('/philosophy-map'),
           ),
           _NavItem(
             icon: Icons.auto_awesome_outlined,
@@ -322,14 +338,14 @@ class _BottomNav extends StatelessWidget {
             label: 'Insight',
             isActive: currentIndex == 3,
             activeColor: AppColors.philosophy,
-            onTap: () => context.go('/insights'),
+            onTap: () => context.push('/insights'),
           ),
           _NavItem(
             icon: Icons.settings_outlined,
             activeIcon: Icons.settings,
             label: 'Settings',
             isActive: currentIndex == 4,
-            onTap: () => context.go('/settings'),
+            onTap: () => context.push('/settings'),
           ),
         ],
       ),
@@ -419,7 +435,7 @@ class _ErrorView extends StatelessWidget {
           children: [
             const Icon(Icons.cloud_off_outlined, color: AppColors.textMuted, size: 48),
             const SizedBox(height: 16),
-            Text(message, style: AppTypography.body, textAlign: TextAlign.center),
+            Text(message, style: AppTypography.bodyMedium, textAlign: TextAlign.center),
             const SizedBox(height: 24),
             TextButton(
               onPressed: onRetry,

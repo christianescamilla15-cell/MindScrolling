@@ -10,8 +10,8 @@ import '../../data/repositories/insights_repository.dart';
 // ---------------------------------------------------------------------------
 
 final insightsRepositoryProvider =
-    FutureProvider<InsightsRepository>((ref) async {
-  final api = await ref.watch(apiClientProvider.future);
+    Provider<InsightsRepository>((ref) {
+  final api = ref.watch(apiClientProvider);
   return InsightsRepository(remote: InsightsRemoteDataSource(api));
 });
 
@@ -57,8 +57,8 @@ class InsightsController extends AsyncNotifier<InsightsState> {
   late InsightsRepository _repo;
 
   @override
-  Future<InsightsState> build() async {
-    _repo = await ref.watch(insightsRepositoryProvider.future);
+  InsightsState build() {
+    _repo = ref.watch(insightsRepositoryProvider);
     return const InsightsState();
   }
 
@@ -118,3 +118,4 @@ final insightsStateProvider = Provider<InsightsState>((ref) {
         orElse: () => const InsightsState(isLoading: true),
       );
 });
+

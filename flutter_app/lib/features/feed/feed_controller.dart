@@ -1,6 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/providers/core_providers.dart';
+import '../../core/storage/cache_storage.dart';
+import '../../data/datasources/local/feed_local_ds.dart';
+import '../../data/datasources/remote/feed_remote_ds.dart';
+import '../../data/datasources/remote/profile_remote_ds.dart';
+import '../../data/datasources/remote/vault_remote_ds.dart';
 import '../../data/models/feed_item_model.dart';
 import '../../data/models/quote_model.dart';
 import '../../data/models/swipe_event_model.dart';
@@ -218,10 +224,15 @@ class FeedController extends StateNotifier<FeedState> {
 }
 
 /// Riverpod provider for [FeedController].
-/// Callers are expected to override this in tests or provide a real repository.
 final feedControllerProvider =
     StateNotifierProvider<FeedController, FeedState>((ref) {
-  throw UnimplementedError(
-    'feedControllerProvider must be overridden with a real FeedRepository.',
+  final api = ref.watch(apiClientProvider);
+  return FeedController(
+    repository: FeedRepository(
+      remote: FeedRemoteDataSource(api),
+      local: FeedLocalDataSource(CacheStorage()),
+      profile: ProfileRemoteDataSource(api),
+      vault: VaultRemoteDataSource(api),
+    ),
   );
 });

@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/core_providers.dart';
-import '../../core/storage/local_storage.dart';
-import '../../data/datasources/local/settings_local_ds.dart';
 import '../../data/datasources/remote/challenge_remote_ds.dart';
 import '../../data/models/challenge_model.dart';
 import '../../data/repositories/challenge_repository.dart';
@@ -12,12 +10,10 @@ import '../../data/repositories/challenge_repository.dart';
 // ---------------------------------------------------------------------------
 
 final challengeRepositoryProvider =
-    FutureProvider<ChallengeRepository>((ref) async {
-  final api = await ref.watch(apiClientProvider.future);
-  final storage = await ref.watch(localStorageProvider.future);
+    Provider<ChallengeRepository>((ref) {
+  final api = ref.watch(apiClientProvider);
   return ChallengeRepository(
     remote: ChallengeRemoteDataSource(api),
-    storage: storage,
   );
 });
 
@@ -72,8 +68,8 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
   late ChallengeRepository _repo;
 
   @override
-  Future<ChallengeState> build() async {
-    _repo = await ref.watch(challengeRepositoryProvider.future);
+  ChallengeState build() {
+    _repo = ref.watch(challengeRepositoryProvider);
     return const ChallengeState();
   }
 
@@ -190,3 +186,4 @@ final challengeStateProvider = Provider<ChallengeState>((ref) {
         orElse: () => const ChallengeState(isLoading: true),
       );
 });
+

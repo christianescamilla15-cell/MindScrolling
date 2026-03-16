@@ -16,18 +16,18 @@ class InterestSelector extends StatelessWidget {
   final String? selected;
   final ValueChanged<String> onSelected;
 
-  static const List<({String value, String label, IconData icon})> _options = [
-    (value: 'philosophy', label: 'Philosophy', icon: Icons.auto_stories_outlined),
-    (value: 'stoicism', label: 'Stoicism', icon: Icons.park_outlined),
-    (value: 'personal_growth', label: 'Personal Growth', icon: Icons.trending_up_outlined),
-    (value: 'mindfulness', label: 'Mindfulness', icon: Icons.spa_outlined),
-    (value: 'curiosity', label: 'Curiosity', icon: Icons.lightbulb_outline),
+  static const List<({String value, String label, String emoji})> _options = [
+    (value: 'philosophy', label: 'Philosophy', emoji: '📚'),
+    (value: 'stoicism', label: 'Stoicism', emoji: '🌿'),
+    (value: 'personal_growth', label: 'Personal Growth', emoji: '📈'),
+    (value: 'mindfulness', label: 'Mindfulness', emoji: '🧘'),
+    (value: 'curiosity', label: 'Curiosity', emoji: '💡'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           'Primary interest',
@@ -53,7 +53,7 @@ class _InterestTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final ({String value, String label, IconData icon}) option;
+  final ({String value, String label, String emoji}) option;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -70,35 +70,14 @@ class _InterestTile extends StatelessWidget {
               ? AppColors.stoicism.withOpacity(0.08)
               : AppColors.surfaceVariant,
           borderRadius: BorderRadius.circular(14),
-          border: Border(
-            left: BorderSide(
-              color: isSelected ? AppColors.stoicism : Colors.transparent,
-              width: 3,
-            ),
-            top: BorderSide(
-              color: isSelected
-                  ? AppColors.stoicism.withOpacity(0.2)
-                  : AppColors.border,
-            ),
-            right: BorderSide(
-              color: isSelected
-                  ? AppColors.stoicism.withOpacity(0.2)
-                  : AppColors.border,
-            ),
-            bottom: BorderSide(
-              color: isSelected
-                  ? AppColors.stoicism.withOpacity(0.2)
-                  : AppColors.border,
-            ),
+          border: Border.all(
+            color: isSelected ? AppColors.stoicism : AppColors.border,
+            width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
-            Icon(
-              option.icon,
-              size: 20,
-              color: isSelected ? AppColors.stoicism : AppColors.textSecondary,
-            ),
+            Text(option.emoji, style: const TextStyle(fontSize: 20)),
             const SizedBox(width: 12),
             Text(
               option.label,
@@ -110,7 +89,7 @@ class _InterestTile extends StatelessWidget {
             ),
             const Spacer(),
             if (isSelected)
-              Icon(
+              const Icon(
                 Icons.check_circle,
                 size: 16,
                 color: AppColors.stoicism,

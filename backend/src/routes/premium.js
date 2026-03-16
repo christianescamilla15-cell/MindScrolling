@@ -19,6 +19,7 @@ export default async function premiumRoutes(fastify) {
       .maybeSingle();
 
     if (userErr) {
+      request.log.error({ err: userErr }, "premium/status: failed to fetch user");
       return reply.status(500).send({ error: "Failed to fetch user", code: "DB_ERROR" });
     }
 
@@ -32,6 +33,7 @@ export default async function premiumRoutes(fastify) {
       .maybeSingle();
 
     if (purchaseErr) {
+      request.log.error({ err: purchaseErr }, "premium/status: failed to fetch purchases");
       return reply.status(500).send({ error: "Failed to verify purchase", code: "DB_ERROR" });
     }
 

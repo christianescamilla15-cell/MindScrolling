@@ -375,7 +375,7 @@ class _EmptyView extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           'Keep exploring philosophical ideas and your weekly AI insight will appear here.',
-          style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 32),
@@ -455,7 +455,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message,
-              style: AppTypography.body,
+              style: AppTypography.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

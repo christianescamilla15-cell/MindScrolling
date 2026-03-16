@@ -9,16 +9,13 @@ import '../../core/storage/local_storage.dart';
 /// Repository for daily challenges and the philosophy map.
 class ChallengeRepository {
   final ChallengeRemoteDataSource _remote;
-  final LocalStorage _storage;
 
   static const _challengeCacheKey = 'mindscroll_challenge_cache';
   static const _progressCacheKey = 'mindscroll_challenge_progress';
 
   const ChallengeRepository({
     required ChallengeRemoteDataSource remote,
-    required LocalStorage storage,
-  })  : _remote = remote,
-        _storage = storage;
+  }) : _remote = remote;
 
   // ── Challenge ─────────────────────────────────────────────────────────────
 
@@ -29,7 +26,7 @@ class ChallengeRepository {
       final json = await _remote.getTodayChallenge();
       final data = json['data'] as Map<String, dynamic>? ?? json;
       final challenge = ChallengeModel.fromJson(data);
-      await _storage.setString(
+      await LocalStorage.setString(
         _challengeCacheKey,
         jsonEncode(challenge.toJson()),
       );
@@ -51,7 +48,7 @@ class ChallengeRepository {
       final progressJson = json['progress'] as Map<String, dynamic>?;
       if (progressJson != null) {
         final progress = ChallengeProgressModel.fromJson(progressJson);
-        await _storage.setString(
+        await LocalStorage.setString(
           _progressCacheKey,
           jsonEncode(progress.toJson()),
         );
@@ -78,7 +75,7 @@ class ChallengeRepository {
         progress: progress,
         completed: completed,
       );
-      await _storage.setString(
+      await LocalStorage.setString(
         _progressCacheKey,
         jsonEncode(model.toJson()),
       );
@@ -113,7 +110,7 @@ class ChallengeRepository {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   Future<ChallengeModel> _loadCachedChallenge() async {
-    final raw = await _storage.getString(_challengeCacheKey);
+    final raw = await LocalStorage.getString(_challengeCacheKey);
     if (raw == null || raw.isEmpty) return ChallengeModel.defaultChallenge;
     try {
       return ChallengeModel.fromJson(
@@ -125,7 +122,7 @@ class ChallengeRepository {
   }
 
   Future<ChallengeProgressModel> _loadCachedProgress() async {
-    final raw = await _storage.getString(_progressCacheKey);
+    final raw = await LocalStorage.getString(_progressCacheKey);
     if (raw == null || raw.isEmpty) return const ChallengeProgressModel();
     try {
       return ChallengeProgressModel.fromJson(

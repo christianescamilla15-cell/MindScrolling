@@ -9,8 +9,8 @@ import '../../data/repositories/vault_repository.dart';
 // Repository provider
 // ---------------------------------------------------------------------------
 
-final vaultRepositoryProvider = FutureProvider<VaultRepository>((ref) async {
-  final api = await ref.watch(apiClientProvider.future);
+final vaultRepositoryProvider = Provider<VaultRepository>((ref) {
+  final api = ref.watch(apiClientProvider);
   return VaultRepository(remote: VaultRemoteDataSource(api));
 });
 
@@ -94,8 +94,8 @@ class VaultNotifier extends AsyncNotifier<VaultState> {
   late VaultController _ctrl;
 
   @override
-  Future<VaultState> build() async {
-    final repo = await ref.watch(vaultRepositoryProvider.future);
+  VaultState build() {
+    final repo = ref.watch(vaultRepositoryProvider);
     _ctrl = VaultController(repo);
     return _ctrl.state;
   }
@@ -124,3 +124,4 @@ final vaultStateProvider = Provider<VaultState>((ref) {
         orElse: () => const VaultState(isLoading: true),
       );
 });
+

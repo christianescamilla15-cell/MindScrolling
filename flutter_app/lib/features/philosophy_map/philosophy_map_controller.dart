@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/core_providers.dart';
-import '../../core/storage/local_storage.dart';
 import '../../data/datasources/remote/challenge_remote_ds.dart';
 import '../../data/models/philosophy_map_model.dart';
 import '../../data/repositories/challenge_repository.dart';
@@ -11,12 +10,10 @@ import '../../data/repositories/challenge_repository.dart';
 // ---------------------------------------------------------------------------
 
 final challengeRepositoryProvider =
-    FutureProvider<ChallengeRepository>((ref) async {
-  final api = await ref.watch(apiClientProvider.future);
-  final storage = await ref.watch(localStorageProvider.future);
+    Provider<ChallengeRepository>((ref) {
+  final api = ref.watch(apiClientProvider);
   return ChallengeRepository(
     remote: ChallengeRemoteDataSource(api),
-    storage: storage,
   );
 });
 
@@ -61,8 +58,8 @@ class PhilosophyMapController extends AsyncNotifier<PhilosophyMapState> {
   late ChallengeRepository _repo;
 
   @override
-  Future<PhilosophyMapState> build() async {
-    _repo = await ref.watch(challengeRepositoryProvider.future);
+  PhilosophyMapState build() {
+    _repo = ref.watch(challengeRepositoryProvider);
     return const PhilosophyMapState();
   }
 
@@ -146,3 +143,4 @@ final philosophyMapStateProvider = Provider<PhilosophyMapState>((ref) {
         orElse: () => const PhilosophyMapState(isLoading: true),
       );
 });
+

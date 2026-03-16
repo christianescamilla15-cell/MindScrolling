@@ -207,7 +207,7 @@ export default async function quotesRoutes(fastify) {
     ]);
 
     const isPremium         = userRow?.is_premium === true;
-    const effectiveLang     = profile?.preferred_language || lang;
+    const effectiveLang     = lang;
     const challengeCategory = today?.category ?? null;
 
     // ── Build scoring inputs ───────────────────────────────────────────────────
@@ -238,8 +238,19 @@ export default async function quotesRoutes(fastify) {
       }));
     }
 
+    // Fallback: if RPC not yet deployed, do a plain query
     if (rpcErr) {
-      return reply.status(500).send({ error: "Failed to fetch quotes", code: "DB_ERROR" });
+      let q = supabase
+        .from("quotes")
+        .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at")
+        .eq("lang", effectiveLang)
+        .limit(poolSize);
+      if (!isPremium) q = q.eq("is_premium", false);
+      const { data: fallback, error: fallbackErr } = await q;
+      if (fallbackErr) {
+        return reply.status(500).send({ error: "Failed to fetch quotes", code: "DB_ERROR" });
+      }
+      candidates = fallback || [];
     }
 
     // ── Handle exhaustion: all quotes seen — reset seen list and restart ───────

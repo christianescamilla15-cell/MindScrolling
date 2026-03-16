@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
@@ -13,14 +14,14 @@ import 'widgets/goal_selector.dart';
 /// Page 0: SwipeGuide (OnboardingIntro)
 /// Page 1: Profile collection
 /// Page 2: Ready / launch
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final PageController _pageController;
   late final OnboardingController _controller;
 
@@ -72,7 +73,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   _Page2(
                     isCompleting: _controller.isCompleting,
-                    onStart: () => _controller.complete(context),
+                    onStart: () => _controller.complete(context, ref),
                   ),
                 ],
               ),

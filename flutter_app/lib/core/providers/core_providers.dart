@@ -1,16 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/api_client.dart';
-import '../storage/local_storage.dart';
 import '../constants/api_constants.dart';
 
-/// Async singleton for [LocalStorage].
-final localStorageProvider = FutureProvider<LocalStorage>((ref) async {
-  return LocalStorage.getInstance();
-});
+/// Synchronous device-ID provider.
+/// Overridden in main.dart with the real device ID before runApp().
+final deviceIdProvider = Provider<String>((ref) => 'unset');
 
-/// Async singleton for [ApiClient] configured with the correct base URL.
-final apiClientProvider = FutureProvider<ApiClient>((ref) async {
-  final storage = await ref.watch(localStorageProvider.future);
-  return ApiClient(baseUrl: ApiConstants.baseUrl, storage: storage);
+/// Synchronous [ApiClient] provider — no async needed because deviceId is
+/// already resolved before the widget tree is built.
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final deviceId = ref.watch(deviceIdProvider);
+  return ApiClient(deviceId: deviceId, baseUrl: ApiConstants.baseUrl);
 });

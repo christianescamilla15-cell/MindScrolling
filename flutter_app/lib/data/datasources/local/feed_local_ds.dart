@@ -12,8 +12,8 @@ class FeedLocalDataSource {
   const FeedLocalDataSource(this._cache);
 
   /// Returns the last cached feed page, or null if missing / expired.
-  Future<List<QuoteModel>?> getCachedFeed() async {
-    final raw = await _cache.get(_feedCacheKey);
+  List<QuoteModel>? getCachedFeed() {
+    final raw = _cache.get<dynamic>(_feedCacheKey);
     if (raw == null) return null;
 
     try {
@@ -23,19 +23,19 @@ class FeedLocalDataSource {
           .map(QuoteModel.fromJson)
           .toList();
     } catch (_) {
-      await _cache.remove(_feedCacheKey);
+      _cache.invalidate(_feedCacheKey);
       return null;
     }
   }
 
   /// Caches [quotes] with a 5-minute TTL.
-  Future<void> cacheFeed(List<QuoteModel> quotes) async {
+  void cacheFeed(List<QuoteModel> quotes) {
     final jsonList = quotes.map((q) => q.toJson()).toList();
-    await _cache.set(_feedCacheKey, jsonList, ttl: _feedCacheTtl);
+    _cache.set(_feedCacheKey, jsonList, ttl: _feedCacheTtl);
   }
 
   /// Removes the cached feed immediately.
-  Future<void> clearCache() async {
-    await _cache.remove(_feedCacheKey);
+  void clearCache() {
+    _cache.invalidate(_feedCacheKey);
   }
 }
