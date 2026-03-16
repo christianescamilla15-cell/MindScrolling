@@ -12,7 +12,8 @@ import swipesRoutes     from "./routes/swipes.js";
 import challengesRoutes from "./routes/challenges.js";
 import mapRoutes        from "./routes/map.js";
 import premiumRoutes    from "./routes/premium.js";
-import insightsRoutes   from "./routes/insights.js";
+import insightsRoutes    from "./routes/insights.js";
+import mindProfileRoutes from "./routes/mind-profile.js";
 import deviceIdPlugin   from "./plugins/deviceId.js";
 
 const app = Fastify({ logger: true });
@@ -39,7 +40,8 @@ await app.register(swipesRoutes,     { prefix: "/swipes"     });
 await app.register(challengesRoutes, { prefix: "/challenges" });
 await app.register(mapRoutes,        { prefix: "/map"        });
 await app.register(premiumRoutes,    { prefix: "/premium"    });
-await app.register(insightsRoutes,   { prefix: "/insights"   });
+await app.register(insightsRoutes,    { prefix: "/insights"    });
+await app.register(mindProfileRoutes, { prefix: "/mind-profile" });
 
 /* ─── Health ───────────────────────────────────────────────────────────────── */
 app.get("/health", async () => ({ status: "ok", ts: new Date().toISOString() }));
