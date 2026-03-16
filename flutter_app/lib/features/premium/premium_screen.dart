@@ -261,6 +261,11 @@ class _ComparisonTable extends StatelessWidget {
         free: tr.basic,
         premium: tr.fullPlusHistory,
       ),
+      _ComparisonRow(
+        feature: tr.aiWeeklyInsight,
+        free: tr.notIncluded,
+        premium: tr.included,
+      ),
     ];
 
     return Container(

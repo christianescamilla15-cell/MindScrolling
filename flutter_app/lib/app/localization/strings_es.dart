@@ -479,6 +479,12 @@ class StringsEs implements AppStrings {
 
   @override
   String get oneTimePurchase => 'Compra única — sin suscripción, nunca.';
+  @override
+  String get aiWeeklyInsight => 'Reflexión semanal IA';
+  @override
+  String get notIncluded => 'No incluido';
+  @override
+  String get included => 'Incluido';
 
   // ------------------------------------------------------------------
   // Philosophy Map screen

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
@@ -73,7 +74,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                 _CountBadge(count: vaultState.items.length),
                 const Spacer(),
                 _CloseButton(
-                  onTap: widget.onClose ?? () => Navigator.of(context).pop(),
+                  onTap: widget.onClose ?? () => context.canPop() ? context.pop() : context.go('/feed'),
                 ),
               ],
             ),

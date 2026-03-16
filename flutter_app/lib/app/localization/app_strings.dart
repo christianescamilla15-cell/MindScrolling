@@ -212,6 +212,9 @@ abstract class AppStrings {
   String get fullPlusHistory;
   String get oneTime;
   String get oneTimePurchase;
+  String get aiWeeklyInsight;
+  String get notIncluded;
+  String get included;
 
   // ------------------------------------------------------------------
   // Philosophy Map screen

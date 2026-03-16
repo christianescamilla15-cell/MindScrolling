@@ -478,6 +478,12 @@ class StringsEn implements AppStrings {
 
   @override
   String get oneTimePurchase => 'One-time purchase — no subscription, ever.';
+  @override
+  String get aiWeeklyInsight => 'AI Weekly Insight';
+  @override
+  String get notIncluded => 'Not included';
+  @override
+  String get included => 'Included';
 
   // ------------------------------------------------------------------
   // Philosophy Map screen

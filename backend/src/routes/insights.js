@@ -9,67 +9,104 @@
 import { supabase }         from "../db/client.js";
 import { getWeeklyInsight } from "../services/insights.js";
 
+// Safe query helper — returns { data, error } without throwing
+async function safeQuery(queryFn) {
+  try {
+    return await queryFn();
+  } catch {
+    return { data: null, error: "table_not_found" };
+  }
+}
+
 export default async function insightsRoutes(fastify) {
   fastify.get("/weekly", async (request, reply) => {
     const { deviceId } = request;
     const lang = request.query.lang || request.headers["accept-language"]?.slice(0, 2) || "en";
 
-    // ── Parallel fetch: preferences + snapshot scores + liked quotes + user stats ──
-    const [
-      { data: prefs   },
-      { data: snapRow },
-      { data: liked   },
-      { data: user    },
-    ] = await Promise.all([
-      supabase
-        .from("user_preferences")
-        .select("category, like_count, swipe_count")
-        .eq("device_id", deviceId),
+    // Premium check: AI insights are a MindScrolling Inside feature
+    const DEV_FORCE_PREMIUM = process.env.DEV_FORCE_PREMIUM === "true";
+    if (!DEV_FORCE_PREMIUM) {
+      const { data: userRow } = await safeQuery(() =>
+        supabase.from("users").select("is_premium").eq("device_id", deviceId).maybeSingle()
+      );
+      if (!userRow?.data?.is_premium) {
+        return reply.send({ insight: null, premium_required: true });
+      }
+    }
 
-      // Latest snapshot (for stable 0-100 scores)
-      supabase
-        .from("user_preference_snapshots")
-        .select("wisdom_score, discipline_score, reflection_score, philosophy_score")
-        .eq("device_id", deviceId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+    // ── Parallel fetch (each query is safe — missing tables don't crash) ──
+    const [prefsResult, snapResult, likedResult, userResult] = await Promise.all([
+      safeQuery(() =>
+        supabase
+          .from("user_preferences")
+          .select("category, like_count, swipe_count")
+          .eq("device_id", deviceId)
+      ),
 
-      // Recently liked / vaulted quotes for Claude context
-      supabase
-        .from("likes")
-        .select("quote_id, quotes(text, author, category)")
-        .eq("device_id", deviceId)
-        .order("liked_at", { ascending: false })
-        .limit(5),
+      // Snapshot table may not exist (requires migration 004)
+      safeQuery(() =>
+        supabase
+          .from("user_preference_snapshots")
+          .select("wisdom_score, discipline_score, reflection_score, philosophy_score")
+          .eq("device_id", deviceId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      ),
 
-      supabase
-        .from("users")
-        .select("streak, total_reflections")
-        .eq("device_id", deviceId)
-        .maybeSingle(),
+      safeQuery(() =>
+        supabase
+          .from("likes")
+          .select("quote_id, quotes(text, author, category)")
+          .eq("device_id", deviceId)
+          .order("liked_at", { ascending: false })
+          .limit(5)
+      ),
+
+      safeQuery(() =>
+        supabase
+          .from("users")
+          .select("streak, total_reflections")
+          .eq("device_id", deviceId)
+          .maybeSingle()
+      ),
     ]);
+
+    const prefs   = prefsResult.data   || [];
+    const snapRow = snapResult.data    || null;
+    const liked   = likedResult.data   || [];
+    const user    = userResult.data    || null;
 
     // ── Derive top category from preferences ──────────────────────────────────
     const catScores = {};
-    (prefs || []).forEach(p => {
+    prefs.forEach(p => {
       catScores[p.category] = (p.like_count ?? 0) * 3 + (p.swipe_count ?? 0);
     });
 
     const topCategory = Object.entries(catScores)
       .sort(([, a], [, b]) => b - a)[0]?.[0] ?? "stoicism";
 
-    // ── Build 0-100 scores (live or from snapshot) ────────────────────────────
-    const scores = snapRow
-      ? {
-          wisdom:      Number(snapRow.wisdom_score),
-          discipline:  Number(snapRow.discipline_score),
-          reflection:  Number(snapRow.reflection_score),
-          philosophy:  Number(snapRow.philosophy_score),
-        }
-      : { wisdom: 0, discipline: 0, reflection: 0, philosophy: 0 };
+    // ── Build 0-100 scores from preferences (snapshot fallback) ─────────────
+    let scores;
+    if (snapRow && snapRow.wisdom_score != null) {
+      scores = {
+        wisdom:     Number(snapRow.wisdom_score),
+        discipline: Number(snapRow.discipline_score),
+        reflection: Number(snapRow.reflection_score),
+        philosophy: Number(snapRow.philosophy_score),
+      };
+    } else {
+      // Derive approximate scores from preference data
+      const total = Object.values(catScores).reduce((s, v) => s + v, 0) || 1;
+      scores = {
+        wisdom:     Math.round(((catScores.stoicism   ?? 0) / total) * 100),
+        discipline: Math.round(((catScores.discipline  ?? 0) / total) * 100),
+        reflection: Math.round(((catScores.reflection  ?? 0) / total) * 100),
+        philosophy: Math.round(((catScores.philosophy  ?? 0) / total) * 100),
+      };
+    }
 
-    const recentQuotes = (liked || [])
+    const recentQuotes = liked
       .map(r => r.quotes)
       .filter(Boolean);
 
@@ -88,6 +125,6 @@ export default async function insightsRoutes(fastify) {
       fastify.log.warn({ err }, "Failed to generate AI insight");
     }
 
-    return reply.send({ insight });   // null if API not configured or generation failed
+    return reply.send({ insight });
   });
 }

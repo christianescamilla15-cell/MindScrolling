@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/premium_gate.dart';
 import 'insights_controller.dart';
 
 class InsightsScreen extends ConsumerStatefulWidget {
@@ -30,10 +31,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _Header(
+      body: PremiumGate(
+        child: SafeArea(
+          child: Column(
+            children: [
+              _Header(
               onRefresh: state.isRefreshing
                   ? null
                   : () =>
@@ -48,8 +50,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                 child: _buildBody(state),
               ),
             ),
-            _BottomNav(currentIndex: 3),
-          ],
+              _BottomNav(currentIndex: 3),
+            ],
+          ),
         ),
       ),
     );
