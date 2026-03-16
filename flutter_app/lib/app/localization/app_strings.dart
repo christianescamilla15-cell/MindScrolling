@@ -272,6 +272,17 @@ abstract class AppStrings {
   // ------------------------------------------------------------------
   String get feedLimitReached;
 
+  // ------------------------------------------------------------------
+  // Ambient audio
+  // ------------------------------------------------------------------
+  String get ambientAudio;
+  String get soundscapes;
+  String get nowPlaying;
+  String get audioComingSoon;
+  String get play;
+  String get pause;
+  String get volume;
+
 }
 
 /// Resolves controller-emitted toast key strings to localized display text.

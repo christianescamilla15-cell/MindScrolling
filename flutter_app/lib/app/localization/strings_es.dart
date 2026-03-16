@@ -573,4 +573,13 @@ class StringsEs implements AppStrings {
   // Feed limit
   @override
   String get feedLimitReached => 'Alcanzaste el límite gratuito de hoy. Actualiza para frases ilimitadas.';
+
+  // Ambient audio
+  @override String get ambientAudio    => 'Audio ambiental';
+  @override String get soundscapes     => 'Paisajes sonoros';
+  @override String get nowPlaying      => 'Reproduciendo';
+  @override String get audioComingSoon => 'Pistas de audio proximamente';
+  @override String get play            => 'Reproducir';
+  @override String get pause           => 'Pausar';
+  @override String get volume          => 'Volumen';
 }

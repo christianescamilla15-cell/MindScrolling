@@ -8,6 +8,7 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/feed_item_model.dart';
 import '../../app/localization/app_strings.dart';
+import '../ambient/ambient_audio_button.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
@@ -251,6 +252,8 @@ class _Header extends StatelessWidget {
             'MindScroll',
             style: AppTypography.displaySmall.copyWith(fontSize: 20),
           ),
+          const SizedBox(width: 8),
+          const AmbientAudioButton(),
           const Spacer(),
           // Reflection count
           _StatChip(

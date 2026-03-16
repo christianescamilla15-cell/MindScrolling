@@ -572,4 +572,13 @@ class StringsEn implements AppStrings {
   // Feed limit
   @override
   String get feedLimitReached => "You've reached today's free limit. Upgrade for unlimited quotes.";
+
+  // Ambient audio
+  @override String get ambientAudio    => 'Ambient Audio';
+  @override String get soundscapes     => 'Soundscapes';
+  @override String get nowPlaying      => 'Now Playing';
+  @override String get audioComingSoon => 'Audio tracks coming soon';
+  @override String get play            => 'Play';
+  @override String get pause           => 'Pause';
+  @override String get volume          => 'Volume';
 }
