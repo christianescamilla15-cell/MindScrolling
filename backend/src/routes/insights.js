@@ -24,12 +24,17 @@ export default async function insightsRoutes(fastify) {
     const lang = request.query.lang || request.headers["accept-language"]?.slice(0, 2) || "en";
 
     // Premium check: AI insights are a MindScrolling Inside feature
-    const DEV_FORCE_PREMIUM = process.env.DEV_FORCE_PREMIUM === "true";
-    if (!DEV_FORCE_PREMIUM) {
-      const { data: userRow } = await safeQuery(() =>
+    // Skip in dev mode; in production, require premium entitlement
+    const isDev = process.env.NODE_ENV !== "production";
+    const devForcePremium = isDev && process.env.DEV_FORCE_PREMIUM === "true";
+    if (!devForcePremium) {
+      const premiumResult = await safeQuery(() =>
         supabase.from("users").select("is_premium").eq("device_id", deviceId).maybeSingle()
       );
-      if (!userRow?.data?.is_premium) {
+      // Only gate if user row exists AND is_premium is explicitly false
+      // New users (no row) get the empty state, not the premium wall
+      const userRow = premiumResult.data;
+      if (userRow && userRow.is_premium === false) {
         return reply.send({ insight: null, premium_required: true });
       }
     }

@@ -37,8 +37,9 @@ export default async function premiumRoutes(fastify) {
     ]);
 
     // Gracefully handle missing columns (pre-migration state)
-    // DEV MODE: force premium ON for testing until migrations are applied
-    const DEV_FORCE_PREMIUM = process.env.DEV_FORCE_PREMIUM === "true";
+    // DEV MODE: force premium ON for testing (disabled in production)
+    const isDev = process.env.NODE_ENV !== "production";
+    const DEV_FORCE_PREMIUM = isDev && process.env.DEV_FORCE_PREMIUM === "true";
     const isPremium = DEV_FORCE_PREMIUM || (
       !userErr && !purchaseErr
         ? (userRow?.is_premium === true) && (purchase !== null)
@@ -233,6 +234,6 @@ export default async function premiumRoutes(fastify) {
       .update({ is_premium: true })
       .eq("device_id", deviceId);
 
-    return reply.status(200).send({ unlocked: true });
+    return reply.status(200).send({ ok: true, is_premium: true, unlocked: true });
   });
 }
