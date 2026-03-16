@@ -528,4 +528,24 @@ class StringsEn implements AppStrings {
 
   @override
   String get hintReflection => 'REFLECTION';
+
+  // Premium purchase flow
+  @override
+  String get restorePurchases => 'Restore Purchases';
+  @override
+  String get purchaseSuccess => 'Welcome to MindScrolling Inside!';
+  @override
+  String get purchaseFailed => 'Purchase could not be completed. Please try again.';
+  @override
+  String get restoreSuccess => 'Your purchase has been restored!';
+  @override
+  String get restoreFailed => 'Could not restore purchases. Please try again.';
+  @override
+  String get noPurchasesFound => 'No previous purchases found.';
+  @override
+  String get premiumActive => 'MindScrolling Inside is active';
+  @override
+  String get premiumRequired => 'This feature requires MindScrolling Inside';
+  @override
+  String get purchasing => 'Processing purchase...';
 }

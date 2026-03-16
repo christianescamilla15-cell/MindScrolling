@@ -5,6 +5,7 @@ import '../../data/datasources/local/settings_local_ds.dart';
 import '../../data/datasources/remote/stats_remote_ds.dart';
 import '../../data/models/premium_state_model.dart';
 import '../../data/repositories/premium_repository.dart';
+import 'premium_purchase_service.dart';
 
 // ---------------------------------------------------------------------------
 // Repository provider
@@ -27,6 +28,7 @@ class PremiumUiState {
   final PremiumStateModel premiumState;
   final bool isLoading;
   final bool isPurchasing;
+  final bool isRestoring;
   final String? error;
   final String? successMessage;
 
@@ -34,6 +36,7 @@ class PremiumUiState {
     this.premiumState = const PremiumStateModel(),
     this.isLoading = false,
     this.isPurchasing = false,
+    this.isRestoring = false,
     this.error,
     this.successMessage,
   });
@@ -44,6 +47,7 @@ class PremiumUiState {
     PremiumStateModel? premiumState,
     bool? isLoading,
     bool? isPurchasing,
+    bool? isRestoring,
     String? error,
     String? successMessage,
   }) {
@@ -51,6 +55,7 @@ class PremiumUiState {
       premiumState: premiumState ?? this.premiumState,
       isLoading: isLoading ?? this.isLoading,
       isPurchasing: isPurchasing ?? this.isPurchasing,
+      isRestoring: isRestoring ?? this.isRestoring,
       error: error,
       successMessage: successMessage,
     );
@@ -132,6 +137,76 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
         );
       },
     );
+  }
+
+  /// Initiates a real in-app purchase via [PremiumPurchaseService].
+  Future<void> purchasePremium() async {
+    final current = state.valueOrNull ?? const PremiumUiState();
+    if (current.isPremium || current.isPurchasing) return;
+
+    state = AsyncData(
+      current.copyWith(isPurchasing: true, error: null, successMessage: null),
+    );
+
+    final service = ref.read(premiumPurchaseServiceProvider);
+    final result = await service.purchase();
+    final updated = state.valueOrNull ?? const PremiumUiState();
+
+    switch (result.outcome) {
+      case PurchaseOutcome.success:
+        state = AsyncData(updated.copyWith(
+          premiumState: const PremiumStateModel(isPremium: true, purchaseType: 'premium_unlock'),
+          isPurchasing: false,
+          successMessage: 'purchaseSuccess',
+        ));
+      case PurchaseOutcome.cancelled:
+        state = AsyncData(updated.copyWith(isPurchasing: false));
+      case PurchaseOutcome.failed:
+      case PurchaseOutcome.pending:
+        state = AsyncData(updated.copyWith(
+          isPurchasing: false,
+          error: result.errorMessage ?? 'purchaseFailed',
+        ));
+      case PurchaseOutcome.restored:
+        state = AsyncData(updated.copyWith(
+          premiumState: const PremiumStateModel(isPremium: true),
+          isPurchasing: false,
+          successMessage: 'restoreSuccess',
+        ));
+    }
+  }
+
+  /// Restores previous purchases via [PremiumPurchaseService].
+  Future<void> restorePurchases() async {
+    final current = state.valueOrNull ?? const PremiumUiState();
+    if (current.isRestoring) return;
+
+    state = AsyncData(
+      current.copyWith(isRestoring: true, error: null, successMessage: null),
+    );
+
+    final service = ref.read(premiumPurchaseServiceProvider);
+    final result = await service.restore();
+    final updated = state.valueOrNull ?? const PremiumUiState();
+
+    switch (result.outcome) {
+      case PurchaseOutcome.restored:
+        state = AsyncData(updated.copyWith(
+          premiumState: const PremiumStateModel(isPremium: true),
+          isRestoring: false,
+          successMessage: 'restoreSuccess',
+        ));
+      case PurchaseOutcome.failed:
+        state = AsyncData(updated.copyWith(
+          isRestoring: false,
+          error: result.errorMessage ?? 'restoreFailed',
+        ));
+      default:
+        state = AsyncData(updated.copyWith(
+          isRestoring: false,
+          error: 'noPurchasesFound',
+        ));
+    }
   }
 }
 

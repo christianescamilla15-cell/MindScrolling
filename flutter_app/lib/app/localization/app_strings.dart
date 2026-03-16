@@ -231,6 +231,19 @@ abstract class AppStrings {
   String get couldNotOpenDonation;
 
   // ------------------------------------------------------------------
+  // Premium purchase flow
+  // ------------------------------------------------------------------
+  String get restorePurchases;
+  String get purchaseSuccess;
+  String get purchaseFailed;
+  String get restoreSuccess;
+  String get restoreFailed;
+  String get noPurchasesFound;
+  String get premiumActive;
+  String get premiumRequired;
+  String get purchasing;
+
+  // ------------------------------------------------------------------
   // Swipe hint overlay
   // ------------------------------------------------------------------
   String get hintPhilosophy;

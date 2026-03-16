@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
+import '../../shared/widgets/premium_gate.dart';
 import '../../app/theme/typography.dart';
 import '../../shared/extensions/context_extensions.dart';
 import 'philosophy_map_controller.dart';
@@ -75,9 +76,10 @@ class _PhilosophyMapScreenState extends ConsumerState<PhilosophyMapScreen> {
         ),
         centerTitle: false,
       ),
-      body: SafeArea(
-        child: mapState.isLoading && mapState.mapData == null
-            ? const _LoadingView()
+      body: PremiumGate(
+        child: SafeArea(
+          child: mapState.isLoading && mapState.mapData == null
+              ? const _LoadingView()
             : mapState.error != null && mapState.mapData == null
                 ? _ErrorView(
                     message: mapState.error!,
@@ -88,6 +90,7 @@ class _PhilosophyMapScreenState extends ConsumerState<PhilosophyMapScreen> {
                     mapState: mapState,
                     onSaveSnapshot: _handleSaveSnapshot,
                   ),
+        ),
       ),
     );
   }

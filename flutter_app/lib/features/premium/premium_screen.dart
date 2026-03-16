@@ -105,13 +105,44 @@ class _PremiumBody extends ConsumerWidget {
             _UnlockButton(
               isPurchasing: ps.isPurchasing,
               onTap: () =>
-                  ref.read(premiumControllerProvider.notifier).unlock(),
+                  ref.read(premiumControllerProvider.notifier).purchasePremium(),
             ),
             const SizedBox(height: 10),
             Text(
               context.tr.oneTimePurchase,
               style: AppTypography.caption,
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            // Restore purchases button
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: TextButton(
+                onPressed: ps.isRestoring
+                    ? null
+                    : () => ref
+                        .read(premiumControllerProvider.notifier)
+                        .restorePurchases(),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                ),
+                child: ps.isRestoring
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textSecondary,
+                        ),
+                      )
+                    : Text(
+                        context.tr.restorePurchases,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+              ),
             ),
           ],
         ],
