@@ -19,6 +19,7 @@ class AmbientTrack {
   });
 }
 
+// Royalty-free ambient audio streams from Pixabay (CC0 license)
 const List<AmbientTrack> kAmbientTracks = [
   AmbientTrack(
     id: 'relax',
@@ -26,7 +27,7 @@ const List<AmbientTrack> kAmbientTracks = [
     nameEs: 'Relajacion',
     icon: Icons.waves_outlined,
     accentColor: AppColors.stoicism,
-    audioUrl: null,
+    audioUrl: 'https://cdn.pixabay.com/audio/2024/11/28/audio_3a6a84e951.mp3',
   ),
   AmbientTrack(
     id: 'deep_focus',
@@ -34,7 +35,7 @@ const List<AmbientTrack> kAmbientTracks = [
     nameEs: 'Enfoque profundo',
     icon: Icons.self_improvement_outlined,
     accentColor: AppColors.discipline,
-    audioUrl: null,
+    audioUrl: 'https://cdn.pixabay.com/audio/2022/10/25/audio_540843e92f.mp3',
   ),
   AmbientTrack(
     id: 'night_reflection',
@@ -42,7 +43,7 @@ const List<AmbientTrack> kAmbientTracks = [
     nameEs: 'Reflexion nocturna',
     icon: Icons.nightlight_outlined,
     accentColor: AppColors.reflection,
-    audioUrl: null,
+    audioUrl: 'https://cdn.pixabay.com/audio/2023/09/04/audio_4b3de66fd7.mp3',
   ),
 ];
 
