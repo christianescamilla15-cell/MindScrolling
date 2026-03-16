@@ -1,0 +1,142 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../app/theme/colors.dart';
+import '../../app/theme/typography.dart';
+import '../../core/constants/monetization_constants.dart';
+
+/// Simple donation screen with a "Buy Me a Coffee" button that opens the
+/// donation URL via url_launcher.
+class DonationsScreen extends ConsumerWidget {
+  const DonationsScreen({super.key});
+
+  Future<void> _openDonationUrl(BuildContext context) async {
+    final uri = Uri.parse(MonetizationConstants.donationUrl);
+    final canLaunch = await canLaunchUrl(uri);
+    if (canLaunch) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Could not open donation page.',
+              style: AppTypography.bodySmall,
+            ),
+            backgroundColor: const Color(0xFF1A1A2E),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0D0D1A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0D0D1A),
+        elevation: 0,
+        centerTitle: false,
+        title: Text('Support', style: AppTypography.displaySmall),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 48),
+
+              // ── Icon ─────────────────────────────────────────────────
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: AppColors.stoicism.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.favorite_rounded,
+                  color: AppColors.stoicism,
+                  size: 40,
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // ── Heading ───────────────────────────────────────────────
+              Text(
+                'Support MindScroll',
+                style: AppTypography.displayMedium,
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 16),
+
+              // ── Description ───────────────────────────────────────────
+              Text(
+                'MindScroll is a passion project built to bring timeless '
+                'philosophy into everyday life. If it has brought you a '
+                'moment of clarity or calm, consider buying a coffee — it '
+                'keeps the project alive and growing.',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.65,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              Text(
+                'Every contribution is deeply appreciated.',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.stoicism.withOpacity(0.8),
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const Spacer(),
+
+              // ── Donation button ───────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: () => _openDonationUrl(context),
+                  icon: const Icon(Icons.coffee_rounded, size: 22),
+                  label: Text(
+                    'Buy Me a Coffee',
+                    style: AppTypography.buttonLabel,
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.stoicism,
+                    foregroundColor: const Color(0xFF0D0D1A),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Text(
+                MonetizationConstants.donationUrl,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textMuted,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sk \"https://api.quotable.io/tags\" -o \"C:/Users/Chris/Desktop/MindScrolling/tags_temp.json\")",
+      "Bash(node -e \"const t=require\\(''./tags_temp.json''\\);console.log\\(t.map\\(x=>x.name+'':''+x.quoteCount\\).join\\(''\\\\n''\\)\\)\")",
+      "Bash(del \"C:\\\\Users\\\\Chris\\\\Desktop\\\\MindScrolling\\\\tags_temp.json\")",
+      "Bash(\"C:/Users/Chris/Desktop/MindScrolling/tags_temp.json\")",
+      "Bash(node -e \"const t=JSON.parse\\(require\\(''fs''\\).readFileSync\\(''C:/Users/Chris/Desktop/MindScrolling/tags_temp.json''\\)\\);console.log\\(t.map\\(x=>x.name+'':''+x.quoteCount\\).join\\(''\\\\n''\\)\\)\")",
+      "Bash(curl -s \"https://type.fit/api/quotes\")",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{try{const t=JSON.parse\\(d\\);console.log\\(''''Count:'''',t.length\\);console.log\\(''''Sample:'''',JSON.stringify\\(t.slice\\(0,2\\)\\)\\)}catch\\(e\\){console.log\\(''''err:'''',e.message,d.slice\\(0,200\\)\\)}}\\)\")"
+    ]
+  }
+}
