@@ -99,46 +99,88 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
     return const PremiumUiState();
   }
 
-  // ── Trial system ──────────────────────────────────────────────────────────
+  // ── Trial system (backend-driven) ─────────────────────────────────────
 
   Future<void> _initTrial() async {
-    final prefs = await SharedPreferences.getInstance();
-    final trialStartStr = prefs.getString(_kTrialStartKey);
+    try {
+      final api = ref.read(apiClientProvider);
 
-    if (trialStartStr == null) {
-      // First launch — start the 7-day trial automatically
-      final now = DateTime.now().toIso8601String();
-      await prefs.setString(_kTrialStartKey, now);
-      state = AsyncData(
-        (state.valueOrNull ?? const PremiumUiState()).copyWith(
-          isTrial: true,
-          trialDaysLeft: _kTrialDurationDays,
-          trialExpired: false,
-        ),
-      );
-      return;
-    }
+      // Check premium status from backend (includes trial info)
+      final response = await api.get('/premium/status');
 
-    final trialStart = DateTime.parse(trialStartStr);
-    final daysPassed = DateTime.now().difference(trialStart).inDays;
-    final daysLeft = _kTrialDurationDays - daysPassed;
+      final trialActive = response['trial_active'] == true;
+      final trialDaysLeft = (response['trial_days_left'] as num?)?.toInt() ?? 0;
+      final trialExpired = response['trial_expired'] == true;
+      final isPaidPremium = response['is_paid_premium'] == true;
 
-    if (daysLeft > 0) {
-      state = AsyncData(
-        (state.valueOrNull ?? const PremiumUiState()).copyWith(
-          isTrial: true,
-          trialDaysLeft: daysLeft,
-          trialExpired: false,
-        ),
-      );
-    } else {
-      state = AsyncData(
-        (state.valueOrNull ?? const PremiumUiState()).copyWith(
-          isTrial: false,
-          trialDaysLeft: 0,
-          trialExpired: true,
-        ),
-      );
+      if (isPaidPremium) {
+        // Already paid — no trial needed
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            premiumState: const PremiumStateModel(isPremium: true),
+            isTrial: false,
+            trialExpired: false,
+          ),
+        );
+        return;
+      }
+
+      if (trialActive) {
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            isTrial: true,
+            trialDaysLeft: trialDaysLeft,
+            trialExpired: false,
+          ),
+        );
+        return;
+      }
+
+      if (trialExpired) {
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            isTrial: false,
+            trialDaysLeft: 0,
+            trialExpired: true,
+          ),
+        );
+        return;
+      }
+
+      // No trial started yet — start one via backend
+      final startResponse = await api.post('/premium/start-trial', body: {});
+      if (startResponse['started'] == true) {
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            isTrial: true,
+            trialDaysLeft: startResponse['trial_days_left'] ?? 7,
+            trialExpired: false,
+          ),
+        );
+      } else if (startResponse['already_used'] == true) {
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            isTrial: false,
+            trialDaysLeft: 0,
+            trialExpired: true,
+          ),
+        );
+      }
+    } catch (_) {
+      // Fallback to local trial if backend unreachable
+      final prefs = await SharedPreferences.getInstance();
+      final trialStartStr = prefs.getString(_kTrialStartKey);
+      if (trialStartStr != null) {
+        final start = DateTime.parse(trialStartStr);
+        final daysLeft = _kTrialDurationDays - DateTime.now().difference(start).inDays;
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            isTrial: daysLeft > 0,
+            trialDaysLeft: daysLeft > 0 ? daysLeft : 0,
+            trialExpired: daysLeft <= 0,
+          ),
+        );
+      }
     }
   }
 

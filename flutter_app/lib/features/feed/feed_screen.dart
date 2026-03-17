@@ -47,9 +47,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Load feed
+      // Load persisted swipe count + feed
+      final feedCtrl = ref.read(feedControllerProvider.notifier);
+      await feedCtrl.loadPersistedSwipeCount();
       final lang = ref.read(settingsStateProvider).lang;
-      ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
+      feedCtrl.loadInitialFeed(lang);
 
       // Check if trial expired — show dialog
       final ps = ref.read(premiumStateProvider);
@@ -65,19 +67,28 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         await prefs.setBool('mindscroll_hint_shown', true);
       }
 
-      // Auto-start ambient audio after onboarding (delayed to ensure audio is ready)
-      final shouldAutostart = prefs.getBool('mindscroll_audio_autostart') ?? false;
-      if (shouldAutostart) {
-        await prefs.setBool('mindscroll_audio_autostart', false); // only once
-        await Future.delayed(const Duration(seconds: 2)); // wait for audio init
-        if (mounted) {
-          try {
+      // Auto-start ambient audio:
+      // - After onboarding (first time) OR
+      // - Every session if user had it enabled
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) {
+        try {
+          final audioState = ref.read(ambientAudioStateProvider);
+          final shouldAutostart = prefs.getBool('mindscroll_audio_autostart') ?? false;
+
+          if (shouldAutostart) {
+            // First time after onboarding
+            await prefs.setBool('mindscroll_audio_autostart', false);
             final audioCtrl = ref.read(ambientAudioControllerProvider.notifier);
             await audioCtrl.setEnabled(true);
             await audioCtrl.setVolume(0.35);
             await audioCtrl.playPause();
-          } catch (_) {}
-        }
+          } else if (audioState.isEnabled && !audioState.isPlaying) {
+            // Returning user who had audio enabled — resume playback
+            final audioCtrl = ref.read(ambientAudioControllerProvider.notifier);
+            await audioCtrl.playPause();
+          }
+        } catch (_) {}
       }
     });
   }

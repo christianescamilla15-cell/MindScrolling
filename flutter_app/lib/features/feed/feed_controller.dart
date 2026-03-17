@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/haptics_service.dart';
@@ -32,6 +33,33 @@ class FeedController extends StateNotifier<FeedState> {
   String _lang = AppConstants.defaultLang;
   String? _cursor;
   DateTime? _swipeStartTime;
+
+  static const _kSwipeCountKey = 'mindscroll_swipe_count';
+  static const _kSwipeDateKey = 'mindscroll_swipe_date';
+
+  /// Load persisted daily swipe count on startup.
+  Future<void> loadPersistedSwipeCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedDate = prefs.getString(_kSwipeDateKey);
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+
+    if (savedDate == today) {
+      final count = prefs.getInt(_kSwipeCountKey) ?? 0;
+      state = state.copyWith(reflections: count);
+    } else {
+      // New day — reset counter
+      await prefs.setString(_kSwipeDateKey, today);
+      await prefs.setInt(_kSwipeCountKey, 0);
+    }
+  }
+
+  /// Save swipe count after each swipe.
+  Future<void> _persistSwipeCount(int count) async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    await prefs.setString(_kSwipeDateKey, today);
+    await prefs.setInt(_kSwipeCountKey, count);
+  }
 
   // -------------------------------------------------------------------------
   // Initialisation
@@ -132,6 +160,7 @@ class FeedController extends StateNotifier<FeedState> {
     updated[category] = (updated[category] ?? 0) + 1;
 
     final newReflections = state.reflections + 1;
+    _persistSwipeCount(newReflections).ignore();
     final triggerStreak =
         newReflections % AppConstants.streakThreshold == 0;
     final newStreak = triggerStreak ? state.streak + 1 : state.streak;

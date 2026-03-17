@@ -25,7 +25,7 @@ export default async function premiumRoutes(fastify) {
     ] = await Promise.all([
       supabase
         .from("users")
-        .select("is_premium")
+        .select("is_premium, trial_start_date, trial_end_date, premium_status")
         .eq("device_id", deviceId)
         .maybeSingle(),
       supabase
@@ -36,8 +36,6 @@ export default async function premiumRoutes(fastify) {
         .maybeSingle(),
     ]);
 
-    // Gracefully handle missing columns (pre-migration state)
-    // DEV MODE: force premium ON for testing (disabled in production)
     const isDev = process.env.NODE_ENV !== "production";
     const DEV_FORCE_PREMIUM = isDev && process.env.DEV_FORCE_PREMIUM === "true";
     const isPremium = DEV_FORCE_PREMIUM || (
@@ -46,12 +44,95 @@ export default async function premiumRoutes(fastify) {
         : false
     );
 
+    // ── Trial logic (server-side) ──────────────────────────────────────
+    const TRIAL_DAYS = 7;
+    let trialActive = false;
+    let trialDaysLeft = 0;
+    let trialExpired = false;
+
+    if (userRow?.trial_start_date) {
+      const start = new Date(userRow.trial_start_date);
+      const end = new Date(start.getTime() + TRIAL_DAYS * 86400000);
+      const now = new Date();
+      if (now < end) {
+        trialActive = true;
+        trialDaysLeft = Math.ceil((end - now) / 86400000);
+      } else {
+        trialExpired = true;
+      }
+    }
+
     return reply.send({
-      is_premium: isPremium,
-      plan:       isPremium ? PLAN_NAME : null,
+      is_premium: isPremium || trialActive,
+      is_paid_premium: isPremium,
+      plan:       (isPremium || trialActive) ? PLAN_NAME : null,
       price:      PLAN_PRICE,
       currency:   "USD",
+      trial_active: trialActive,
+      trial_days_left: trialDaysLeft,
+      trial_expired: trialExpired,
     });
+  });
+
+  /**
+   * POST /premium/start-trial
+   * Starts a 7-day trial for the device. Only works once per device.
+   * Returns: { started, trial_days_left } or { already_used }
+   */
+  fastify.post("/start-trial", async (request, reply) => {
+    const deviceId = request.deviceId;
+
+    // Ensure user row exists
+    await supabase
+      .from("users")
+      .upsert({ device_id: deviceId }, { onConflict: "device_id" });
+
+    // Check if trial was already started
+    const { data: user } = await supabase
+      .from("users")
+      .select("trial_start_date")
+      .eq("device_id", deviceId)
+      .maybeSingle();
+
+    if (user?.trial_start_date) {
+      // Trial already used — check if still active
+      const start = new Date(user.trial_start_date);
+      const end = new Date(start.getTime() + 7 * 86400000);
+      const now = new Date();
+      if (now < end) {
+        return reply.send({
+          started: false,
+          already_active: true,
+          trial_days_left: Math.ceil((end - now) / 86400000),
+        });
+      }
+      return reply.send({ started: false, already_used: true });
+    }
+
+    // Start trial
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from("users")
+      .update({
+        trial_start_date: now,
+        trial_end_date: new Date(Date.now() + 7 * 86400000).toISOString(),
+        premium_status: "trial",
+      })
+      .eq("device_id", deviceId);
+
+    if (error) {
+      return reply.status(500).send({ error: "Failed to start trial", code: "DB_ERROR" });
+    }
+
+    // Audit log
+    await supabase.from("premium_audit_log").insert({
+      device_id: deviceId,
+      event_type: "trial_started",
+      source: "app",
+      metadata: { started_at: now },
+    }).catch(() => {});
+
+    return reply.send({ started: true, trial_days_left: 7 });
   });
 
   /**
