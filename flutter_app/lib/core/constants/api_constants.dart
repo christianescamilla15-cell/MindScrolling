@@ -9,7 +9,7 @@ class ApiConstants {
   /// Base URL. Override with `--dart-define=API_BASE_URL=<url>`.
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:3000',
+    defaultValue: 'https://mindscrolling.onrender.com',
   );
 
   // ------------------------------------------------------------------
