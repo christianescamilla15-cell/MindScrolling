@@ -55,6 +55,9 @@ abstract class AppStrings {
   String get premiumUnlock;
   String get premiumPrice;
   String get premiumFeature;
+  String get premiumPacks;
+  String get noPacks;
+  String get explorePacks;
 
   // ------------------------------------------------------------------
   // Donations
@@ -183,6 +186,8 @@ abstract class AppStrings {
   String get logOneStep;
   String get completeChallenge;
   String get challengeCompleted;
+  String get challengeAutoComplete;
+  String challengeProgress(int count, int target);
   String get complete;
   String get progress;
   String get dailyChallengeLabel;
@@ -372,6 +377,7 @@ extension AppStringsToastResolver on AppStrings {
       case 'streakExtended':    return streakExtended;
       case 'vaultLimitReached': return vaultLimitReached;
       case 'feedLimitReached':  return feedLimitReached;
+      case 'challengeAutoComplete': return challengeAutoComplete;
       default:                  return null;
     }
   }

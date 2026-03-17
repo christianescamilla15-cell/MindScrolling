@@ -110,27 +110,36 @@ class _ChallengeBody extends ConsumerWidget {
 
           const SizedBox(height: 28),
 
-          // ── Action button ──────────────────────────────────────────────
-          _ActionButton(
-            completed: cs.completed,
-            onTap: cs.completed
-                ? null
-                : () =>
-                    ref.read(challengesControllerProvider.notifier).complete(),
-          ),
-
-          const SizedBox(height: 16),
-
+          // ── Progress / Achievement display ─────────────────────────────
           if (!cs.completed)
-            TextButton(
-              onPressed: () => ref
-                  .read(challengesControllerProvider.notifier)
-                  .incrementProgress(),
-              child: Text(
-                context.tr.logOneStep,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.stoicism,
-                ),
+            Text(
+              context.tr.challengeProgress(cs.progress, cs.target),
+              style: AppTypography.displaySmall.copyWith(
+                color: AppColors.stoicism,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+          if (cs.completed)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.stoicism.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.stoicism.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.emoji_events_rounded,
+                      color: AppColors.stoicism, size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    context.tr.challengeCompleted,
+                    style: AppTypography.buttonLabel
+                        .copyWith(color: AppColors.stoicism),
+                  ),
+                ],
               ),
             ),
         ],

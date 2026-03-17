@@ -12,6 +12,7 @@ import '../features/philosophy_map/philosophy_map_screen.dart';
 import '../features/premium/premium_screen.dart';
 import '../features/premium/redeem_code_screen.dart';
 import '../features/authors/author_detail_screen.dart';
+import '../features/packs/packs_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/insights/insights_screen.dart';
@@ -79,6 +80,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/redeem',
         builder: (context, state) => const RedeemCodeScreen(),
+      ),
+      GoRoute(
+        path: '/packs',
+        builder: (context, state) => const PacksScreen(),
       ),
       GoRoute(
         path: '/donations',

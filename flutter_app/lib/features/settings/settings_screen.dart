@@ -74,6 +74,12 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _Divider(),
                 _NavTile(
+                  icon: Icons.library_books_outlined,
+                  label: context.tr.explorePacks,
+                  onTap: () => context.push('/packs'),
+                ),
+                _Divider(),
+                _NavTile(
                   icon: Icons.favorite_border_rounded,
                   label: context.tr.donations,
                   onTap: () => context.push('/donations'),

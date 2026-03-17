@@ -13,6 +13,8 @@ import '../ambient/ambient_audio_button.dart';
 import '../ambient/ambient_audio_controller.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/app_bottom_nav.dart';
+import '../../core/utils/haptics_service.dart';
+import '../challenges/challenges_controller.dart';
 import '../../shared/widgets/streak_milestone_dialog.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
@@ -196,6 +198,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       // Streak milestone check
       if (prev != null && next.streak != prev.streak && mounted) {
         StreakMilestoneDialog.checkAndShow(context, next.streak);
+      }
+      // Challenge auto-complete at 8 swipes
+      if (prev != null &&
+          next.reflections >= 8 &&
+          prev.reflections < 8 &&
+          mounted) {
+        ref
+            .read(challengesControllerProvider.notifier)
+            .updateFromSwipes(next.reflections);
+        HapticsService.heavyImpact();
       }
     });
 

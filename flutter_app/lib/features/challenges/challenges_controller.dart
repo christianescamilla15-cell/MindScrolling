@@ -147,6 +147,31 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
     }
   }
 
+  /// Called by the feed after each swipe to sync challenge progress.
+  /// Auto-completes when [swipeCount] reaches the target.
+  Future<void> updateFromSwipes(int swipeCount) async {
+    final current = state.valueOrNull;
+    if (current == null || current.completed) return;
+
+    final clamped = swipeCount.clamp(0, current.target);
+    final nowCompleted = clamped >= current.target;
+
+    state = AsyncData(
+      current.copyWith(
+        progress: clamped,
+        completed: nowCompleted,
+      ),
+    );
+
+    if (current.challenge != null) {
+      await _repo.updateProgress(
+        current.challenge!.id,
+        clamped,
+        nowCompleted,
+      );
+    }
+  }
+
   /// Marks the challenge as manually completed.
   Future<void> complete() async {
     final current = state.valueOrNull;

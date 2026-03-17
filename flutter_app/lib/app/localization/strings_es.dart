@@ -108,6 +108,12 @@ class StringsEs implements AppStrings {
 
   @override
   String get premiumFeature => 'Función MindScrolling Inside';
+  @override
+  String get premiumPacks => 'Packs de contenido';
+  @override
+  String get noPacks => 'No hay packs disponibles aún';
+  @override
+  String get explorePacks => 'Explorar packs';
 
   // ------------------------------------------------------------------
   // Donations
@@ -399,6 +405,10 @@ class StringsEs implements AppStrings {
 
   @override
   String get challengeCompleted => 'Reto completado';
+  @override
+  String get challengeAutoComplete => '¡Reto diario completado!';
+  @override
+  String challengeProgress(int count, int target) => '$count/$target frases hoy';
 
   @override
   String get complete => '¡Completo!';

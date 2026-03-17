@@ -108,6 +108,12 @@ class StringsEn implements AppStrings {
 
   @override
   String get premiumFeature => 'MindScrolling Inside feature';
+  @override
+  String get premiumPacks => 'Content Packs';
+  @override
+  String get noPacks => 'No packs available yet';
+  @override
+  String get explorePacks => 'Explore Packs';
 
   // ------------------------------------------------------------------
   // Donations
@@ -398,6 +404,10 @@ class StringsEn implements AppStrings {
 
   @override
   String get challengeCompleted => 'Challenge Completed';
+  @override
+  String get challengeAutoComplete => 'Daily Challenge Complete!';
+  @override
+  String challengeProgress(int count, int target) => '$count/$target quotes today';
 
   @override
   String get complete => 'Complete!';
