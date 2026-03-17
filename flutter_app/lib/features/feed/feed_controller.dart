@@ -43,24 +43,9 @@ class FeedController extends StateNotifier<FeedState> {
     final prefs = await SharedPreferences.getInstance();
     final today = DateTime.now().toIso8601String().substring(0, 10);
 
-    // Try backend first (source of truth — survives reinstall)
-    try {
-      final stats = await _repository.getStats();
-      stats.when(
-        success: (data) {
-          final todaySwipes = (data['today_swipes'] as num?)?.toInt() ?? 0;
-          // Backend knows exact count for today — use it
-          state = state.copyWith(reflections: todaySwipes);
-          prefs.setString(_kSwipeDateKey, today);
-          prefs.setInt(_kSwipeCountKey, todaySwipes);
-        },
-        failure: (_, __) {
-          _loadLocalSwipeCount(prefs, today);
-        },
-      );
-    } catch (_) {
-      _loadLocalSwipeCount(prefs, today);
-    }
+    // Load from local storage (persists across app restarts)
+    // Backend seen_quotes is the ultimate source of truth for reinstalls
+    _loadLocalSwipeCount(prefs, today);
   }
 
   void _loadLocalSwipeCount(SharedPreferences prefs, String today) {

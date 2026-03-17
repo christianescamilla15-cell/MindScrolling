@@ -260,7 +260,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final isPremium = ref.watch(premiumStateProvider).isPremium;
 
     // Free users: 20 quotes per session
-    if (!isPremium && state.currentIndex >= 20) {
+    // Free users: 20 swipes per day
+    if (!isPremium && state.reflections >= 20) {
       return _FeedLimitView(onUpgrade: () => context.push('/premium'));
     }
 
