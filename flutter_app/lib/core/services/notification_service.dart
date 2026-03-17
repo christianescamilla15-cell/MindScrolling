@@ -3,9 +3,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Manages daily and weekly local notifications for MindScrolling.
-///
-/// - Daily: "Your reflection awaits" at user-chosen time
-/// - Weekly: "Your philosophy map is ready" on Sundays
 class NotificationService {
   NotificationService._();
 
@@ -17,27 +14,42 @@ class NotificationService {
   static const _dailyId = 100;
   static const _weeklyId = 200;
 
-  // ── Init ──────────────────────────────────────────────────────────────
-
   static Future<void> init() async {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidSettings);
+    const darwinSettings = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: darwinSettings,
+      macOS: darwinSettings,
+    );
     await _plugin.initialize(initSettings);
   }
 
-  // ── Permission ────────────────────────────────────────────────────────
-
   static Future<bool> requestPermission() async {
+    // Android 13+
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     if (android != null) {
       final granted = await android.requestNotificationsPermission();
       return granted ?? false;
     }
+    // iOS
+    final ios = _plugin.resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>();
+    if (ios != null) {
+      final granted = await ios.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      return granted ?? false;
+    }
     return true;
   }
-
-  // ── Schedule daily ────────────────────────────────────────────────────
 
   static Future<void> scheduleDailyReminder({
     required int hour,
@@ -71,8 +83,6 @@ class NotificationService {
     );
   }
 
-  // ── Schedule weekly ───────────────────────────────────────────────────
-
   static Future<void> scheduleWeeklyMapReminder({
     required String title,
     required String body,
@@ -98,15 +108,11 @@ class NotificationService {
     );
   }
 
-  // ── Cancel ────────────────────────────────────────────────────────────
-
   static Future<void> cancelAll() async {
     await _plugin.cancelAll();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kNotifEnabledKey, false);
   }
-
-  // ── State ─────────────────────────────────────────────────────────────
 
   static Future<bool> isEnabled() async {
     final prefs = await SharedPreferences.getInstance();

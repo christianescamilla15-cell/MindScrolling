@@ -37,19 +37,40 @@ class FeedController extends StateNotifier<FeedState> {
   static const _kSwipeCountKey = 'mindscroll_swipe_count';
   static const _kSwipeDateKey = 'mindscroll_swipe_date';
 
-  /// Load persisted daily swipe count on startup.
+  /// Load daily swipe count — tries backend first (survives reinstall),
+  /// falls back to local SharedPreferences.
   Future<void> loadPersistedSwipeCount() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedDate = prefs.getString(_kSwipeDateKey);
     final today = DateTime.now().toIso8601String().substring(0, 10);
 
+    // Try backend first (source of truth — survives reinstall)
+    try {
+      final stats = await _repository.getStats();
+      stats.when(
+        success: (data) {
+          final todaySwipes = (data['today_swipes'] as num?)?.toInt() ?? 0;
+          // Backend knows exact count for today — use it
+          state = state.copyWith(reflections: todaySwipes);
+          prefs.setString(_kSwipeDateKey, today);
+          prefs.setInt(_kSwipeCountKey, todaySwipes);
+        },
+        failure: (_, __) {
+          _loadLocalSwipeCount(prefs, today);
+        },
+      );
+    } catch (_) {
+      _loadLocalSwipeCount(prefs, today);
+    }
+  }
+
+  void _loadLocalSwipeCount(SharedPreferences prefs, String today) {
+    final savedDate = prefs.getString(_kSwipeDateKey);
     if (savedDate == today) {
       final count = prefs.getInt(_kSwipeCountKey) ?? 0;
       state = state.copyWith(reflections: count);
     } else {
-      // New day — reset counter
-      await prefs.setString(_kSwipeDateKey, today);
-      await prefs.setInt(_kSwipeCountKey, 0);
+      prefs.setString(_kSwipeDateKey, today);
+      prefs.setInt(_kSwipeCountKey, 0);
     }
   }
 
@@ -68,7 +89,9 @@ class FeedController extends StateNotifier<FeedState> {
   Future<void> loadInitialFeed(String lang) async {
     _lang = lang;
     _cursor = null;
-    state = FeedState.initial();
+    // Preserve swipe count when reloading feed (language change, app resume)
+    final currentReflections = state.reflections;
+    state = FeedState.initial().copyWith(reflections: currentReflections);
 
     final result = await _repository.getFeed(lang: _lang, cursor: null);
     result.when(

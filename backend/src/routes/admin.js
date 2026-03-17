@@ -36,6 +36,23 @@ function generateCode() {
 }
 
 export default async function adminRoutes(fastify) {
+  // Stricter rate limit for admin routes (10 req/min vs 60 global)
+  fastify.addHook("preHandler", async (request, reply) => {
+    // Simple in-memory rate limit for admin
+    const ip = request.ip;
+    const now = Date.now();
+    if (!adminRoutes._rateMap) adminRoutes._rateMap = new Map();
+    const entry = adminRoutes._rateMap.get(ip) || { count: 0, resetAt: now + 60000 };
+    if (now > entry.resetAt) {
+      entry.count = 0;
+      entry.resetAt = now + 60000;
+    }
+    entry.count++;
+    adminRoutes._rateMap.set(ip, entry);
+    if (entry.count > 10) {
+      return reply.status(429).send({ error: "Too many admin requests", code: "RATE_LIMITED" });
+    }
+  });
   /**
    * POST /admin/codes/create
    * Headers: X-Admin-Secret

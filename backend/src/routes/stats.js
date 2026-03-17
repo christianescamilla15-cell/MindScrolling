@@ -16,9 +16,18 @@ export default async function statsRoutes(fastify) {
     const category_counts = { stoicism: 0, philosophy: 0, discipline: 0, reflection: 0 };
     prefs.forEach(p => { if (p.category in category_counts) category_counts[p.category] = p.swipe_count; });
 
+    // Count today's swipes from seen_quotes
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const { count: todaySwipes } = await supabase
+      .from("seen_quotes")
+      .select("*", { count: "exact", head: true })
+      .eq("device_id", deviceId)
+      .gte("seen_at", todayStr + "T00:00:00Z");
+
     return reply.send({
       streak:            user.streak,
       total_reflections: user.total_reflections,
+      today_swipes:      todaySwipes ?? 0,
       category_counts,
     });
   });
