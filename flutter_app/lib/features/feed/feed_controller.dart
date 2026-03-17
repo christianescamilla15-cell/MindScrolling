@@ -174,22 +174,22 @@ class FeedController extends StateNotifier<FeedState> {
     var items = List<FeedItemModel>.from(state.items);
 
     if (newIndex < items.length) {
-      // Check if the card at newIndex already matches
+      // Skip non-quote items (reflection/challenge cards) — don't displace them
       final nextItem = items[newIndex];
-      final alreadyMatches = nextItem.isQuote &&
-          nextItem.quote?.swipeDir == direction;
+      if (nextItem.isQuote) {
+        final alreadyMatches = nextItem.quote?.swipeDir == direction;
 
-      if (!alreadyMatches) {
-        // Find the closest matching quote in the remaining buffer
-        for (int i = newIndex + 1; i < items.length; i++) {
-          if (items[i].isQuote &&
-              items[i].quote?.swipeDir == direction) {
-            // Swap it to the next position
-            final temp = items[newIndex];
-            items[newIndex] = items[i];
-            items[i] = temp;
-            break;
+        if (!alreadyMatches) {
+          // Find the closest matching QUOTE (skip non-quote items)
+          for (int i = newIndex + 1; i < items.length; i++) {
+            if (items[i].isQuote &&
+                items[i].quote?.swipeDir == direction) {
+              final temp = items[newIndex];
+              items[newIndex] = items[i];
+              items[i] = temp;
+              break;
           }
+        }
         }
       }
     }

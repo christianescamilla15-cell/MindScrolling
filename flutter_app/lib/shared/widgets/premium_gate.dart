@@ -17,6 +17,12 @@ class PremiumGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ps = ref.watch(premiumStateProvider);
+    // Show loading spinner instead of gate while premium status is loading
+    if (ps.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.stoicism, strokeWidth: 2),
+      );
+    }
     if (ps.isPremium) return child;
     return _PremiumGateView();
   }

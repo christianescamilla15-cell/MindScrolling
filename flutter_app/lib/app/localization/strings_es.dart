@@ -593,6 +593,27 @@ class StringsEs implements AppStrings {
   @override String get trialExpiredButton  => 'Desbloquear MindScrolling Inside — \$4.99';
   @override String get continueReading     => 'Continuar gratis';
 
+  // Notifications
+  @override String get notifications        => 'Notificaciones';
+  @override String get dailyReminder        => 'Tu reflexi\u00f3n te espera';
+  @override String get dailyReminderBody    => 'Toma un momento para explorar una nueva perspectiva filos\u00f3fica.';
+  @override String get weeklyMapTitle       => 'Tu mapa filos\u00f3fico est\u00e1 listo';
+  @override String get weeklyMapBody        => 'Mira c\u00f3mo evolucion\u00f3 tu camino filos\u00f3fico esta semana.';
+  @override String get reminderTime         => 'Hora del recordatorio';
+  @override String get notificationsEnabled => 'Recordatorios diarios activados';
+  @override String get notificationsDisabled => 'Recordatorios desactivados';
+
+  // Streak milestones
+  @override String get milestone7Title  => '7 d\u00edas de sabidur\u00eda';
+  @override String get milestone7Msg    => 'Una semana de reflexi\u00f3n filos\u00f3fica. Una vida sin examen no merece ser vivida. \u2014 S\u00f3crates';
+  @override String get milestone30Title => '30 d\u00edas de crecimiento';
+  @override String get milestone30Msg   => 'Un mes de reflexi\u00f3n constante. Te est\u00e1s convirtiendo en quien deb\u00edas ser.';
+  @override String get milestoneClose   => 'Continuar';
+
+  // Vault export
+  @override String get exportVault      => 'Exportar b\u00f3veda';
+  @override String get exportVaultEmpty => 'A\u00fan no hay frases para exportar.';
+
   // Philosophy Map tabs
   @override String get today      => 'Hoy';
   @override String get evolution  => 'Evoluci\u00f3n';

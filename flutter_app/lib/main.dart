@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
 import 'core/providers/core_providers.dart';
+import 'core/services/notification_service.dart';
 import 'core/utils/device_id.dart';
 
 Future<void> main() async {
@@ -28,11 +30,30 @@ Future<void> main() async {
 
   // Pre-load shared preferences so LocalStorage is ready
   await SharedPreferences.getInstance();
+  await NotificationService.init();
 
-  // Resolve device ID once before the widget tree builds so
-  // apiClientProvider can be a synchronous Provider<ApiClient>.
+  // Resolve device ID once before the widget tree builds
   final deviceId = await DeviceIdService.getOrCreate();
 
+  // Sentry DSN — set via --dart-define=SENTRY_DSN=https://...
+  // If not set, Sentry is disabled (no-op)
+  const sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+
+  if (sentryDsn.isNotEmpty) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = sentryDsn;
+        options.tracesSampleRate = 0.2;
+        options.environment = 'production';
+      },
+      appRunner: () => _runApp(deviceId),
+    );
+  } else {
+    _runApp(deviceId);
+  }
+}
+
+void _runApp(String deviceId) {
   runApp(
     ProviderScope(
       overrides: [

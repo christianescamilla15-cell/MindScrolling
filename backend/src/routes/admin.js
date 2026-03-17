@@ -1,12 +1,19 @@
 import { supabase } from "../db/client.js";
 import crypto from "crypto";
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "mindscrolling-admin-2026";
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+if (!ADMIN_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error("ADMIN_SECRET must be set in production");
+}
 
 /**
  * Validates the X-Admin-Secret header.
  */
 function requireAdmin(request, reply) {
+  if (!ADMIN_SECRET) {
+    reply.status(503).send({ error: "Admin not configured", code: "ADMIN_NOT_CONFIGURED" });
+    return false;
+  }
   const secret = request.headers["x-admin-secret"];
   if (!secret || secret !== ADMIN_SECRET) {
     reply.status(403).send({ error: "Forbidden", code: "INVALID_ADMIN_SECRET" });

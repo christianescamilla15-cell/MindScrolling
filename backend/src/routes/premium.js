@@ -38,11 +38,8 @@ export default async function premiumRoutes(fastify) {
 
     const isDev = process.env.NODE_ENV !== "production";
     const DEV_FORCE_PREMIUM = isDev && process.env.DEV_FORCE_PREMIUM === "true";
-    const isPremium = DEV_FORCE_PREMIUM || (
-      !userErr && !purchaseErr
-        ? (userRow?.is_premium === true) && (purchase !== null)
-        : false
-    );
+    // is_premium flag is the source of truth (set by purchase, code redeem, or admin)
+    const isPremium = DEV_FORCE_PREMIUM || (userRow?.is_premium === true);
 
     // ── Trial logic (server-side) ──────────────────────────────────────
     const TRIAL_DAYS = 7;
@@ -248,11 +245,20 @@ export default async function premiumRoutes(fastify) {
 
     const now = new Date().toISOString();
 
+    // Insert a NEW purchase row for the restoring device (don't mutate the original)
     const [{ error: purchaseUpdateErr }, { error: userUpsertErr }] = await Promise.all([
       supabase
         .from("purchases")
-        .update({ device_id: deviceId, status: "restored", updated_at: now })
-        .eq("id", existingPurchase.id),
+        .insert({
+          device_id: deviceId,
+          store,
+          purchase_token: purchase_token,
+          transaction_id: transaction_id,
+          status: "restored",
+          amount: 4.99,
+          currency: "USD",
+          updated_at: now,
+        }),
       supabase
         .from("users")
         .upsert({ device_id: deviceId }, { onConflict: "device_id" }),

@@ -28,7 +28,7 @@ List<AmbientTrack> get kAmbientTracks => [
   AmbientTrack(
     id: 'relax',
     nameEn: 'Relax',
-    nameEs: 'Relajacion',
+    nameEs: 'Relajaci\u00f3n',
     icon: Icons.waves_outlined,
     accentColor: AppColors.stoicism,
     audioUrl: '${ApiConstants.baseUrl}/static/audio/Clean_20Soul.mp3',
@@ -44,7 +44,7 @@ List<AmbientTrack> get kAmbientTracks => [
   AmbientTrack(
     id: 'night_reflection',
     nameEn: 'Night Reflection',
-    nameEs: 'Reflexion nocturna',
+    nameEs: 'Reflexi\u00f3n nocturna',
     icon: Icons.nightlight_outlined,
     accentColor: AppColors.reflection,
     audioUrl: '${ApiConstants.baseUrl}/static/audio/Long_20Note_20Four.mp3',

@@ -592,6 +592,27 @@ class StringsEn implements AppStrings {
   @override String get trialExpiredButton  => 'Unlock MindScrolling Inside — \$4.99';
   @override String get continueReading     => 'Continue free';
 
+  // Notifications
+  @override String get notifications        => 'Notifications';
+  @override String get dailyReminder        => 'Your reflection awaits';
+  @override String get dailyReminderBody    => 'Take a moment to explore a new philosophical perspective.';
+  @override String get weeklyMapTitle       => 'Your philosophy map is ready';
+  @override String get weeklyMapBody        => 'See how your philosophical journey evolved this week.';
+  @override String get reminderTime         => 'Reminder time';
+  @override String get notificationsEnabled => 'Daily reminders enabled';
+  @override String get notificationsDisabled => 'Reminders disabled';
+
+  // Streak milestones
+  @override String get milestone7Title  => '7 Days of Wisdom';
+  @override String get milestone7Msg    => 'A week of philosophical reflection. The unexamined life is not worth living. — Socrates';
+  @override String get milestone30Title => '30 Days of Growth';
+  @override String get milestone30Msg   => 'A month of consistent reflection. You are becoming who you were meant to be.';
+  @override String get milestoneClose   => 'Continue';
+
+  // Vault export
+  @override String get exportVault      => 'Export Vault';
+  @override String get exportVaultEmpty => 'No quotes to export yet.';
+
   // Philosophy Map tabs
   @override String get today      => 'Today';
   @override String get evolution  => 'Evolution';

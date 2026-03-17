@@ -11,6 +11,7 @@ import '../features/onboarding/onboarding_screen.dart';
 import '../features/philosophy_map/philosophy_map_screen.dart';
 import '../features/premium/premium_screen.dart';
 import '../features/premium/redeem_code_screen.dart';
+import '../features/authors/author_detail_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/insights/insights_screen.dart';
@@ -68,6 +69,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/insights',
         builder: (context, state) => const InsightsScreen(),
+      ),
+      GoRoute(
+        path: '/author/:name',
+        builder: (context, state) => AuthorDetailScreen(
+          authorName: Uri.decodeComponent(state.pathParameters['name'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/redeem',

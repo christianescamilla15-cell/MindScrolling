@@ -298,6 +298,33 @@ abstract class AppStrings {
   // Reflection card
   // ------------------------------------------------------------------
   // ------------------------------------------------------------------
+  // Notifications
+  // ------------------------------------------------------------------
+  String get notifications;
+  String get dailyReminder;
+  String get dailyReminderBody;
+  String get weeklyMapTitle;
+  String get weeklyMapBody;
+  String get reminderTime;
+  String get notificationsEnabled;
+  String get notificationsDisabled;
+
+  // ------------------------------------------------------------------
+  // Streak milestones
+  // ------------------------------------------------------------------
+  String get milestone7Title;
+  String get milestone7Msg;
+  String get milestone30Title;
+  String get milestone30Msg;
+  String get milestoneClose;
+
+  // ------------------------------------------------------------------
+  // Vault export
+  // ------------------------------------------------------------------
+  String get exportVault;
+  String get exportVaultEmpty;
+
+  // ------------------------------------------------------------------
   // Philosophy Map tabs
   // ------------------------------------------------------------------
   String get today;

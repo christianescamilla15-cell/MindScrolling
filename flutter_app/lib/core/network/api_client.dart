@@ -56,7 +56,10 @@ class ApiClient {
     Map<String, String>? queryParams,
   }) async {
     final uri = _buildUri(path, queryParams);
-    final response = await _http.get(uri, headers: _headers());
+    final response = await _http.get(uri, headers: _headers()).timeout(
+      const Duration(seconds: 15),
+      onTimeout: () => throw Exception('Request timeout — server may be starting up. Please try again.'),
+    );
     return _handleResponse(response);
   }
 
@@ -70,6 +73,9 @@ class ApiClient {
       uri,
       headers: _headers(),
       body: body != null ? jsonEncode(body) : null,
+    ).timeout(
+      const Duration(seconds: 15),
+      onTimeout: () => throw Exception('Request timeout — server may be starting up. Please try again.'),
     );
     return _handleResponse(response);
   }
@@ -77,7 +83,10 @@ class ApiClient {
   /// Performs a DELETE request.
   Future<Map<String, dynamic>> delete(String path) async {
     final uri = _buildUri(path, null);
-    final response = await _http.delete(uri, headers: _headers());
+    final response = await _http.delete(uri, headers: _headers()).timeout(
+      const Duration(seconds: 15),
+      onTimeout: () => throw Exception('Request timeout — server may be starting up. Please try again.'),
+    );
     return _handleResponse(response);
   }
 

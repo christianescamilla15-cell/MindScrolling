@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/quote_model.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/author_avatar.dart';
+import '../share_export/share_export_service.dart';
 import 'vault_controller.dart';
 
 /// Bottom-sheet style screen displaying the user's saved quotes.
@@ -74,6 +76,16 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                 const SizedBox(width: 10),
                 _CountBadge(count: vaultState.items.length),
                 const Spacer(),
+                // Export button
+                if (vaultState.items.isNotEmpty)
+                  GestureDetector(
+                    onTap: () => _exportVault(context, vaultState.items),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Icon(Icons.file_download_outlined,
+                          size: 22, color: AppColors.textSecondary),
+                    ),
+                  ),
                 _CloseButton(
                   onTap: widget.onClose ?? () => context.canPop() ? context.pop() : context.go('/feed'),
                 ),
@@ -102,6 +114,21 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
         ],
       ),
     );
+  }
+
+  void _exportVault(BuildContext context, List<QuoteModel> items) {
+    final buffer = StringBuffer();
+    buffer.writeln('MindScrolling — My Vault');
+    buffer.writeln('=' * 40);
+    buffer.writeln();
+    for (final q in items) {
+      buffer.writeln('\u201C${q.text}\u201D');
+      buffer.writeln('\u2014 ${q.author} [${q.category}]');
+      buffer.writeln();
+    }
+    buffer.writeln('---');
+    buffer.writeln('Exported from MindScrolling');
+    Share.share(buffer.toString(), subject: 'MindScrolling Vault');
   }
 
   void _handleRemove(String quoteId) {
@@ -327,9 +354,7 @@ class _VaultQuoteItem extends StatelessWidget {
                         const SizedBox(width: 8),
                         // Share button
                         GestureDetector(
-                          onTap: () {
-                            // TODO: wire share
-                          },
+                          onTap: () => ShareExportService.exportQuoteAsImage(context, quote),
                           child: Icon(
                             Icons.ios_share_rounded,
                             size: 16,

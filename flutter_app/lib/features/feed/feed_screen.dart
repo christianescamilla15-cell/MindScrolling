@@ -13,6 +13,7 @@ import '../ambient/ambient_audio_button.dart';
 import '../ambient/ambient_audio_controller.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/app_bottom_nav.dart';
+import '../../shared/widgets/streak_milestone_dialog.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
 import '../settings/settings_controller.dart';
@@ -53,11 +54,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       final lang = ref.read(settingsStateProvider).lang;
       feedCtrl.loadInitialFeed(lang);
 
-      // Check if trial expired — show dialog
-      final ps = ref.read(premiumStateProvider);
-      if (ps.trialExpired && !ps.premiumState.isPremium) {
-        _showTrialExpiredDialog(context);
-      }
+      // Listen for trial expiry — show dialog when premium status finishes loading
+      ref.listenManual(premiumControllerProvider, (prev, next) {
+        final ps = next.valueOrNull;
+        if (ps != null && !ps.isLoading && ps.trialExpired && !ps.premiumState.isPremium) {
+          if (mounted) _showTrialExpiredDialog(context);
+        }
+      });
 
       // Show swipe hint on first ever feed visit
       final prefs = await SharedPreferences.getInstance();
@@ -189,6 +192,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             ref.read(feedControllerProvider.notifier).clearToast();
           }
         });
+      }
+      // Streak milestone check
+      if (prev != null && next.streak != prev.streak && mounted) {
+        StreakMilestoneDialog.checkAndShow(context, next.streak);
       }
     });
 

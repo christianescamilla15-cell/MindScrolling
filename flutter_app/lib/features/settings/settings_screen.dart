@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/services/notification_service.dart';
 import '../../shared/extensions/context_extensions.dart';
 import 'settings_controller.dart';
 
@@ -80,6 +81,15 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
 
+            const SizedBox(height: 24),
+
+            // ── Section: Notifications ────────────────────────────────────
+            _SectionHeader(title: context.tr.notifications),
+            _SettingsCard(
+              children: [
+                _NotificationTile(),
+              ],
+            ),
             const SizedBox(height: 24),
 
             // ── Section: About ─────────────────────────────────────────────
@@ -364,6 +374,126 @@ class _SectionHeader extends StatelessWidget {
           letterSpacing: 1.4,
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Notification tile
+// ---------------------------------------------------------------------------
+
+class _NotificationTile extends StatefulWidget {
+  @override
+  State<_NotificationTile> createState() => _NotificationTileState();
+}
+
+class _NotificationTileState extends State<_NotificationTile> {
+  bool _enabled = false;
+  TimeOfDay _time = const TimeOfDay(hour: 9, minute: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+  }
+
+  Future<void> _loadState() async {
+    final enabled = await NotificationService.isEnabled();
+    final time = await NotificationService.getScheduledTime();
+    if (mounted) setState(() { _enabled = enabled; _time = time; });
+  }
+
+  Future<void> _toggle(bool value) async {
+    if (value) {
+      final granted = await NotificationService.requestPermission();
+      if (!granted) return;
+      await NotificationService.scheduleDailyReminder(
+        hour: _time.hour,
+        minute: _time.minute,
+        title: context.tr.dailyReminder,
+        body: context.tr.dailyReminderBody,
+      );
+      await NotificationService.scheduleWeeklyMapReminder(
+        title: context.tr.weeklyMapTitle,
+        body: context.tr.weeklyMapBody,
+      );
+    } else {
+      await NotificationService.cancelAll();
+    }
+    setState(() => _enabled = value);
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _time,
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: const ColorScheme.dark(
+            primary: AppColors.stoicism,
+            surface: Color(0xFF1C1C28),
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() => _time = picked);
+      if (_enabled) {
+        await NotificationService.scheduleDailyReminder(
+          hour: picked.hour,
+          minute: picked.minute,
+          title: context.tr.dailyReminder,
+          body: context.tr.dailyReminderBody,
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          leading: Icon(
+            _enabled ? Icons.notifications_active : Icons.notifications_outlined,
+            color: _enabled ? AppColors.stoicism : AppColors.textMuted,
+            size: 22,
+          ),
+          title: Text(context.tr.dailyReminder, style: AppTypography.bodyMedium),
+          subtitle: Text(
+            _enabled ? context.tr.notificationsEnabled : context.tr.notificationsDisabled,
+            style: AppTypography.bodySmall,
+          ),
+          trailing: Switch(
+            value: _enabled,
+            onChanged: _toggle,
+            activeColor: AppColors.stoicism,
+          ),
+        ),
+        if (_enabled)
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.access_time, color: AppColors.textMuted, size: 22),
+            title: Text(context.tr.reminderTime, style: AppTypography.bodyMedium),
+            trailing: GestureDetector(
+              onTap: _pickTime,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Text(
+                  _time.format(context),
+                  style: AppTypography.bodyMedium.copyWith(color: AppColors.stoicism),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

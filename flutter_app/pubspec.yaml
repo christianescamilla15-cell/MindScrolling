@@ -53,6 +53,8 @@ dependencies:
   # Ambient audio
   just_audio: ^0.9.39
   audio_session: ^0.1.21
+  flutter_local_notifications: ^21.0.0
+  sentry_flutter: ^8.14.2
 
 dev_dependencies:
   flutter_test:

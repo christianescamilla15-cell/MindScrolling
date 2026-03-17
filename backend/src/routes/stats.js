@@ -6,7 +6,7 @@ export default async function statsRoutes(fastify) {
     const deviceId = request.deviceId;
 
     const [userRes, prefsRes] = await Promise.all([
-      supabase.from("users").select("streak, total_reflections").eq("device_id", deviceId).single(),
+      supabase.from("users").select("streak, total_reflections").eq("device_id", deviceId).maybeSingle(),
       supabase.from("user_preferences").select("category, swipe_count").eq("device_id", deviceId),
     ]);
 

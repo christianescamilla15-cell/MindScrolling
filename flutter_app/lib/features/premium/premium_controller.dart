@@ -113,8 +113,11 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
       final trialExpired = response['trial_expired'] == true;
       final isPaidPremium = response['is_paid_premium'] == true;
 
+      // Persist trial info locally for offline fallback
+      final prefs = await SharedPreferences.getInstance();
+
       if (isPaidPremium) {
-        // Already paid — no trial needed
+        await prefs.setString(_kTrialStartKey, 'paid');
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
             premiumState: const PremiumStateModel(isPremium: true),
@@ -126,6 +129,10 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
       }
 
       if (trialActive) {
+        // Save trial start locally so offline fallback works
+        final trialEnd = DateTime.now().add(Duration(days: trialDaysLeft));
+        await prefs.setString(_kTrialStartKey,
+            trialEnd.subtract(const Duration(days: _kTrialDurationDays)).toIso8601String());
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
             isTrial: true,
@@ -150,6 +157,7 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
       // No trial started yet — start one via backend
       final startResponse = await api.post('/premium/start-trial', body: {});
       if (startResponse['started'] == true) {
+        await prefs.setString(_kTrialStartKey, DateTime.now().toIso8601String());
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
             isTrial: true,

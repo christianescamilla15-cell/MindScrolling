@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
@@ -114,10 +115,13 @@ class QuoteCard extends StatelessWidget {
                     const Spacer(flex: 1),
 
                     // Author portrait — large, centered
-                    AuthorAvatar(
-                      name: quote.author,
-                      size: 72,
-                      accentColor: accentColor,
+                    GestureDetector(
+                      onTap: () => context.push('/author/${Uri.encodeComponent(quote.author)}'),
+                      child: AuthorAvatar(
+                        name: quote.author,
+                        size: 72,
+                        accentColor: accentColor,
+                      ),
                     ),
                     const SizedBox(height: 14),
 

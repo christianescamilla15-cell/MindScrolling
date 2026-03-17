@@ -20,6 +20,7 @@ import premiumRoutes    from "./routes/premium.js";
 import insightsRoutes    from "./routes/insights.js";
 import mindProfileRoutes from "./routes/mind-profile.js";
 import adminRoutes       from "./routes/admin.js";
+import authorsRoutes     from "./routes/authors.js";
 import deviceIdPlugin   from "./plugins/deviceId.js";
 
 const app = Fastify({ logger: true });
@@ -56,6 +57,7 @@ await app.register(premiumRoutes,    { prefix: "/premium"    });
 await app.register(insightsRoutes,    { prefix: "/insights"    });
 await app.register(mindProfileRoutes, { prefix: "/mind-profile" });
 await app.register(adminRoutes,       { prefix: "/admin" });
+await app.register(authorsRoutes,     { prefix: "/authors" });
 
 /* ─── Health ───────────────────────────────────────────────────────────────── */
 app.get("/health", async () => ({ status: "ok", ts: new Date().toISOString() }));

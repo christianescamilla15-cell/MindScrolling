@@ -1,6 +1,6 @@
 # MindScrolling — Product Roadmap
 
-**Last updated:** 2026-03-15
+**Last updated:** 2026-03-17
 **Methodology:** Continuous delivery with sprint-based milestones
 
 ---
@@ -18,10 +18,12 @@ Every phase must leave the product meaningfully more valuable to the user — no
 | 1 | MVP Foundation | ✅ Complete |
 | 2 | Intelligent Feed & Onboarding | ✅ Complete |
 | 3 | Flutter Mobile Migration | ✅ Complete |
-| 4 | Philosophy Map & Evolution | 🔄 In Progress |
-| 5 | Premium & Content Packs | 🔜 Next |
-| 6 | Scale to 100k Users | 📅 Planned |
-| 7 | Scale to 1M+ Users | 📅 Future |
+| 4 | Philosophy Map & Evolution | ✅ Complete |
+| 5 | Premium & Content Packs | ✅ Complete (v1 — trial + one-time unlock) |
+| 6 | Google Play Launch + Retention | 🔄 In Progress (Sprint 7) |
+| 7 | Content Depth & Growth | 🔜 Next (Sprint 8) |
+| 8 | Scale to 100k Users | 📅 Planned |
+| 9 | Scale to 1M+ Users | 📅 Future |
 
 ---
 
@@ -121,25 +123,19 @@ Every phase must leave the product meaningfully more valuable to the user — no
 
 **Goal:** Turn the Philosophy Map into the app's signature retention feature.
 
-### Product Milestones
-- [ ] Philosophy Map with animated score bars
-- [ ] Weekly evolution delta (before/after comparison)
-- [ ] "Your philosophy this week" summary card in feed
-- [ ] Radar chart visualization (Stoicism / Philosophy / Discipline / Reflection quadrants)
-- [ ] Snapshot history (scroll through past weeks)
-- [ ] Insight messages: "You've been exploring Stoicism more this week"
+**Status: Complete as of Sprint 6.**
 
-### Technical Milestones
-- [ ] Materialized score view or scheduled score computation
-- [ ] Evolution card injected into feed at interval (every 10 quotes)
-- [ ] Snapshot comparison endpoint (`/map?compare=last`)
-- [ ] Push notification: "Your weekly philosophy map is ready"
-- [ ] Flutter radar chart widget (CustomPainter)
+### Product Milestones
+- [x] Philosophy Map with radar chart visualization
+- [x] Radar chart (Stoicism / Philosophy / Discipline / Reflection quadrants)
+- [x] Mental state labels on map
+- [ ] Weekly evolution delta (before/after comparison) — deferred to Sprint 8
+- [ ] Evolution card injected into feed every 10 quotes — deferred to Sprint 8
+- [ ] Snapshot history (scroll through past weeks) — deferred to Sprint 8
 
 ### Key Deliverables
-- Enhanced `PhilosophyMapScreen` with radar + history
-- Evolution cards in `FeedScreen`
-- Weekly insight generation (backend or local)
+- `PhilosophyMapScreen` with CustomPainter radar chart
+- AI Weekly Insight gated behind MindScrolling Inside premium
 
 ---
 
@@ -147,33 +143,79 @@ Every phase must leave the product meaningfully more valuable to the user — no
 
 **Goal:** Establish a sustainable revenue model and significantly expand the content library.
 
-### Product Milestones
-- [ ] Payment integration (RevenueCat or direct Stripe)
-- [ ] Premium receipt validation
-- [ ] Content packs (purchasable or included in premium):
-  - Stoicism Deep Dive (500+ quotes, Marcus Aurelius, Seneca, Epictetus)
-  - Zen Buddhism (300+ quotes)
-  - Existentialism (300+ quotes, Camus, Sartre, Nietzsche)
-  - Spanish Philosophy (500+ ES quotes)
-- [ ] Pack preview (see locked quotes, upgrade prompt)
-- [ ] Restore purchases flow
+**Status: v1 complete as of Sprint 6. Content packs deferred to Sprint 8.**
 
-### Technical Milestones
-- [ ] Purchases table integration with receipt validation
-- [ ] Pack-gated quotes in feed query
-- [ ] RevenueCat SDK integration in Flutter
-- [ ] Backend webhook for purchase events
-- [ ] 2,000+ additional quotes curated and seeded
+### Product Milestones (v1 — Complete)
+- [x] MindScrolling Inside premium ($4.99 one-time unlock)
+- [x] 7-day free trial (server-side protected)
+- [x] Activation code system for donors
+- [x] Restore purchases flow (RevenueCat)
+- [x] AI Weekly Insight gated behind premium
+- [ ] Content packs (Stoicism / Existentialism / Zen / Spanish) — Sprint 8
+- [ ] Pack preview screen (locked quotes visible, upgrade blur) — Sprint 8
 
 ### Key Deliverables
-- `premium_screen.dart` — full purchase flow
-- `backend/routes/premium.js` — receipt validation
-- 4 new content packs in database
-- 2,000+ new quotes
+- `premium_controller.dart` — trial + purchase + restore state machine
+- `backend/routes/premium.js` — `/status`, `/start-trial`, `/unlock` endpoints
+- `PremiumPurchaseService` — RevenueCat integration
 
 ---
 
-## Phase 6 — Scale to 100k Users
+## Phase 6 — Google Play Launch + Retention
+
+**Goal:** Ship to real users on Google Play, protect the revenue funnel, and establish the first retention loop.
+
+### Product Milestones
+- [ ] Google Play Store submission and approval
+- [ ] Backend deployed to Railway production (no cold starts)
+- [ ] pgvector enabled + AI feed fully operational
+- [ ] Trial-to-paid conversion funnel instrumented
+- [ ] Push notifications: daily reminder at user-set time
+- [ ] "Your weekly map is ready" weekly re-engagement notification
+- [ ] Vault export as plain text (free — drives word of mouth)
+- [ ] Price localization audit (MXN / BRL / ARS)
+
+### Technical Milestones
+- [ ] Sentry error tracking on backend
+- [ ] Feed query optimization (partial indexes)
+- [ ] Server-side funnel events: trial_started / trial_expired / premium_purchased
+- [ ] Railway production deployment with health check
+
+### Key Deliverables
+- Live Google Play listing
+- Production backend on Railway
+- Conversion analytics pipeline
+
+---
+
+## Phase 7 — Content Depth & Growth
+
+**Goal:** Give users a reason to stay beyond the first 30 days through deeper content and richer personal context.
+
+### Product Milestones
+- [ ] Content packs: Stoicism Deep Dive, Existentialism, Zen & Buddhism, Spanish Philosophy
+- [ ] Pack preview screen (locked quotes visible with upgrade blur)
+- [ ] Author deep-dive cards (bio + top 5 quotes, premium)
+- [ ] "Today's reflection" daily question card injected into feed
+- [ ] Evolution card in feed every 10 quotes ("Your philosophy shifted this week")
+- [ ] Vault collections (themed folders)
+- [ ] Streak milestone moments (7 / 30 days): full-screen card only, no badge
+- [ ] iOS App Store submission
+
+### Technical Milestones
+- [ ] 2,000+ additional curated quotes seeded for content packs
+- [ ] Pack-gated feed query (premium required for pack quotes)
+- [ ] Daily question rotation system (backend-driven)
+- [ ] Snapshot history comparison endpoint (`/map?compare=last`)
+
+### Key Deliverables
+- 4 content packs live in database
+- Author deep-dive cards in `FeedScreen`
+- Live iOS listing
+
+---
+
+## Phase 8 — Scale to 100k Users
 
 **Goal:** The infrastructure reliably serves 100k daily active users with sub-200ms feed responses.
 
@@ -201,7 +243,7 @@ Every phase must leave the product meaningfully more valuable to the user — no
 
 ---
 
-## Phase 7 — Scale to 1M+ Users
+## Phase 9 — Scale to 1M+ Users
 
 **Goal:** MindScrolling operates as a resilient, globally distributed product at million-user scale.
 
