@@ -77,14 +77,17 @@ Rules:
 
 // ─── Cache helpers ────────────────────────────────────────────────────────────
 
-async function getCachedInsight(deviceId) {
+async function getCachedInsight(deviceId, lang = "en") {
   const { data } = await supabase
     .from("ai_insights")
-    .select("insight, generated_at")
+    .select("insight, generated_at, lang")
     .eq("device_id", deviceId)
     .maybeSingle();
 
   if (!data) return null;
+
+  // If cached in a different language, treat as expired
+  if (data.lang && data.lang !== lang) return null;
 
   const age = Date.now() - new Date(data.generated_at).getTime();
   if (age > CACHE_TTL_MS) return null;   // expired
@@ -92,11 +95,11 @@ async function getCachedInsight(deviceId) {
   return data.insight;
 }
 
-async function cacheInsight(deviceId, insight) {
+async function cacheInsight(deviceId, insight, lang = "en") {
   await supabase
     .from("ai_insights")
     .upsert(
-      { device_id: deviceId, insight, generated_at: new Date().toISOString() },
+      { device_id: deviceId, insight, lang, generated_at: new Date().toISOString() },
       { onConflict: "device_id" }
     );
 }
@@ -116,8 +119,10 @@ export async function getWeeklyInsight(deviceId, context) {
     return null;   // insight feature not configured
   }
 
-  // Return cached if fresh
-  const cached = await getCachedInsight(deviceId);
+  const lang = context.lang || "en";
+
+  // Return cached if fresh AND same language
+  const cached = await getCachedInsight(deviceId, lang);
   if (cached) return cached;
 
   // Generate with Claude
@@ -132,8 +137,8 @@ export async function getWeeklyInsight(deviceId, context) {
   const insight = message.content[0]?.text?.trim() ?? null;
   if (!insight) return null;
 
-  // Persist for 24-hour cache
-  await cacheInsight(deviceId, insight);
+  // Persist for 24-hour cache (keyed by device + lang)
+  await cacheInsight(deviceId, insight, lang);
 
   return insight;
 }
