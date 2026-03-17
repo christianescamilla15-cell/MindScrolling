@@ -175,11 +175,28 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
         );
       }
     } catch (_) {
-      // Fallback to local trial if backend unreachable
+      // Fallback to local trial if backend unreachable or fails
       final prefs = await SharedPreferences.getInstance();
-      final trialStartStr = prefs.getString(_kTrialStartKey);
-      if (trialStartStr != null) {
-        final start = DateTime.parse(trialStartStr);
+      var trialStartStr = prefs.getString(_kTrialStartKey);
+
+      // First time + backend failed → start trial locally
+      if (trialStartStr == null || trialStartStr == 'paid') {
+        if (trialStartStr != 'paid') {
+          trialStartStr = DateTime.now().toIso8601String();
+          await prefs.setString(_kTrialStartKey, trialStartStr);
+        }
+      }
+
+      if (trialStartStr == 'paid') {
+        // User already paid
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            premiumState: const PremiumStateModel(isPremium: true),
+            isTrial: false,
+          ),
+        );
+      } else {
+        final start = DateTime.parse(trialStartStr!);
         final daysLeft = _kTrialDurationDays - DateTime.now().difference(start).inDays;
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(

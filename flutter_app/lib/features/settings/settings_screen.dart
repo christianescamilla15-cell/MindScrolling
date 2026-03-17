@@ -404,23 +404,29 @@ class _NotificationTileState extends State<_NotificationTile> {
   }
 
   Future<void> _toggle(bool value) async {
+    // Update UI immediately for responsiveness
+    setState(() => _enabled = value);
+
     if (value) {
-      final granted = await NotificationService.requestPermission();
-      if (!granted) return;
-      await NotificationService.scheduleDailyReminder(
-        hour: _time.hour,
-        minute: _time.minute,
-        title: context.tr.dailyReminder,
-        body: context.tr.dailyReminderBody,
-      );
-      await NotificationService.scheduleWeeklyMapReminder(
-        title: context.tr.weeklyMapTitle,
-        body: context.tr.weeklyMapBody,
-      );
+      try {
+        await NotificationService.requestPermission();
+        await NotificationService.scheduleDailyReminder(
+          hour: _time.hour,
+          minute: _time.minute,
+          title: context.tr.dailyReminder,
+          body: context.tr.dailyReminderBody,
+        );
+        await NotificationService.scheduleWeeklyMapReminder(
+          title: context.tr.weeklyMapTitle,
+          body: context.tr.weeklyMapBody,
+        );
+      } catch (_) {
+        // If scheduling fails, revert
+        if (mounted) setState(() => _enabled = false);
+      }
     } else {
       await NotificationService.cancelAll();
     }
-    setState(() => _enabled = value);
   }
 
   Future<void> _pickTime() async {
