@@ -125,13 +125,8 @@ class OnboardingController extends ChangeNotifier {
       // Fire-and-forget profile submission.
       _repository?.postProfile(profileSnapshot).ignore();
 
-      // Auto-enable ambient audio after onboarding
-      try {
-        final audioCtrl = ref.read(ambientAudioControllerProvider.notifier);
-        await audioCtrl.setEnabled(true);
-        await audioCtrl.setVolume(0.35);
-        await audioCtrl.playPause(); // start playing
-      } catch (_) {}
+      // Mark that audio should auto-start on first feed load
+      await prefs.setBool('mindscroll_audio_autostart', true);
     } catch (_) {
       // Non-fatal; proceed regardless.
     }

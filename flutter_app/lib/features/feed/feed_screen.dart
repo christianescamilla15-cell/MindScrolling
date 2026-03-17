@@ -10,6 +10,7 @@ import '../../app/theme/typography.dart';
 import '../../data/models/feed_item_model.dart';
 import '../../app/localization/app_strings.dart';
 import '../ambient/ambient_audio_button.dart';
+import '../ambient/ambient_audio_controller.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/app_bottom_nav.dart';
 import '../premium/premium_controller.dart';
@@ -62,6 +63,21 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (!hintShown && mounted) {
         setState(() => _showHint = true);
         await prefs.setBool('mindscroll_hint_shown', true);
+      }
+
+      // Auto-start ambient audio after onboarding (delayed to ensure audio is ready)
+      final shouldAutostart = prefs.getBool('mindscroll_audio_autostart') ?? false;
+      if (shouldAutostart) {
+        await prefs.setBool('mindscroll_audio_autostart', false); // only once
+        await Future.delayed(const Duration(seconds: 2)); // wait for audio init
+        if (mounted) {
+          try {
+            final audioCtrl = ref.read(ambientAudioControllerProvider.notifier);
+            await audioCtrl.setEnabled(true);
+            await audioCtrl.setVolume(0.35);
+            await audioCtrl.playPause();
+          } catch (_) {}
+        }
       }
     });
   }

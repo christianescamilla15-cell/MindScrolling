@@ -3,119 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindScrolling - Privacy Policy / Politica de Privacidad</title>
+    <title>MindScrolling — Privacy Policy</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #0F0F13; color: #F5F0E8; line-height: 1.7; }
-        h1 { color: #14B8A6; font-size: 28px; }
-        h2 { color: #14B8A6; font-size: 20px; margin-top: 32px; }
-        p, li { color: #C0BDB5; font-size: 15px; }
-        a { color: #14B8A6; }
-        .date { color: #888; font-size: 13px; }
-        hr { border: none; border-top: 1px solid #2A2A35; margin: 40px 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #0A0A0F;
+            color: #E8E4DC;
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(180deg, #0F1A1A 0%, #0A0A0F 100%);
+            border-bottom: 1px solid rgba(20, 184, 166, 0.15);
+        }
+        .hero-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(20, 184, 166, 0.1);
+            border: 1.5px solid rgba(20, 184, 166, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 28px;
+        }
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #F5F0E8;
+            letter-spacing: -0.5px;
+        }
+        .hero .subtitle {
+            font-size: 15px;
+            color: #14B8A6;
+            margin-top: 8px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .hero .date {
+            font-size: 13px;
+            color: #666;
+            margin-top: 16px;
+        }
+
+        /* Language tabs */
+        .lang-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 24px 20px 0;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .lang-tab {
+            padding: 8px 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(20, 184, 166, 0.3);
+            background: transparent;
+            color: #14B8A6;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .lang-tab.active, .lang-tab:hover {
+            background: rgba(20, 184, 166, 0.15);
+            border-color: #14B8A6;
+        }
+
+        /* Content */
+        .content {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+        .lang-section { display: none; }
+        .lang-section.active { display: block; }
+
+        /* Cards */
+        .section-card {
+            background: #13131B;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        .section-card:hover {
+            border-color: rgba(20, 184, 166, 0.2);
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #14B8A6;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 .icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: rgba(20, 184, 166, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        p { color: #A8A4A0; font-size: 15px; margin-bottom: 12px; }
+        ul { list-style: none; padding: 0; }
+        li {
+            color: #A8A4A0;
+            font-size: 15px;
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 16px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #14B8A6;
+            opacity: 0.6;
+        }
+        strong { color: #E8E4DC; font-weight: 600; }
+
+        /* Third party grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .service-chip {
+            background: rgba(20, 184, 166, 0.06);
+            border: 1px solid rgba(20, 184, 166, 0.12);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #C0BDB5;
+        }
+        .service-chip strong {
+            display: block;
+            color: #E8E4DC;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        /* Contact card */
+        .contact-card {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.08), rgba(20, 184, 166, 0.02));
+            border: 1px solid rgba(20, 184, 166, 0.2);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            margin-top: 32px;
+        }
+        .contact-card a {
+            color: #14B8A6;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .contact-card a:hover { text-decoration: underline; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 32px 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: #444;
+            font-size: 13px;
+        }
+        .footer a { color: #14B8A6; text-decoration: none; }
+
+        /* Highlight badge */
+        .badge {
+            display: inline-block;
+            background: rgba(20, 184, 166, 0.1);
+            color: #14B8A6;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+            .hero { padding: 60px 20px 40px; }
+            .hero h1 { font-size: 26px; }
+            .section-card { padding: 20px; }
+            .services-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
+
+<!-- Hero -->
+<div class="hero">
+    <div class="hero-icon">&#10077;</div>
     <h1>MindScrolling</h1>
-    <h2>Privacy Policy / Politica de Privacidad</h2>
-    <p class="date">Last updated / Ultima actualizacion: March 17, 2026</p>
+    <div class="subtitle">Privacy Policy</div>
+    <p class="date">Last updated: March 17, 2026</p>
+</div>
 
-    <hr>
+<!-- Language tabs -->
+<div class="lang-tabs">
+    <button class="lang-tab active" onclick="switchLang('en')">English</button>
+    <button class="lang-tab" onclick="switchLang('es')">Espanol</button>
+</div>
 
-    <h2>English</h2>
+<div class="content">
 
-    <h2>1. Information We Collect</h2>
+<!-- ==================== ENGLISH ==================== -->
+<div id="lang-en" class="lang-section active">
+
+<div class="section-card">
+    <h2><span class="icon">&#128274;</span> Information We Collect</h2>
     <p>MindScrolling collects minimal data to provide a personalized philosophical experience:</p>
     <ul>
         <li><strong>Device Identifier:</strong> A randomly generated anonymous ID stored locally on your device. We do not collect your name, email, phone number, or any personally identifiable information.</li>
         <li><strong>Usage Data:</strong> Swipe directions, liked quotes, saved quotes, and reading preferences to personalize your philosophical feed.</li>
         <li><strong>Language Preference:</strong> Your selected language (English or Spanish) to serve content in your preferred language.</li>
     </ul>
+</div>
 
-    <h2>2. How We Use Your Information</h2>
+<div class="section-card">
+    <h2><span class="icon">&#9881;</span> How We Use Your Information</h2>
     <ul>
-        <li>To personalize your philosophical quote feed based on your reading interests</li>
-        <li>To save your favorite quotes in your personal vault</li>
-        <li>To generate your philosophy map and daily mind profile</li>
-        <li>To track your reading streak and engagement</li>
-        <li>To provide AI-generated weekly insights (MindScrolling Inside users only)</li>
+        <li>Personalize your philosophical quote feed based on your reading interests</li>
+        <li>Save your favorite quotes in your personal vault</li>
+        <li>Generate your philosophy map and daily mind profile</li>
+        <li>Track your reading streak and engagement</li>
+        <li>Provide AI-generated weekly insights <span class="badge">MindScrolling Inside</span></li>
     </ul>
+</div>
 
-    <h2>3. Data Storage</h2>
+<div class="section-card">
+    <h2><span class="icon">&#9729;</span> Data Storage</h2>
     <p>Your data is stored securely on Supabase (PostgreSQL) cloud infrastructure. Data is associated with your anonymous device ID, not with any personal identity.</p>
+</div>
 
-    <h2>4. Third-Party Services</h2>
-    <ul>
-        <li><strong>Supabase:</strong> Database hosting and authentication</li>
-        <li><strong>Anthropic (Claude AI):</strong> Weekly insight generation for premium users</li>
-        <li><strong>Google Play Billing:</strong> In-app purchase processing</li>
-        <li><strong>Wikimedia Commons:</strong> Author portrait images (public domain)</li>
-    </ul>
+<div class="section-card">
+    <h2><span class="icon">&#128279;</span> Third-Party Services</h2>
+    <div class="services-grid">
+        <div class="service-chip"><strong>Supabase</strong>Database &amp; hosting</div>
+        <div class="service-chip"><strong>Anthropic AI</strong>Weekly insights</div>
+        <div class="service-chip"><strong>Google Play</strong>In-app purchases</div>
+        <div class="service-chip"><strong>Wikimedia</strong>Author portraits</div>
+    </div>
+</div>
 
-    <h2>5. No Account Required</h2>
+<div class="section-card">
+    <h2><span class="icon">&#128100;</span> No Account Required</h2>
     <p>MindScrolling does not require you to create an account, provide an email address, or sign in. Your experience is tied to your device.</p>
+</div>
 
-    <h2>6. Children's Privacy</h2>
+<div class="section-card">
+    <h2><span class="icon">&#128118;</span> Children's Privacy</h2>
     <p>MindScrolling is not directed at children under 13. We do not knowingly collect data from children under 13.</p>
+</div>
 
-    <h2>7. Data Deletion</h2>
-    <p>You can reset all your data at any time using the "Reset Experience" option in Settings. This clears your local data and preferences. To request complete deletion of server-side data, contact us at the email below.</p>
+<div class="section-card">
+    <h2><span class="icon">&#128465;</span> Data Deletion</h2>
+    <p>You can reset all your data at any time using the <strong>"Reset Experience"</strong> option in Settings. This clears your local data and preferences. To request complete deletion of server-side data, contact us at the email below.</p>
+</div>
 
-    <h2>8. Changes to This Policy</h2>
+<div class="section-card">
+    <h2><span class="icon">&#128196;</span> Changes to This Policy</h2>
     <p>We may update this privacy policy from time to time. Changes will be reflected on this page with an updated date.</p>
+</div>
 
-    <h2>9. Contact</h2>
-    <p>If you have questions about this privacy policy, contact us at:<br>
-    <a href="mailto:christianescamilla15@gmail.com">christianescamilla15@gmail.com</a></p>
+<div class="contact-card">
+    <p style="color: #888; margin-bottom: 8px;">Questions about this policy?</p>
+    <a href="mailto:christianescamilla15@gmail.com">christianescamilla15@gmail.com</a>
+</div>
 
-    <hr>
+</div>
 
-    <h2>Espanol</h2>
+<!-- ==================== SPANISH ==================== -->
+<div id="lang-es" class="lang-section">
 
-    <h2>1. Informacion que Recopilamos</h2>
+<div class="section-card">
+    <h2><span class="icon">&#128274;</span> Informacion que Recopilamos</h2>
     <p>MindScrolling recopila datos minimos para ofrecer una experiencia filosofica personalizada:</p>
     <ul>
-        <li><strong>Identificador de dispositivo:</strong> Un ID anonimo generado aleatoriamente y almacenado localmente en tu dispositivo. No recopilamos tu nombre, correo electronico, numero de telefono ni ninguna informacion de identificacion personal.</li>
-        <li><strong>Datos de uso:</strong> Direcciones de deslizamiento, frases marcadas como favoritas, frases guardadas y preferencias de lectura para personalizar tu feed filosofico.</li>
+        <li><strong>Identificador de dispositivo:</strong> Un ID anonimo generado aleatoriamente y almacenado localmente en tu dispositivo. No recopilamos tu nombre, correo electronico, numero de telefono ni ninguna informacion personal.</li>
+        <li><strong>Datos de uso:</strong> Direcciones de deslizamiento, frases favoritas, frases guardadas y preferencias de lectura para personalizar tu feed filosofico.</li>
         <li><strong>Preferencia de idioma:</strong> Tu idioma seleccionado (ingles o espanol) para mostrar contenido en tu idioma preferido.</li>
     </ul>
+</div>
 
-    <h2>2. Como Usamos tu Informacion</h2>
+<div class="section-card">
+    <h2><span class="icon">&#9881;</span> Como Usamos tu Informacion</h2>
     <ul>
-        <li>Para personalizar tu feed de frases filosoficas segun tus intereses de lectura</li>
-        <li>Para guardar tus frases favoritas en tu boveda personal</li>
-        <li>Para generar tu mapa filosofico y perfil mental diario</li>
-        <li>Para rastrear tu racha de lectura y participacion</li>
-        <li>Para generar reflexiones semanales con IA (solo usuarios MindScrolling Inside)</li>
+        <li>Personalizar tu feed de frases filosoficas segun tus intereses</li>
+        <li>Guardar tus frases favoritas en tu boveda personal</li>
+        <li>Generar tu mapa filosofico y perfil mental diario</li>
+        <li>Rastrear tu racha de lectura y participacion</li>
+        <li>Generar reflexiones semanales con IA <span class="badge">MindScrolling Inside</span></li>
     </ul>
+</div>
 
-    <h2>3. Almacenamiento de Datos</h2>
+<div class="section-card">
+    <h2><span class="icon">&#9729;</span> Almacenamiento de Datos</h2>
     <p>Tus datos se almacenan de forma segura en la infraestructura en la nube de Supabase (PostgreSQL). Los datos estan asociados con tu ID de dispositivo anonimo, no con ninguna identidad personal.</p>
+</div>
 
-    <h2>4. Servicios de Terceros</h2>
-    <ul>
-        <li><strong>Supabase:</strong> Alojamiento de base de datos y autenticacion</li>
-        <li><strong>Anthropic (Claude AI):</strong> Generacion de reflexiones semanales para usuarios premium</li>
-        <li><strong>Google Play Billing:</strong> Procesamiento de compras dentro de la app</li>
-        <li><strong>Wikimedia Commons:</strong> Imagenes de retratos de autores (dominio publico)</li>
-    </ul>
+<div class="section-card">
+    <h2><span class="icon">&#128279;</span> Servicios de Terceros</h2>
+    <div class="services-grid">
+        <div class="service-chip"><strong>Supabase</strong>Base de datos</div>
+        <div class="service-chip"><strong>Anthropic AI</strong>Reflexiones semanales</div>
+        <div class="service-chip"><strong>Google Play</strong>Compras en la app</div>
+        <div class="service-chip"><strong>Wikimedia</strong>Retratos de autores</div>
+    </div>
+</div>
 
-    <h2>5. No Se Requiere Cuenta</h2>
+<div class="section-card">
+    <h2><span class="icon">&#128100;</span> No Se Requiere Cuenta</h2>
     <p>MindScrolling no requiere que crees una cuenta, proporciones un correo electronico o inicies sesion. Tu experiencia esta vinculada a tu dispositivo.</p>
+</div>
 
-    <h2>6. Privacidad de Menores</h2>
+<div class="section-card">
+    <h2><span class="icon">&#128118;</span> Privacidad de Menores</h2>
     <p>MindScrolling no esta dirigido a menores de 13 anos. No recopilamos datos de menores de 13 anos de forma intencionada.</p>
+</div>
 
-    <h2>7. Eliminacion de Datos</h2>
-    <p>Puedes restablecer todos tus datos en cualquier momento usando la opcion "Reiniciar experiencia" en Ajustes. Esto borra tus datos locales y preferencias. Para solicitar la eliminacion completa de datos del servidor, contactanos al correo electronico indicado abajo.</p>
+<div class="section-card">
+    <h2><span class="icon">&#128465;</span> Eliminacion de Datos</h2>
+    <p>Puedes restablecer todos tus datos en cualquier momento usando la opcion <strong>"Reiniciar experiencia"</strong> en Ajustes. Para solicitar la eliminacion completa de datos del servidor, contactanos al correo indicado abajo.</p>
+</div>
 
-    <h2>8. Cambios a Esta Politica</h2>
-    <p>Podemos actualizar esta politica de privacidad de vez en cuando. Los cambios se reflejaran en esta pagina con una fecha actualizada.</p>
+<div class="section-card">
+    <h2><span class="icon">&#128196;</span> Cambios a Esta Politica</h2>
+    <p>Podemos actualizar esta politica de privacidad periodicamente. Los cambios se reflejaran en esta pagina con una fecha actualizada.</p>
+</div>
 
-    <h2>9. Contacto</h2>
-    <p>Si tienes preguntas sobre esta politica de privacidad, contactanos en:<br>
-    <a href="mailto:christianescamilla15@gmail.com">christianescamilla15@gmail.com</a></p>
+<div class="contact-card">
+    <p style="color: #888; margin-bottom: 8px;">Preguntas sobre esta politica?</p>
+    <a href="mailto:christianescamilla15@gmail.com">christianescamilla15@gmail.com</a>
+</div>
 
-    <hr>
-    <p class="date">&copy; 2026 MindScrolling. All rights reserved.</p>
+</div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>&copy; 2026 MindScrolling. All rights reserved.</p>
+    <p style="margin-top: 8px;"><a href="https://buymeacoffee.com/mindscrolling">Support MindScrolling</a></p>
+</div>
+
+<script>
+function switchLang(lang) {
+    document.querySelectorAll('.lang-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('lang-' + lang).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+
 </body>
 </html>
