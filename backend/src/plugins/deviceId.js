@@ -11,7 +11,7 @@ async function deviceIdPlugin(fastify) {
 
     const deviceId = request.headers["x-device-id"];
     if (!deviceId || deviceId.trim() === "") {
-      return reply.status(400).send({ error: "Missing X-Device-ID header", code: "MISSING_DEVICE_ID" });
+      return reply.status(401).send({ error: "Missing X-Device-ID header", code: "MISSING_DEVICE_ID" });
     }
     request.deviceId = deviceId.trim();
   });

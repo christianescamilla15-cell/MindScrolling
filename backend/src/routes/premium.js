@@ -19,22 +19,12 @@ export default async function premiumRoutes(fastify) {
   fastify.get("/status", async (request, reply) => {
     const deviceId = request.deviceId;
 
-    const [
-      { data: userRow,  error: userErr     },
-      { data: purchase, error: purchaseErr },
-    ] = await Promise.all([
-      supabase
-        .from("users")
-        .select("is_premium, trial_start_date, trial_end_date, premium_status")
-        .eq("device_id", deviceId)
-        .maybeSingle(),
-      supabase
-        .from("purchases")
-        .select("id")
-        .eq("device_id", deviceId)
-        .limit(1)
-        .maybeSingle(),
-    ]);
+    // Single query — purchases check removed (is_premium is source of truth)
+    const { data: userRow, error: userErr } = await supabase
+      .from("users")
+      .select("is_premium, trial_start_date, trial_end_date, premium_status")
+      .eq("device_id", deviceId)
+      .maybeSingle();
 
     const isDev = process.env.NODE_ENV !== "production";
     const DEV_FORCE_PREMIUM = isDev && process.env.DEV_FORCE_PREMIUM === "true";
@@ -189,7 +179,12 @@ export default async function premiumRoutes(fastify) {
 
     const { error: updateErr } = await supabase
       .from("users")
-      .update({ is_premium: true, premium_since: now })
+      .update({
+        is_premium: true,
+        premium_since: now,
+        premium_status: "premium_onetime",
+        premium_source: "play_billing",
+      })
       .eq("device_id", deviceId);
 
     if (updateErr) {
@@ -255,7 +250,7 @@ export default async function premiumRoutes(fastify) {
           purchase_token: purchase_token,
           transaction_id: transaction_id,
           status: "restored",
-          amount: 4.99,
+          amount: Number(PLAN_PRICE),
           currency: "USD",
           updated_at: now,
         }),
@@ -270,7 +265,12 @@ export default async function premiumRoutes(fastify) {
 
     await supabase
       .from("users")
-      .update({ is_premium: true, premium_since: now })
+      .update({
+        is_premium: true,
+        premium_since: now,
+        premium_status: "premium_onetime",
+        premium_source: "play_billing",
+      })
       .eq("device_id", deviceId);
 
     return reply.status(200).send({ restored: true, plan: PLAN_NAME });

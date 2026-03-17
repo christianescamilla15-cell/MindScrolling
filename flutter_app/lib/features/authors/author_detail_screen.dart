@@ -68,7 +68,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
           else if (_data == null)
             SliverFillRemaining(
               child: Center(child: Text(
-                'Could not load author',
+                context.tr.authorLoadError,
                 style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
               )),
             )
@@ -127,7 +127,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
 
                   // ── Top Quotes ──────────────────────────────────────
                   Text(
-                    'Top Quotes',
+                    context.tr.topQuotes,
                     style: AppTypography.labelSmall.copyWith(
                       letterSpacing: 2,
                       color: AppColors.textMuted,

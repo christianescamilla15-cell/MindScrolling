@@ -592,6 +592,10 @@ class StringsEn implements AppStrings {
   @override String get trialExpiredButton  => 'Unlock MindScrolling Inside — \$4.99';
   @override String get continueReading     => 'Continue free';
 
+  // Author detail
+  @override String get authorLoadError => 'Could not load author';
+  @override String get topQuotes       => 'Top Quotes';
+
   // Notifications
   @override String get notifications        => 'Notifications';
   @override String get dailyReminder        => 'Your reflection awaits';

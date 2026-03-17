@@ -593,6 +593,10 @@ class StringsEs implements AppStrings {
   @override String get trialExpiredButton  => 'Desbloquear MindScrolling Inside — \$4.99';
   @override String get continueReading     => 'Continuar gratis';
 
+  // Author detail
+  @override String get authorLoadError => 'No se pudo cargar el autor';
+  @override String get topQuotes       => 'Frases destacadas';
+
   // Notifications
   @override String get notifications        => 'Notificaciones';
   @override String get dailyReminder        => 'Tu reflexi\u00f3n te espera';
