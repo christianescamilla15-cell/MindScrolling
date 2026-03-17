@@ -50,9 +50,19 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
   /// Clears ALL MindScroll data (vault, likes, preferences, map, onboarding, premium cache).
   Future<void> resetExperience() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Preserve trial start date — user can't restart trial by resetting
+    final trialStart = prefs.getString('mindscroll_trial_start');
+
+    // Clear all local mindscroll keys
     final keys = prefs.getKeys().where((k) => k.startsWith('mindscroll')).toList();
     for (final key in keys) {
       await prefs.remove(key);
+    }
+
+    // Restore trial date so it can't be exploited
+    if (trialStart != null) {
+      await prefs.setString('mindscroll_trial_start', trialStart);
     }
   }
 

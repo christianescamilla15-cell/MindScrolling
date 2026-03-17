@@ -6,8 +6,8 @@ import fp from "fastify-plugin";
  */
 async function deviceIdPlugin(fastify) {
   fastify.addHook("preHandler", async (request, reply) => {
-    // Health check doesn't need device ID
-    if (request.url === "/health") return;
+    // Public routes don't need device ID
+    if (request.url === "/health" || request.url.startsWith("/static/") || request.url.startsWith("/admin/")) return;
 
     const deviceId = request.headers["x-device-id"];
     if (!deviceId || deviceId.trim() === "") {

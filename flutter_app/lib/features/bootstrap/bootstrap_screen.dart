@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'bootstrap_controller.dart';
 
 /// Splash / loading screen shown while checking onboarding state.
@@ -72,7 +73,7 @@ class _BootstrapScreenState extends State<BootstrapScreen>
               _MindScrollLogo(),
               const SizedBox(height: 24),
               Text(
-                'Loading reflections...',
+                context.tr.loadingReflections,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textMuted,
                   fontSize: 12,

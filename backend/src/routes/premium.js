@@ -236,4 +236,129 @@ export default async function premiumRoutes(fastify) {
 
     return reply.status(200).send({ ok: true, is_premium: true, unlocked: true });
   });
+
+  /**
+   * POST /premium/redeem
+   * Body: { code }
+   * Validates an activation code and grants premium_lifetime.
+   */
+  fastify.post("/redeem", async (request, reply) => {
+    const deviceId = request.deviceId;
+    const { code } = request.body ?? {};
+
+    if (!code || typeof code !== "string" || code.trim().length < 6) {
+      return reply.status(400).send({
+        error: "Invalid code format",
+        code: "INVALID_CODE",
+      });
+    }
+
+    const cleanCode = code.trim().toUpperCase();
+
+    // Look up the activation code
+    const { data: codeRow, error: lookupErr } = await supabase
+      .from("premium_activation_codes")
+      .select("*")
+      .eq("code", cleanCode)
+      .maybeSingle();
+
+    if (lookupErr) {
+      request.log.error({ err: lookupErr }, "premium/redeem: lookup failed");
+      return reply.status(500).send({ error: "Failed to validate code", code: "DB_ERROR" });
+    }
+
+    // Validate code
+    if (!codeRow) {
+      return reply.status(404).send({
+        error: "Code not found",
+        code: "CODE_NOT_FOUND",
+      });
+    }
+
+    if (codeRow.revoked) {
+      return reply.status(410).send({
+        error: "This code has been revoked",
+        code: "CODE_REVOKED",
+      });
+    }
+
+    if (codeRow.is_redeemed) {
+      return reply.status(409).send({
+        error: "This code has already been used",
+        code: "CODE_ALREADY_REDEEMED",
+      });
+    }
+
+    if (codeRow.expires_at && new Date(codeRow.expires_at) < new Date()) {
+      return reply.status(410).send({
+        error: "This code has expired",
+        code: "CODE_EXPIRED",
+      });
+    }
+
+    const now = new Date().toISOString();
+
+    // Mark code as redeemed
+    const { error: redeemErr } = await supabase
+      .from("premium_activation_codes")
+      .update({
+        is_redeemed: true,
+        redeemed_by: deviceId,
+        redeemed_at: now,
+      })
+      .eq("id", codeRow.id);
+
+    if (redeemErr) {
+      request.log.error({ err: redeemErr }, "premium/redeem: failed to mark code");
+      return reply.status(500).send({ error: "Failed to redeem code", code: "DB_ERROR" });
+    }
+
+    // Ensure user row exists
+    await supabase
+      .from("users")
+      .upsert({ device_id: deviceId }, { onConflict: "device_id" });
+
+    // Grant premium lifetime
+    const { error: upgradeErr } = await supabase
+      .from("users")
+      .update({
+        is_premium: true,
+        premium_status: "premium_lifetime",
+        premium_source: "activation_code",
+        premium_activated_at: now,
+        premium_since: now,
+      })
+      .eq("device_id", deviceId);
+
+    if (upgradeErr) {
+      request.log.error({ err: upgradeErr }, "premium/redeem: failed to upgrade user");
+      return reply.status(500).send({ error: "Failed to activate premium", code: "DB_ERROR" });
+    }
+
+    // Audit log
+    await supabase
+      .from("premium_audit_log")
+      .insert({
+        device_id: deviceId,
+        event_type: "code_redeemed",
+        source: "activation_code",
+        metadata: {
+          code_id: codeRow.id,
+          code: cleanCode,
+          type: codeRow.type,
+          assigned_email: codeRow.assigned_email,
+        },
+      })
+      .then(() => {}) // fire and forget
+      .catch(() => {});
+
+    request.log.info({ deviceId, code: cleanCode }, "premium/redeem: code redeemed successfully");
+
+    return reply.status(200).send({
+      success: true,
+      plan: PLAN_NAME,
+      type: codeRow.type,
+      message: "MindScrolling Inside activated!",
+    });
+  });
 }

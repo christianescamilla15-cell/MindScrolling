@@ -1,11 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../data/datasources/local/settings_local_ds.dart';
 import '../../data/datasources/remote/stats_remote_ds.dart';
 import '../../data/models/premium_state_model.dart';
+import '../../core/utils/haptics_service.dart';
 import '../../data/repositories/premium_repository.dart';
 import 'premium_purchase_service.dart';
+
+// ---------------------------------------------------------------------------
+// Trial constants
+// ---------------------------------------------------------------------------
+
+const _kTrialStartKey = 'mindscroll_trial_start';
+const _kTrialDurationDays = 7;
 
 // ---------------------------------------------------------------------------
 // Repository provider
@@ -29,6 +38,9 @@ class PremiumUiState {
   final bool isLoading;
   final bool isPurchasing;
   final bool isRestoring;
+  final bool isTrial;
+  final int trialDaysLeft;
+  final bool trialExpired;
   final String? error;
   final String? successMessage;
 
@@ -37,17 +49,24 @@ class PremiumUiState {
     this.isLoading = false,
     this.isPurchasing = false,
     this.isRestoring = false,
+    this.isTrial = false,
+    this.trialDaysLeft = 0,
+    this.trialExpired = false,
     this.error,
     this.successMessage,
   });
 
-  bool get isPremium => premiumState.isPremium;
+  /// User has premium access — either paid or active trial.
+  bool get isPremium => premiumState.isPremium || isTrial;
 
   PremiumUiState copyWith({
     PremiumStateModel? premiumState,
     bool? isLoading,
     bool? isPurchasing,
     bool? isRestoring,
+    bool? isTrial,
+    int? trialDaysLeft,
+    bool? trialExpired,
     String? error,
     String? successMessage,
   }) {
@@ -56,6 +75,9 @@ class PremiumUiState {
       isLoading: isLoading ?? this.isLoading,
       isPurchasing: isPurchasing ?? this.isPurchasing,
       isRestoring: isRestoring ?? this.isRestoring,
+      isTrial: isTrial ?? this.isTrial,
+      trialDaysLeft: trialDaysLeft ?? this.trialDaysLeft,
+      trialExpired: trialExpired ?? this.trialExpired,
       error: error,
       successMessage: successMessage,
     );
@@ -72,7 +94,52 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
   @override
   PremiumUiState build() {
     _repo = ref.watch(premiumRepositoryProvider);
+    // Check trial on startup
+    _initTrial();
     return const PremiumUiState();
+  }
+
+  // ── Trial system ──────────────────────────────────────────────────────────
+
+  Future<void> _initTrial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final trialStartStr = prefs.getString(_kTrialStartKey);
+
+    if (trialStartStr == null) {
+      // First launch — start the 7-day trial automatically
+      final now = DateTime.now().toIso8601String();
+      await prefs.setString(_kTrialStartKey, now);
+      state = AsyncData(
+        (state.valueOrNull ?? const PremiumUiState()).copyWith(
+          isTrial: true,
+          trialDaysLeft: _kTrialDurationDays,
+          trialExpired: false,
+        ),
+      );
+      return;
+    }
+
+    final trialStart = DateTime.parse(trialStartStr);
+    final daysPassed = DateTime.now().difference(trialStart).inDays;
+    final daysLeft = _kTrialDurationDays - daysPassed;
+
+    if (daysLeft > 0) {
+      state = AsyncData(
+        (state.valueOrNull ?? const PremiumUiState()).copyWith(
+          isTrial: true,
+          trialDaysLeft: daysLeft,
+          trialExpired: false,
+        ),
+      );
+    } else {
+      state = AsyncData(
+        (state.valueOrNull ?? const PremiumUiState()).copyWith(
+          isTrial: false,
+          trialDaysLeft: 0,
+          trialExpired: true,
+        ),
+      );
+    }
   }
 
   /// Checks current premium status from the server (with local fallback).
@@ -154,6 +221,7 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
 
     switch (result.outcome) {
       case PurchaseOutcome.success:
+        HapticsService.heavyImpact();
         state = AsyncData(updated.copyWith(
           premiumState: const PremiumStateModel(isPremium: true, purchaseType: 'premium_unlock'),
           isPurchasing: false,
@@ -191,6 +259,7 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
 
     switch (result.outcome) {
       case PurchaseOutcome.restored:
+        HapticsService.mediumImpact();
         state = AsyncData(updated.copyWith(
           premiumState: const PremiumStateModel(isPremium: true),
           isRestoring: false,

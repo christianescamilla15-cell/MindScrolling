@@ -8,6 +8,7 @@ abstract class AppStrings {
   // ------------------------------------------------------------------
   String get appName;
   String get loading;
+  String get loadingReflections;
   String get vault;
   String get settings;
   String get streak;
@@ -282,6 +283,48 @@ abstract class AppStrings {
   String get play;
   String get pause;
   String get volume;
+
+  // ------------------------------------------------------------------
+  // Trial
+  // ------------------------------------------------------------------
+  String get trialActive;
+  String trialDaysLeft(int days);
+  String get trialExpiredTitle;
+  String get trialExpiredMsg;
+  String get trialExpiredButton;
+  String get continueReading;
+
+  // ------------------------------------------------------------------
+  // Reflection card
+  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
+  // Philosophy Map tabs
+  // ------------------------------------------------------------------
+  String get today;
+  String get evolution;
+  String get comparedTo;
+
+  // ------------------------------------------------------------------
+  // Redeem code
+  // ------------------------------------------------------------------
+  String get redeemCode;
+  String get redeemCodeTitle;
+  String get redeemCodeSubtitle;
+  String get activateCode;
+  String get redeemSuccess;
+  String get redeemFailed;
+  String get codeNotFound;
+  String get codeAlreadyUsed;
+  String get codeExpired;
+  String get invalidCodeFormat;
+  String get haveActivationCode;
+
+  // ------------------------------------------------------------------
+  // Reflection card
+  // ------------------------------------------------------------------
+  String get takeABreath;
+  String get doingWell;
+  String get swipeContinue;
 
 }
 

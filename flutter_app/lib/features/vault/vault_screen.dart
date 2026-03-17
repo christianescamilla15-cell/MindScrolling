@@ -6,6 +6,7 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/quote_model.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/author_avatar.dart';
 import 'vault_controller.dart';
 
 /// Bottom-sheet style screen displaying the user's saved quotes.
@@ -191,10 +192,21 @@ class _EmptyView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
       child: Center(
-        child: Text(
-          '🔮 ${context.tr.emptyVaultMsg}',
-          textAlign: TextAlign.center,
-          style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.bookmark_border_rounded,
+              size: 48,
+              color: AppColors.vault.withOpacity(0.4),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.tr.emptyVaultMsg,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+            ),
+          ],
         ),
       ),
     );
@@ -219,7 +231,21 @@ class _QuoteList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final quote = items[index];
-        return _VaultQuoteItem(quote: quote, onRemove: onRemove);
+        return Dismissible(
+          key: ValueKey(quote.id),
+          direction: DismissDirection.endToStart,
+          onDismissed: (_) => onRemove(quote.id),
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF6B6B).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.delete_outline, color: Color(0xFFFF6B6B)),
+          ),
+          child: _VaultQuoteItem(quote: quote, onRemove: onRemove),
+        );
       },
     );
   }
@@ -242,7 +268,7 @@ class _VaultQuoteItem extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
       clipBehavior: Clip.hardEdge,
@@ -250,14 +276,14 @@ class _VaultQuoteItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Colored left border accent (4 px)
+            // Colored left border accent
             Container(
-              width: 4,
+              width: 3,
               decoration: BoxDecoration(
-                color: accentColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [accentColor, accentColor.withOpacity(0.3)],
                 ),
               ),
             ),
@@ -265,51 +291,54 @@ class _VaultQuoteItem extends StatelessWidget {
             // Main content
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+                padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Quote text (italic)
+                    // Quote text
                     Text(
-                      '"${quote.text}"',
+                      '\u201C${quote.text}\u201D',
                       style: AppTypography.quoteText.copyWith(
-                        fontSize: 14,
-                        height: 1.5,
+                        fontSize: 15,
+                        height: 1.55,
                       ),
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 12),
 
-                    // Author + category chip
+                    // Author row + actions
                     Row(
                       children: [
+                        AuthorAvatar(
+                          name: quote.author,
+                          size: 24,
+                          accentColor: accentColor,
+                        ),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            '— ${quote.author}',
-                            style: AppTypography.authorText,
+                            quote.author,
+                            style: AppTypography.authorText.copyWith(fontSize: 12),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        _CategoryChip(label: quote.category, color: accentColor),
                         const SizedBox(width: 8),
-                        _CategoryChip(
-                          label: quote.category,
-                          color: accentColor,
+                        // Share button
+                        GestureDetector(
+                          onTap: () {
+                            // TODO: wire share
+                          },
+                          child: Icon(
+                            Icons.ios_share_rounded,
+                            size: 16,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ],
                     ),
                   ],
-                ),
-              ),
-            ),
-
-            // Remove (×) button
-            GestureDetector(
-              onTap: () => onRemove(quote.id),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Center(
-                  child: Icon(Icons.close, size: 16, color: AppColors.textMuted),
                 ),
               ),
             ),
@@ -325,6 +354,17 @@ class _CategoryChip extends StatelessWidget {
   final Color color;
   const _CategoryChip({required this.label, required this.color});
 
+  String _localize(String cat, BuildContext context) {
+    final tr = context.tr;
+    return switch (cat.toLowerCase()) {
+      'stoicism'   => tr.stoicism,
+      'philosophy' => tr.philosophy,
+      'discipline' => tr.discipline,
+      'reflection' => tr.reflection,
+      _            => cat,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -334,7 +374,7 @@ class _CategoryChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        label.toLowerCase(),
+        _localize(label, context).toLowerCase(),
         style: AppTypography.labelSmall.copyWith(color: color, letterSpacing: 0.5),
       ),
     );

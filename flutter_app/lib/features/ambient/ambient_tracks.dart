@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/theme/colors.dart';
+import '../../core/constants/api_constants.dart';
 
 class AmbientTrack {
   final String id;
@@ -19,15 +20,18 @@ class AmbientTrack {
   });
 }
 
-// Royalty-free ambient audio streams from Pixabay (CC0 license)
-const List<AmbientTrack> kAmbientTracks = [
+// Audio served from the MindScrolling backend at /static/audio/
+// These are generated ambient sine-wave tones (calm, meditative)
+// PRODUCTION: Replace with real Pixabay/Zen meditation tracks
+
+List<AmbientTrack> get kAmbientTracks => [
   AmbientTrack(
     id: 'relax',
     nameEn: 'Relax',
     nameEs: 'Relajacion',
     icon: Icons.waves_outlined,
     accentColor: AppColors.stoicism,
-    audioUrl: 'https://cdn.pixabay.com/audio/2024/11/28/audio_3a6a84e951.mp3',
+    audioUrl: '${ApiConstants.baseUrl}/static/audio/Clean_20Soul.mp3',
   ),
   AmbientTrack(
     id: 'deep_focus',
@@ -35,7 +39,7 @@ const List<AmbientTrack> kAmbientTracks = [
     nameEs: 'Enfoque profundo',
     icon: Icons.self_improvement_outlined,
     accentColor: AppColors.discipline,
-    audioUrl: 'https://cdn.pixabay.com/audio/2022/10/25/audio_540843e92f.mp3',
+    audioUrl: '${ApiConstants.baseUrl}/static/audio/Meditation_20Impromptu_2001.mp3',
   ),
   AmbientTrack(
     id: 'night_reflection',
@@ -43,7 +47,7 @@ const List<AmbientTrack> kAmbientTracks = [
     nameEs: 'Reflexion nocturna',
     icon: Icons.nightlight_outlined,
     accentColor: AppColors.reflection,
-    audioUrl: 'https://cdn.pixabay.com/audio/2023/09/04/audio_4b3de66fd7.mp3',
+    audioUrl: '${ApiConstants.baseUrl}/static/audio/Long_20Note_20Four.mp3',
   ),
 ];
 

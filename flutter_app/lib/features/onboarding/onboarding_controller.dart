@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 import '../../data/models/user_profile_model.dart';
 import '../../data/repositories/feed_repository.dart';
+import '../ambient/ambient_audio_controller.dart';
 import '../settings/settings_controller.dart';
 import '../../core/utils/locale_utils.dart';
 
@@ -123,6 +124,14 @@ class OnboardingController extends ChangeNotifier {
 
       // Fire-and-forget profile submission.
       _repository?.postProfile(profileSnapshot).ignore();
+
+      // Auto-enable ambient audio after onboarding
+      try {
+        final audioCtrl = ref.read(ambientAudioControllerProvider.notifier);
+        await audioCtrl.setEnabled(true);
+        await audioCtrl.setVolume(0.35);
+        await audioCtrl.playPause(); // start playing
+      } catch (_) {}
     } catch (_) {
       // Non-fatal; proceed regardless.
     }

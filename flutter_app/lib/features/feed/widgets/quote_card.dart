@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
 import '../../../data/models/quote_model.dart';
+import '../../../shared/widgets/author_avatar.dart';
 import 'action_bar.dart';
 import 'category_badge.dart';
 
 /// Main quote card shown in the feed swiper.
 ///
-/// Displays the quote text, author, category badge, and action bar.
-/// [onExport] is null for free users (button hidden), non-null for premium.
+/// Premium, minimalist design inspired by Stoic/Quoto/Headspace.
+/// Generous whitespace, serif quote typography, author avatar circle.
 class QuoteCard extends StatelessWidget {
   const QuoteCard({
     super.key,
@@ -37,21 +38,21 @@ class QuoteCard extends StatelessWidget {
     return GestureDetector(
       onDoubleTap: onLike,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF1C1C28), Color(0xFF14141E)],
+            colors: [Color(0xFF1C1C28), Color(0xFF13131B)],
           ),
           border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withOpacity(0.12),
-              blurRadius: 32,
-              spreadRadius: -4,
-              offset: const Offset(0, 8),
+              color: accentColor.withOpacity(0.10),
+              blurRadius: 40,
+              spreadRadius: -8,
+              offset: const Offset(0, 12),
             ),
           ],
         ),
@@ -65,32 +66,95 @@ class QuoteCard extends StatelessWidget {
                 top: 0,
                 bottom: 0,
                 width: 3,
-                child: Container(color: accentColor),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        accentColor.withOpacity(0.8),
+                        accentColor.withOpacity(0.2),
+                      ],
+                    ),
+                  ),
+                ),
               ),
+
+              // Subtle accent glow top-right
+              Positioned(
+                top: -60,
+                right: -60,
+                child: Container(
+                  width: 180,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        accentColor.withOpacity(0.06),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
               // Content
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 36, 24, 24),
+                padding: const EdgeInsets.fromLTRB(32, 28, 32, 24),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Category badge
-                    CategoryBadge(category: quote.category),
-                    const Spacer(flex: 2),
-                    // Quote text
+                    // Category badge (left-aligned)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: CategoryBadge(category: quote.category),
+                    ),
+
+                    const Spacer(flex: 1),
+
+                    // Author portrait — large, centered
+                    AuthorAvatar(
+                      name: quote.author,
+                      size: 72,
+                      accentColor: accentColor,
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Author name centered
+                    Text(
+                      quote.author,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: accentColor,
+                        letterSpacing: 1.2,
+                        fontSize: 11,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Quote text — premium serif typography
                     Text(
                       '\u201C${quote.text}\u201D',
                       style: AppTypography.quoteText.copyWith(
                         fontSize: _adaptiveFontSize(quote.text.length),
-                        height: 1.5,
+                        height: 1.55,
+                        letterSpacing: 0.2,
                       ),
+                      textAlign: TextAlign.center,
                     ),
+
                     const Spacer(flex: 1),
-                    // Author
-                    Text(
-                      '\u2014 ${quote.author}',
-                      style: AppTypography.authorText,
+
+                    // Divider
+                    Container(
+                      width: 40,
+                      height: 1,
+                      color: accentColor.withOpacity(0.2),
                     ),
-                    const SizedBox(height: 28),
+
+                    const SizedBox(height: 20),
+
                     // Action bar
                     Row(
                       children: [
@@ -108,8 +172,8 @@ class QuoteCard extends StatelessWidget {
                           GestureDetector(
                             onTap: onExport,
                             behavior: HitTestBehavior.opaque,
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
+                            child: const Padding(
+                              padding: EdgeInsets.all(6),
                               child: Icon(
                                 Icons.photo_camera_outlined,
                                 size: 22,
@@ -131,9 +195,10 @@ class QuoteCard extends StatelessWidget {
   }
 
   double _adaptiveFontSize(int charCount) {
-    if (charCount < 80) return 26;
-    if (charCount < 160) return 22;
-    if (charCount < 280) return 19;
-    return 17;
+    if (charCount < 60) return 28;
+    if (charCount < 120) return 24;
+    if (charCount < 200) return 21;
+    if (charCount < 300) return 18;
+    return 16;
   }
 }

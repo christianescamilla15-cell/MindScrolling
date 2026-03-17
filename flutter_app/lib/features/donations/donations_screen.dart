@@ -14,20 +14,24 @@ class DonationsScreen extends ConsumerWidget {
 
   Future<void> _openDonationUrl(BuildContext context) async {
     final uri = Uri.parse(MonetizationConstants.donationUrl);
-    final canLaunch = await canLaunchUrl(uri);
-    if (canLaunch) {
+    try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.tr.couldNotOpenDonation,
-              style: AppTypography.bodySmall,
+    } catch (_) {
+      // Fallback: try platform default
+      try {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } catch (_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                context.tr.couldNotOpenDonation,
+                style: AppTypography.bodySmall,
+              ),
+              backgroundColor: const Color(0xFF1A1A2E),
             ),
-            backgroundColor: const Color(0xFF1A1A2E),
-          ),
-        );
+          );
+        }
       }
     }
   }
@@ -118,16 +122,6 @@ class DonationsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Text(
-                MonetizationConstants.donationUrl,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textMuted,
-                ),
-                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: 32),

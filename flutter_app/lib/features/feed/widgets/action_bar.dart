@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// Bottom action bar inside a QuoteCard.
 ///
@@ -38,7 +39,7 @@ class ActionBar extends StatelessWidget {
         // Hint text (expands to fill centre)
         Expanded(
           child: Text(
-            'DOUBLE TAP TO LIKE',
+            context.tr.doubleTapToLike.toUpperCase(),
             textAlign: TextAlign.center,
             style: AppTypography.caption.copyWith(
               letterSpacing: 1.2,

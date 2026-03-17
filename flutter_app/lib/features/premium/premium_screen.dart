@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
@@ -69,9 +70,12 @@ class _PremiumBody extends ConsumerWidget {
         children: [
           const SizedBox(height: 16),
 
-          // ── Badge ───────────────────────────────────────────────────────
-          if (ps.isPremium) ...[
+          // ── Badge / Trial / Hero ────────────────────────────────────────
+          if (ps.premiumState.isPremium) ...[
             _PremiumBadge(),
+            const SizedBox(height: 28),
+          ] else if (ps.isTrial) ...[
+            _TrialBanner(daysLeft: ps.trialDaysLeft),
             const SizedBox(height: 28),
           ] else ...[
             _HeroSection(),
@@ -97,8 +101,8 @@ class _PremiumBody extends ConsumerWidget {
               isError: true,
             ),
 
-          // ── Action button ───────────────────────────────────────────────
-          if (!ps.isPremium) ...[
+          // ── Action button (show for trial users + free users) ────────────
+          if (!ps.premiumState.isPremium) ...[
             const SizedBox(height: 8),
             _PriceLabel(),
             const SizedBox(height: 12),
@@ -142,6 +146,18 @@ class _PremiumBody extends ConsumerWidget {
                           color: AppColors.textSecondary,
                         ),
                       ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // ── Have activation code? ──────────────────────────────────────
+            TextButton(
+              onPressed: () => context.push('/redeem'),
+              child: Text(
+                context.tr.haveActivationCode,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.stoicism.withOpacity(0.7),
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ],
@@ -218,6 +234,53 @@ class _PremiumBadge extends StatelessWidget {
             context.tr.alreadyPremium,
             style: AppTypography.displaySmall.copyWith(
               color: AppColors.stoicism,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Trial banner
+// ---------------------------------------------------------------------------
+
+class _TrialBanner extends StatelessWidget {
+  final int daysLeft;
+  const _TrialBanner({required this.daysLeft});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B6B3A).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF1B6B3A).withOpacity(0.4)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.timer_outlined,
+                  color: Color(0xFF4ADE80), size: 22),
+              const SizedBox(width: 10),
+              Text(
+                context.tr.trialActive,
+                style: AppTypography.displaySmall.copyWith(
+                  color: const Color(0xFF4ADE80),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            context.tr.trialDaysLeft(daysLeft),
+            style: AppTypography.bodySmall.copyWith(
+              color: const Color(0xFF4ADE80).withOpacity(0.8),
             ),
           ),
         ],

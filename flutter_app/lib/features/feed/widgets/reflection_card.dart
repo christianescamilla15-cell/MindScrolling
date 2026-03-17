@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// Periodic mindfulness interstitial card.
 ///
@@ -62,7 +63,7 @@ class ReflectionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 28),
                 Text(
-                  'Take a breath.',
+                  context.tr.takeABreath,
                   style: AppTypography.displayMedium.copyWith(
                     fontStyle: FontStyle.italic,
                     color: AppColors.textPrimary,
@@ -71,7 +72,7 @@ class ReflectionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "You're doing well.",
+                  context.tr.doingWell,
                   style: AppTypography.displayMedium.copyWith(
                     fontStyle: FontStyle.italic,
                     color: AppColors.reflection,
@@ -86,7 +87,7 @@ class ReflectionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Swipe to continue your journey.',
+                  context.tr.swipeContinue,
                   style: AppTypography.caption.copyWith(
                     color: AppColors.textMuted,
                     letterSpacing: 0.5,

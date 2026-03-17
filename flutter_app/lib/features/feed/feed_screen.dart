@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../app/theme/colors.dart';
@@ -10,6 +11,7 @@ import '../../data/models/feed_item_model.dart';
 import '../../app/localization/app_strings.dart';
 import '../ambient/ambient_audio_button.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/app_bottom_nav.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
 import '../settings/settings_controller.dart';
@@ -18,6 +20,7 @@ import 'feed_state.dart';
 import 'widgets/challenge_card.dart';
 import 'widgets/quote_card.dart';
 import 'widgets/reflection_card.dart';
+import 'widgets/swipe_direction_overlay.dart';
 import 'widgets/swipe_hint.dart';
 
 // ─── Provider override helper ─────────────────────────────────────────────────
@@ -33,16 +36,77 @@ class FeedScreen extends ConsumerStatefulWidget {
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   final CardSwiperController _swiperController = CardSwiperController();
-  bool _showHint = false; // set true on first-ever launch via SharedPreferences
+  bool _showHint = false;
+
+  // Swipe direction overlay state
+  String? _swipeDirection;
+  double _swipeIntensity = 0.0;
 
   @override
   void initState() {
     super.initState();
-    // Load feed on mount using the persisted language preference
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Load feed
       final lang = ref.read(settingsStateProvider).lang;
       ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
+
+      // Check if trial expired — show dialog
+      final ps = ref.read(premiumStateProvider);
+      if (ps.trialExpired && !ps.premiumState.isPremium) {
+        _showTrialExpiredDialog(context);
+      }
+
+      // Show swipe hint on first ever feed visit
+      final prefs = await SharedPreferences.getInstance();
+      final hintShown = prefs.getBool('mindscroll_hint_shown') ?? false;
+      if (!hintShown && mounted) {
+        setState(() => _showHint = true);
+        await prefs.setBool('mindscroll_hint_shown', true);
+      }
     });
+  }
+
+  void _showTrialExpiredDialog(BuildContext ctx) {
+    showDialog(
+      context: ctx,
+      barrierDismissible: false,
+      builder: (c) => AlertDialog(
+        backgroundColor: const Color(0xFF1C1C28),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          ctx.tr.trialExpiredTitle,
+          style: AppTypography.displaySmall.copyWith(color: AppColors.stoicism),
+          textAlign: TextAlign.center,
+        ),
+        content: Text(
+          ctx.tr.trialExpiredMsg,
+          style: AppTypography.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c),
+            child: Text(ctx.tr.continueReading,
+                style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(c);
+              context.push('/premium');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.stoicism,
+              foregroundColor: const Color(0xFF0D0D1A),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(ctx.tr.trialExpiredButton,
+                style: AppTypography.buttonLabel),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -66,6 +130,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       _ => 'left',
     };
     ref.read(feedControllerProvider.notifier).onSwipe(dirStr);
+    // Reset overlay after swipe completes
+    setState(() {
+      _swipeDirection = null;
+      _swipeIntensity = 0.0;
+    });
     return true;
   }
 
@@ -109,8 +178,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   streakPulse: state.streakPulse,
                 ),
                 Expanded(child: _buildBody(state)),
-                _BottomNav(currentIndex: 0),
+                AppBottomNav(currentIndex: 0),
               ],
+            ),
+            // Swipe direction indicator
+            SwipeDirectionOverlay(
+              direction: _swipeDirection,
+              intensity: _swipeIntensity,
             ),
             if (_showHint)
               SwipeHint(onDismiss: () => setState(() => _showHint = false)),
@@ -162,13 +236,41 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       initialIndex: state.currentIndex,
       onSwipe: _onSwipe,
       allowedSwipeDirection: const AllowedSwipeDirection.all(),
-      numberOfCardsDisplayed: 2,
-      backCardOffset: const Offset(0, 24),
-      scale: 0.94,
+      numberOfCardsDisplayed: 1,
+      backCardOffset: const Offset(0, 0),
+      scale: 1.0,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       cardBuilder: (context, index, horizontalOffsetPercentage, verticalOffsetPercentage) {
         // Guard against CardSwiper pre-rendering beyond the list end
         if (index >= state.items.length) return const SizedBox.shrink();
+
+        // Track swipe direction from the top card only
+        if (index == (state.currentIndex % state.items.length)) {
+          final hAbs = horizontalOffsetPercentage.abs();
+          final vAbs = verticalOffsetPercentage.abs();
+          final maxOffset = hAbs > vAbs ? hAbs : vAbs;
+          final intensity = (maxOffset / 40).clamp(0.0, 1.0);
+
+          String? dir;
+          if (maxOffset > 5) {
+            if (hAbs > vAbs) {
+              dir = horizontalOffsetPercentage > 0 ? 'right' : 'left';
+            } else {
+              dir = verticalOffsetPercentage > 0 ? 'down' : 'up';
+            }
+          }
+
+          // Schedule state update after build
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && (_swipeDirection != dir || (_swipeIntensity - intensity).abs() > 0.05)) {
+              setState(() {
+                _swipeDirection = dir;
+                _swipeIntensity = intensity;
+              });
+            }
+          });
+        }
+
         final item = state.items[index];
         return _buildCard(context, item, state, controller, isPremium);
       },
@@ -316,105 +418,7 @@ class _StatChip extends StatelessWidget {
 
 // ─── Bottom navigation ───────────────────────────────────────────────────────
 
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.currentIndex});
-
-  final int currentIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavItem(
-            icon: Icons.home_outlined,
-            activeIcon: Icons.home,
-            label: context.tr.feed,
-            isActive: currentIndex == 0,
-            onTap: () => context.go('/feed'),
-          ),
-          _NavItem(
-            icon: Icons.bookmark_border,
-            activeIcon: Icons.bookmark,
-            label: context.tr.vault,
-            isActive: currentIndex == 1,
-            onTap: () => context.push('/vault'),
-          ),
-          _NavItem(
-            icon: Icons.map_outlined,
-            activeIcon: Icons.map,
-            label: context.tr.map,
-            isActive: currentIndex == 2,
-            onTap: () => context.push('/philosophy-map'),
-          ),
-          _NavItem(
-            icon: Icons.auto_awesome_outlined,
-            activeIcon: Icons.auto_awesome,
-            label: context.tr.insight,
-            isActive: currentIndex == 3,
-            activeColor: AppColors.philosophy,
-            onTap: () => context.push('/insights'),
-          ),
-          _NavItem(
-            icon: Icons.settings_outlined,
-            activeIcon: Icons.settings,
-            label: context.tr.settings,
-            isActive: currentIndex == 4,
-            onTap: () => context.push('/settings'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-    this.activeColor,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-  final Color? activeColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isActive
-        ? (activeColor ?? AppColors.stoicism)
-        : AppColors.textMuted;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 64,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(isActive ? activeIcon : icon, size: 22, color: color),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: AppTypography.caption.copyWith(fontSize: 10, color: color),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Bottom nav extracted to shared/widgets/app_bottom_nav.dart
 
 // ─── Loading shimmer ─────────────────────────────────────────────────────────
 

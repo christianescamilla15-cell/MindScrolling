@@ -40,7 +40,7 @@ class MonetizationConstants {
 
   /// Fallback donation URL when [donationLinkEnvKey] is not provided.
   static const String defaultDonationUrl =
-      'https://buymeacoffee.com/mindscroll';
+      'https://buymeacoffee.com/mindscrolling';
 
   /// Returns the resolved donation URL.
   static String get donationUrl => const String.fromEnvironment(

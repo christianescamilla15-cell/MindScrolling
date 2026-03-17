@@ -1,7 +1,12 @@
 import "dotenv/config";
+import path from "path";
+import { fileURLToPath } from "url";
 import Fastify from "fastify";
+import fastifyStatic from "@fastify/static";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 import quotesRoutes     from "./routes/quotes.js";
 import vaultRoutes      from "./routes/vault.js";
@@ -14,6 +19,7 @@ import mapRoutes        from "./routes/map.js";
 import premiumRoutes    from "./routes/premium.js";
 import insightsRoutes    from "./routes/insights.js";
 import mindProfileRoutes from "./routes/mind-profile.js";
+import adminRoutes       from "./routes/admin.js";
 import deviceIdPlugin   from "./plugins/deviceId.js";
 
 const app = Fastify({ logger: true });
@@ -30,6 +36,13 @@ await app.register(rateLimit, {
 
 await app.register(deviceIdPlugin);
 
+// Serve static audio files from /public/audio/
+await app.register(fastifyStatic, {
+  root: path.join(__dirname, "..", "public"),
+  prefix: "/static/",
+  decorateReply: false,
+});
+
 /* ─── Routes ───────────────────────────────────────────────────────────────── */
 await app.register(quotesRoutes,     { prefix: "/quotes"     });
 await app.register(vaultRoutes,      { prefix: "/vault"      });
@@ -42,6 +55,7 @@ await app.register(mapRoutes,        { prefix: "/map"        });
 await app.register(premiumRoutes,    { prefix: "/premium"    });
 await app.register(insightsRoutes,    { prefix: "/insights"    });
 await app.register(mindProfileRoutes, { prefix: "/mind-profile" });
+await app.register(adminRoutes,       { prefix: "/admin" });
 
 /* ─── Health ───────────────────────────────────────────────────────────────── */
 app.get("/health", async () => ({ status: "ok", ts: new Date().toISOString() }));

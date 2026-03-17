@@ -86,20 +86,7 @@ class _OnboardingIntroState extends State<OnboardingIntro>
 
     return Column(
       children: [
-        // Title
-        Text(
-          tr.welcomeTitle,
-          style: AppTypography.displayMedium,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          tr.welcomeSubtitle,
-          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 48),
-        // 2×2 compass grid
+        // 2×2 compass grid (title moved to hero in _Page0)
         SizedBox(
           width: 260,
           child: Column(

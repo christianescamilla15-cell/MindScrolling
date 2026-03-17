@@ -90,9 +90,68 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 // Page 0: Swipe guide
 // ---------------------------------------------------------------------------
 
-class _Page0 extends StatelessWidget {
+class _Page0 extends StatefulWidget {
   const _Page0({required this.onNext});
   final VoidCallback onNext;
+
+  @override
+  State<_Page0> createState() => _Page0State();
+}
+
+class _Page0State extends State<_Page0> with TickerProviderStateMixin {
+  late final AnimationController _fadeCtrl;
+  late final Animation<double> _titleFade;
+  late final Animation<double> _subtitleFade;
+  late final Animation<double> _compassFade;
+  late final Animation<double> _buttonFade;
+  late final Animation<Offset> _titleSlide;
+  late final Animation<Offset> _subtitleSlide;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    );
+
+    // Staggered: title → subtitle → compass → button
+    _titleFade = CurvedAnimation(
+      parent: _fadeCtrl,
+      curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
+    );
+    _titleSlide = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(_titleFade);
+
+    _subtitleFade = CurvedAnimation(
+      parent: _fadeCtrl,
+      curve: const Interval(0.15, 0.45, curve: Curves.easeOut),
+    );
+    _subtitleSlide = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(_subtitleFade);
+
+    _compassFade = CurvedAnimation(
+      parent: _fadeCtrl,
+      curve: const Interval(0.35, 0.7, curve: Curves.easeOut),
+    );
+
+    _buttonFade = CurvedAnimation(
+      parent: _fadeCtrl,
+      curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+    );
+
+    _fadeCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,12 +159,81 @@ class _Page0 extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-          const SizedBox(height: 24),
-          const OnboardingIntro(),
+          const SizedBox(height: 48),
+
+          // ── Hero headline with staggered fade ──
+          SlideTransition(
+            position: _titleSlide,
+            child: FadeTransition(
+              opacity: _titleFade,
+              child: Text(
+                'Stop Doom-Scrolling.',
+                style: AppTypography.displayLarge.copyWith(
+                  fontSize: 32,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.textPrimary,
+                  height: 1.2,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SlideTransition(
+            position: _subtitleSlide,
+            child: FadeTransition(
+              opacity: _subtitleFade,
+              child: Text(
+                'Start Thinking.',
+                style: AppTypography.displayLarge.copyWith(
+                  fontSize: 32,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.stoicism,
+                  height: 1.2,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FadeTransition(
+            opacity: _subtitleFade,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(width: 24, height: 1, color: AppColors.textMuted),
+                const SizedBox(width: 12),
+                Text(
+                  'MindScrolling',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.textMuted,
+                    letterSpacing: 3,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(width: 24, height: 1, color: AppColors.textMuted),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 48),
+
+          // ── Compass grid with fade ──
+          FadeTransition(
+            opacity: _compassFade,
+            child: const OnboardingIntro(),
+          ),
+
           const SizedBox(height: 40),
-          _PrimaryButton(
-            label: context.tr.onboardingNext,
-            onPressed: onNext,
+
+          // ── CTA button with fade ──
+          FadeTransition(
+            opacity: _buttonFade,
+            child: _PrimaryButton(
+              label: context.tr.onboardingNext,
+              onPressed: widget.onNext,
+            ),
           ),
           const SizedBox(height: 24),
         ],
@@ -180,10 +308,48 @@ class _Page1 extends StatelessWidget {
 // Page 2: Ready
 // ---------------------------------------------------------------------------
 
-class _Page2 extends StatelessWidget {
+class _Page2 extends StatefulWidget {
   const _Page2({required this.isCompleting, required this.onStart});
   final bool isCompleting;
   final VoidCallback onStart;
+
+  @override
+  State<_Page2> createState() => _Page2State();
+}
+
+class _Page2State extends State<_Page2> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _iconFade;
+  late final Animation<double> _textFade;
+  late final Animation<double> _btnFade;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _iconFade = CurvedAnimation(
+      parent: _ctrl,
+      curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+    );
+    _textFade = CurvedAnimation(
+      parent: _ctrl,
+      curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
+    );
+    _btnFade = CurvedAnimation(
+      parent: _ctrl,
+      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+    );
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,33 +358,85 @@ class _Page2 extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            '✦',
-            style: TextStyle(
-              fontSize: 48,
-              color: AppColors.stoicism,
+          // Animated icon
+          FadeTransition(
+            opacity: _iconFade,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.stoicism.withOpacity(0.1),
+                border: Border.all(
+                  color: AppColors.stoicism.withOpacity(0.3),
+                  width: 1.5,
+                ),
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                size: 36,
+                color: AppColors.stoicism,
+              ),
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            context.tr.youreAllSet,
-            style: AppTypography.displayLarge.copyWith(
-              fontStyle: FontStyle.italic,
+          const SizedBox(height: 32),
+
+          // Text
+          FadeTransition(
+            opacity: _textFade,
+            child: Column(
+              children: [
+                Text(
+                  context.tr.youreAllSet,
+                  style: AppTypography.displayLarge.copyWith(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 28,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  context.tr.wisdomAwaits,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                // Trial info
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1B6B3A).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '7 ${context.tr.trialDaysLeft(7).split(' ').skip(1).join(' ')}',
+                    style: AppTypography.caption.copyWith(
+                      color: const Color(0xFF4ADE80),
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
-          Text(
-            context.tr.wisdomAwaits,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+
+          const SizedBox(height: 48),
+
+          // Button
+          FadeTransition(
+            opacity: _btnFade,
+            child: _PrimaryButton(
+              label: widget.isCompleting
+                  ? context.tr.starting
+                  : context.tr.startScrolling,
+              onPressed: widget.isCompleting ? null : widget.onStart,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 56),
-          _PrimaryButton(
-            label: isCompleting ? context.tr.starting : context.tr.startScrolling,
-            onPressed: isCompleting ? null : onStart,
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/utils/haptics_service.dart';
 import '../../core/providers/core_providers.dart';
 import '../../core/storage/cache_storage.dart';
 import '../../data/datasources/local/feed_local_ds.dart';
@@ -46,6 +47,14 @@ class FeedController extends StateNotifier<FeedState> {
       success: (items) {
         _queueManager.enqueue(items);
         final loaded = _drainQueue();
+        // Update cursor to last quote ID for pagination
+        if (loaded.isNotEmpty) {
+          final lastQuote = loaded.reversed.firstWhere(
+            (i) => i.isQuote && i.quote != null,
+            orElse: () => loaded.last,
+          );
+          _cursor = lastQuote.quote?.id;
+        }
         state = state.copyWith(
           items: loaded,
           currentIndex: 0,
@@ -76,8 +85,17 @@ class FeedController extends StateNotifier<FeedState> {
       cursor: _cursor,
       onPrefetchComplete: (newItems) {
         _queueManager.enqueue(newItems);
+        final drained = _drainQueue();
+        // Update cursor for next page
+        if (drained.isNotEmpty) {
+          final lastQuote = drained.reversed.firstWhere(
+            (i) => i.isQuote && i.quote != null,
+            orElse: () => drained.last,
+          );
+          _cursor = lastQuote.quote?.id;
+        }
         final extended = List<FeedItemModel>.from(state.items)
-          ..addAll(_drainQueue());
+          ..addAll(drained);
         state = state.copyWith(items: extended);
       },
     );
@@ -88,6 +106,7 @@ class FeedController extends StateNotifier<FeedState> {
   // -------------------------------------------------------------------------
 
   void onSwipe(String direction) {
+    HapticsService.lightImpact();
     final current = state.currentItem;
     if (current == null) return;
 
@@ -119,8 +138,36 @@ class FeedController extends StateNotifier<FeedState> {
 
     final newIndex = state.currentIndex + 1;
 
+    // ── Reorder upcoming items to match swipe direction ──────────────────
+    // The user swiped in [direction]. The NEXT card should be of the
+    // category that corresponds to that direction.
+    // We match by swipeDir field (up/down/left/right) directly.
+    var items = List<FeedItemModel>.from(state.items);
+
+    if (newIndex < items.length) {
+      // Check if the card at newIndex already matches
+      final nextItem = items[newIndex];
+      final alreadyMatches = nextItem.isQuote &&
+          nextItem.quote?.swipeDir == direction;
+
+      if (!alreadyMatches) {
+        // Find the closest matching quote in the remaining buffer
+        for (int i = newIndex + 1; i < items.length; i++) {
+          if (items[i].isQuote &&
+              items[i].quote?.swipeDir == direction) {
+            // Swap it to the next position
+            final temp = items[newIndex];
+            items[newIndex] = items[i];
+            items[i] = temp;
+            break;
+          }
+        }
+      }
+    }
+
     state = state.copyWith(
       currentIndex: newIndex,
+      items: items,
       swipeCounts: updated,
       reflections: newReflections,
       streak: newStreak,
@@ -156,6 +203,7 @@ class FeedController extends StateNotifier<FeedState> {
   // -------------------------------------------------------------------------
 
   void onLike(String quoteId) {
+    HapticsService.lightImpact();
     final wasLiked = state.likedIds.contains(quoteId);
     final updated = Set<String>.from(state.likedIds);
     if (wasLiked) {
@@ -177,6 +225,7 @@ class FeedController extends StateNotifier<FeedState> {
 
   void onVaultSave(QuoteModel quote, {bool isPremium = false}) {
     if (!isPremium && state.vault.length >= 20) {
+      HapticsService.warningFeedback();
       state = state.copyWith(
         toastMessage: 'vaultLimitReached',
         toastColor: null,
@@ -191,6 +240,7 @@ class FeedController extends StateNotifier<FeedState> {
       );
       return;
     }
+    HapticsService.mediumImpact();
     final updated = List<QuoteModel>.from(state.vault)..add(quote);
     state = state.copyWith(
       vault: updated,

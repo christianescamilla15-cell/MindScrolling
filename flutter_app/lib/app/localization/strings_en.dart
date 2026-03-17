@@ -12,6 +12,8 @@ class StringsEn implements AppStrings {
 
   @override
   String get loading => 'Loading…';
+  @override
+  String get loadingReflections => 'Loading reflections…';
 
   @override
   String get vault => 'Vault';
@@ -99,13 +101,13 @@ class StringsEn implements AppStrings {
   // Premium / monetisation
   // ------------------------------------------------------------------
   @override
-  String get premiumUnlock => 'Unlock Premium';
+  String get premiumUnlock => 'Unlock MindScrolling Inside';
 
   @override
-  String get premiumPrice => r'$2.99 once — forever yours';
+  String get premiumPrice => r'$4.99 once — forever yours';
 
   @override
-  String get premiumFeature => 'Premium feature';
+  String get premiumFeature => 'MindScrolling Inside feature';
 
   // ------------------------------------------------------------------
   // Donations
@@ -208,7 +210,7 @@ class StringsEn implements AppStrings {
   String get dailyChallenge => 'Daily Challenge';
 
   @override
-  String get premium => 'Premium';
+  String get premium => 'MindScrolling Inside';
 
   @override
   String get donations => 'Donations';
@@ -423,7 +425,7 @@ class StringsEn implements AppStrings {
       'Remove all limits and distractions.\nOne small price, forever.';
 
   @override
-  String get alreadyPremium => 'Already Premium';
+  String get alreadyPremium => 'MindScrolling Inside Active';
 
   @override
   String get featureColumn => 'Feature';
@@ -432,7 +434,7 @@ class StringsEn implements AppStrings {
   String get freeColumn => 'Free';
 
   @override
-  String get premiumColumn => 'Premium';
+  String get premiumColumn => 'Inside';
 
   @override
   String get dailyFeed => 'Daily feed';
@@ -581,4 +583,35 @@ class StringsEn implements AppStrings {
   @override String get play            => 'Play';
   @override String get pause           => 'Pause';
   @override String get volume          => 'Volume';
+
+  // Trial
+  @override String get trialActive        => 'Free Trial';
+  @override String trialDaysLeft(int d)   => '$d days left in your free trial';
+  @override String get trialExpiredTitle   => 'Your Free Trial Has Ended';
+  @override String get trialExpiredMsg     => 'Premium features are now disabled.\nUnlock full access with a one-time payment.';
+  @override String get trialExpiredButton  => 'Unlock MindScrolling Inside — \$4.99';
+  @override String get continueReading     => 'Continue free';
+
+  // Philosophy Map tabs
+  @override String get today      => 'Today';
+  @override String get evolution  => 'Evolution';
+  @override String get comparedTo => 'Compared to';
+
+  // Redeem code
+  @override String get redeemCode         => 'Redeem Code';
+  @override String get redeemCodeTitle    => 'Activate MindScrolling Inside';
+  @override String get redeemCodeSubtitle => 'If you received an activation code, enter it here to unlock lifetime premium access.';
+  @override String get activateCode       => 'Activate Code';
+  @override String get redeemSuccess      => 'Premium access activated for life. Enjoy the full experience.';
+  @override String get redeemFailed       => 'Could not activate code. Please try again.';
+  @override String get codeNotFound       => 'Code not found. Please check and try again.';
+  @override String get codeAlreadyUsed    => 'This code has already been used.';
+  @override String get codeExpired        => 'This code has expired.';
+  @override String get invalidCodeFormat  => 'Please enter a valid activation code.';
+  @override String get haveActivationCode => 'Have an activation code?';
+
+  // Reflection card
+  @override String get takeABreath    => 'Take a breath.';
+  @override String get doingWell      => "You're doing well.";
+  @override String get swipeContinue  => 'Swipe to continue your journey.';
 }

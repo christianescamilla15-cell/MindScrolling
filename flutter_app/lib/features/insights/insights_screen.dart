@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/app_bottom_nav.dart';
 import '../../shared/widgets/premium_gate.dart';
 import 'insights_controller.dart';
 
@@ -50,7 +51,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                 child: _buildBody(state),
               ),
             ),
-              _BottomNav(currentIndex: 3),
+              AppBottomNav(currentIndex: 3),
             ],
           ),
         ),
@@ -478,105 +479,4 @@ class _ErrorView extends StatelessWidget {
   }
 }
 
-// ─── Bottom navigation ────────────────────────────────────────────────────────
-
-class _BottomNav extends StatelessWidget {
-  final int currentIndex;
-
-  const _BottomNav({required this.currentIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavItem(
-            icon: Icons.home_outlined,
-            activeIcon: Icons.home,
-            label: context.tr.feed,
-            isActive: currentIndex == 0,
-            onTap: () => context.go('/feed'),
-          ),
-          _NavItem(
-            icon: Icons.bookmark_border,
-            activeIcon: Icons.bookmark,
-            label: context.tr.vault,
-            isActive: currentIndex == 1,
-            onTap: () => context.push('/vault'),
-          ),
-          _NavItem(
-            icon: Icons.map_outlined,
-            activeIcon: Icons.map,
-            label: context.tr.map,
-            isActive: currentIndex == 2,
-            onTap: () => context.push('/philosophy-map'),
-          ),
-          _NavItem(
-            icon: Icons.auto_awesome_outlined,
-            activeIcon: Icons.auto_awesome,
-            label: context.tr.insight,
-            isActive: currentIndex == 3,
-            activeColor: AppColors.philosophy,
-            onTap: () => context.go('/insights'),
-          ),
-          _NavItem(
-            icon: Icons.settings_outlined,
-            activeIcon: Icons.settings,
-            label: context.tr.settings,
-            isActive: currentIndex == 4,
-            onTap: () => context.push('/settings'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-  final Color? activeColor;
-
-  const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-    this.activeColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isActive
-        ? (activeColor ?? AppColors.stoicism)
-        : AppColors.textMuted;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 64,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(isActive ? activeIcon : icon, size: 22, color: color),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style:
-                  AppTypography.caption.copyWith(fontSize: 10, color: color),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Bottom nav extracted to shared/widgets/app_bottom_nav.dart
