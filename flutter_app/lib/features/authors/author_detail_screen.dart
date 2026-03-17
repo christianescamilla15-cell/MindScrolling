@@ -30,15 +30,26 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
     _load();
   }
 
+  String? _error;
+
   Future<void> _load() async {
-    try {
-      final api = ref.read(apiClientProvider);
-      final lang = ref.read(settingsStateProvider).lang;
-      final encoded = Uri.encodeComponent(widget.authorName);
-      final result = await api.get('/authors/$encoded', queryParams: {'lang': lang});
-      if (mounted) setState(() { _data = result; _loading = false; });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    // Retry once if first attempt fails (Render cold start)
+    for (int attempt = 0; attempt < 2; attempt++) {
+      try {
+        final api = ref.read(apiClientProvider);
+        final lang = ref.read(settingsStateProvider).lang;
+        final encoded = Uri.encodeComponent(widget.authorName);
+        final result = await api.get('/authors/$encoded', queryParams: {'lang': lang});
+        if (mounted) setState(() { _data = result; _loading = false; });
+        return;
+      } catch (e) {
+        debugPrint('[AuthorDetail] Attempt ${attempt + 1} failed for ${widget.authorName}: $e');
+        if (attempt == 1) {
+          if (mounted) setState(() { _error = e.toString(); _loading = false; });
+        }
+        // Wait 2s before retry
+        await Future.delayed(const Duration(seconds: 2));
+      }
     }
   }
 
@@ -67,10 +78,32 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
             )
           else if (_data == null)
             SliverFillRemaining(
-              child: Center(child: Text(
-                context.tr.authorLoadError,
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
-              )),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline, color: AppColors.textMuted, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        context.tr.authorLoadError,
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          setState(() { _loading = true; _error = null; });
+                          _load();
+                        },
+                        child: Text(context.tr.retry,
+                            style: const TextStyle(color: AppColors.stoicism)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             )
           else
             SliverPadding(

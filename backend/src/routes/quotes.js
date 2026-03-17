@@ -238,19 +238,33 @@ export default async function quotesRoutes(fastify) {
       }));
     }
 
-    // Fallback: if RPC not yet deployed, do a plain query
+    // Fallback: if RPC not yet deployed, fetch balanced by category
     if (rpcErr) {
-      let q = supabase
-        .from("quotes")
-        .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at")
-        .eq("lang", effectiveLang)
-        .limit(poolSize);
-      if (!isPremium) q = q.eq("is_premium", false);
-      const { data: fallback, error: fallbackErr } = await q;
-      if (fallbackErr) {
-        return reply.status(500).send({ error: "Failed to fetch quotes", code: "DB_ERROR" });
+      const perCategory = Math.ceil(poolSize / CATEGORIES.length);
+      const categoryQueries = CATEGORIES.map(cat => {
+        let q = supabase
+          .from("quotes")
+          .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at")
+          .eq("lang", effectiveLang)
+          .eq("category", cat)
+          .limit(perCategory);
+        if (!isPremium) q = q.eq("is_premium", false);
+        return q;
+      });
+
+      const results = await Promise.all(categoryQueries);
+      const allQuotes = [];
+      for (const { data, error: qErr } of results) {
+        if (!qErr && data) allQuotes.push(...data);
       }
-      candidates = fallback || [];
+
+      // Shuffle for randomness
+      for (let i = allQuotes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allQuotes[i], allQuotes[j]] = [allQuotes[j], allQuotes[i]];
+      }
+
+      candidates = allQuotes.slice(0, poolSize);
     }
 
     // ── Handle exhaustion: all quotes seen — reset seen list and restart ───────

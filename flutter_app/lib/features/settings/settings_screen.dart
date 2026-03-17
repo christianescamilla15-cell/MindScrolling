@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/theme/colors.dart';
@@ -410,12 +411,18 @@ class _NotificationTileState extends State<_NotificationTile> {
   }
 
   Future<void> _toggle(bool value) async {
-    // Update UI immediately for responsiveness
-    setState(() => _enabled = value);
+    // Persist and update UI immediately
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('mindscroll_notif_enabled', value);
+    if (mounted) setState(() => _enabled = value);
 
     if (value) {
       try {
         await NotificationService.requestPermission();
+      } catch (_) {
+        // Permission dialog may fail on some devices — continue anyway
+      }
+      try {
         await NotificationService.scheduleDailyReminder(
           hour: _time.hour,
           minute: _time.minute,
@@ -427,11 +434,12 @@ class _NotificationTileState extends State<_NotificationTile> {
           body: context.tr.weeklyMapBody,
         );
       } catch (_) {
-        // If scheduling fails, revert
-        if (mounted) setState(() => _enabled = false);
+        // Scheduling may fail but the preference is saved
       }
     } else {
-      await NotificationService.cancelAll();
+      try {
+        await NotificationService.cancelAll();
+      } catch (_) {}
     }
   }
 
