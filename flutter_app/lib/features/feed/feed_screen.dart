@@ -278,16 +278,20 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (prev != null && next.streak != prev.streak && mounted) {
         StreakMilestoneDialog.checkAndShow(context, next.streak);
       }
-      // Challenge auto-complete when reflections reach the challenge target
-      final challengeTarget = ref.read(challengeStateProvider).target;
+      // Sync challenge progress on every swipe (incremental updates)
       if (prev != null &&
-          next.reflections >= challengeTarget &&
-          prev.reflections < challengeTarget &&
+          next.reflections > prev.reflections &&
           mounted) {
-        ref
-            .read(challengesControllerProvider.notifier)
-            .updateFromSwipes(next.reflections);
-        HapticsService.heavyImpact();
+        final cs = ref.read(challengeStateProvider);
+        if (!cs.completed) {
+          ref
+              .read(challengesControllerProvider.notifier)
+              .updateFromSwipes(next.reflections);
+          // Haptic on completion
+          if (next.reflections >= cs.target && prev.reflections < cs.target) {
+            HapticsService.heavyImpact();
+          }
+        }
       }
       // Soft paywall injection at swipe 100 for Trial users (US-B07).
       if (prev != null &&

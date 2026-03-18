@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../settings/settings_controller.dart';
 import 'challenges_controller.dart';
 
 /// Screen showing today's daily philosophy challenge with a progress ring,
@@ -27,6 +28,13 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = ref.watch(challengeStateProvider);
+
+    // Reload challenge when language changes (translations come from backend)
+    ref.listen(settingsStateProvider, (prev, next) {
+      if (prev?.lang != next.lang) {
+        ref.read(challengesControllerProvider.notifier).load();
+      }
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
