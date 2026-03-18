@@ -1,7 +1,8 @@
 import fp from "fastify-plugin";
 import { UUID_RE } from "../utils/validation.js";
 
-const EXEMPT_PREFIXES = ["/health", "/static/", "/admin/", "/webhooks/"];
+const EXEMPT_EXACT    = ["/health"];
+const EXEMPT_PREFIXES = ["/static/", "/admin/", "/webhooks/"];
 
 /**
  * Reads X-Device-ID header and attaches it to the request.
@@ -10,7 +11,8 @@ const EXEMPT_PREFIXES = ["/health", "/static/", "/admin/", "/webhooks/"];
 async function deviceIdPlugin(fastify) {
   fastify.addHook("preHandler", async (request, reply) => {
     // Public routes don't need device ID
-    if (EXEMPT_PREFIXES.some(p => request.url === p || request.url.startsWith(p))) return;
+    if (EXEMPT_EXACT.includes(request.url) ||
+        EXEMPT_PREFIXES.some(p => request.url.startsWith(p))) return;
 
     const deviceId = request.headers["x-device-id"]?.trim();
     if (!deviceId) {

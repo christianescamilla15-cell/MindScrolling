@@ -69,7 +69,7 @@ class ChallengeRepository {
     try {
       final response = await _remote.updateProgress(challengeId, count: count);
       // Use server-confirmed values instead of caller-predicted values
-      final serverProgress = (response['progress'] as num?)?.toInt() ?? progress;
+      final serverProgress = (response['progress'] as num?)?.toInt() ?? 0;
       final serverCompleted = response['completed'] as bool? ?? completed;
       final model = ChallengeProgressModel(
         progress: serverProgress,

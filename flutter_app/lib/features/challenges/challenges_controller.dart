@@ -138,7 +138,7 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
     if (current.challenge != null && current.challenge!.id != 'default') {
       await _repo.updateProgress(
         current.challenge!.id,
-        newProgress,
+        1, // delta: always 1 for single increment
         nowCompleted,
       );
     }
@@ -181,9 +181,13 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
   /// Marks the challenge as manually completed.
   Future<void> complete() async {
     final current = state.valueOrNull;
-    if (current == null || current.completed || current.challenge == null) {
+    if (current == null || current.completed || current.challenge == null ||
+        current.challenge!.id == 'default') {
       return;
     }
+
+    final remaining = current.target - current.progress;
+    if (remaining <= 0) return;
 
     EventLogger.logChallengeComplete(current.challenge!.code);
 
@@ -196,7 +200,7 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
 
     await _repo.updateProgress(
       current.challenge!.id,
-      current.target,
+      remaining, // delta: only the remaining swipes
       true,
     );
   }

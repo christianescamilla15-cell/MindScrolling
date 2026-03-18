@@ -70,13 +70,6 @@ const PAYWALL_COPY = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Build a normalized lang string from a raw query param or Accept-Language header.
- * Returns 'en' or 'es'. Defaults to 'en'.
- */
-
-
-
-/**
  * Fire-and-forget audit log insert.
  */
 function logAuditEvent(deviceId, eventType, metadata) {

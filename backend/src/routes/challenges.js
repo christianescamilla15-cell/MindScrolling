@@ -140,20 +140,25 @@ export default async function challengesRoutes(fastify) {
     }
 
     // Fetch current server-side progress
-    const { data: existing } = await supabase
+    const { data: existing, error: progressErr } = await supabase
       .from("challenge_progress")
       .select("progress, completed")
       .eq("device_id", deviceId)
       .eq("challenge_id", challengeId)
       .maybeSingle();
 
+    if (progressErr) {
+      return reply.status(500).send({ error: "Failed to fetch progress", code: "INTERNAL_ERROR" });
+    }
+
     // If already completed, return immediately
     if (existing?.completed) {
       return reply.status(200).send({ updated: false, completed: true, progress: existing.progress, target: TARGET_QUOTES });
     }
 
-    // Increment server-side progress by count (default 1)
-    const newProgress = (existing?.progress ?? 0) + count;
+    // Increment server-side progress by count (default 1), capped at target
+    const rawProgress = (existing?.progress ?? 0) + count;
+    const newProgress = Math.min(rawProgress, TARGET_QUOTES);
     const completed   = newProgress >= TARGET_QUOTES;
 
     const { error: upsertErr } = await supabase

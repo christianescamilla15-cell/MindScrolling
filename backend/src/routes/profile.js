@@ -77,8 +77,8 @@ export default async function profileRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to fetch profile", code: "INTERNAL_ERROR" });
     }
 
-    // Contract: return 200 with the profile object, or 200 with null if not yet created.
-    // Fastify serializes null as JSON "null" with Content-Type: application/json.
-    return reply.header("Content-Type", "application/json").send(data !== null ? JSON.stringify(data) : "null");
+    // Contract: 200 with the profile object, or 200 with null if not yet created.
+    // Fastify natively serializes objects as JSON and null as the JSON literal "null".
+    return reply.send(data ?? null);
   });
 }
