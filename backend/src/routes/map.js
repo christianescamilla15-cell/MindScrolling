@@ -53,7 +53,7 @@ export default async function mapRoutes(fastify) {
 
     if (prefsErr) {
       request.log.error({ err: prefsErr }, "map: failed to fetch user_preferences");
-      return reply.status(500).send({ error: "Failed to fetch preferences", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch preferences", code: "INTERNAL_ERROR" });
     }
 
     const current = computeScores(prefs);
@@ -101,7 +101,7 @@ export default async function mapRoutes(fastify) {
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
 
     if (userErr) {
-      return reply.status(500).send({ error: "Failed to initialise user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
     }
 
     // Read current preferences to snapshot
@@ -111,7 +111,7 @@ export default async function mapRoutes(fastify) {
       .eq("device_id", deviceId);
 
     if (prefsErr) {
-      return reply.status(500).send({ error: "Failed to fetch preferences", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch preferences", code: "INTERNAL_ERROR" });
     }
 
     const scores = computeScores(prefs);
@@ -127,7 +127,7 @@ export default async function mapRoutes(fastify) {
       });
 
     if (insertErr) {
-      return reply.status(500).send({ error: "Failed to save snapshot", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to save snapshot", code: "INTERNAL_ERROR" });
     }
 
     return reply.status(200).send({ ok: true });

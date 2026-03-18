@@ -278,7 +278,7 @@ export default async function quotesRoutes(fastify) {
 
       const { data: fresh, error: freshErr } = await retryParams;
       if (freshErr) {
-        return reply.status(500).send({ error: "Failed to fetch quotes", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to fetch quotes", code: "INTERNAL_ERROR" });
       }
       candidates = fresh || [];
     }

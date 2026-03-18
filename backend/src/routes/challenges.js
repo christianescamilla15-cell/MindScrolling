@@ -26,7 +26,7 @@ export default async function challengesRoutes(fastify) {
       .maybeSingle();
 
     if (challengeErr) {
-      return reply.status(500).send({ error: "Failed to fetch challenge", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch challenge", code: "INTERNAL_ERROR" });
     }
 
     const activeChallenge = challenge ?? { ...DEFAULT_CHALLENGE, active_date: todayStr };
@@ -43,7 +43,7 @@ export default async function challengesRoutes(fastify) {
         .maybeSingle();
 
       if (progErr) {
-        return reply.status(500).send({ error: "Failed to fetch progress", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to fetch progress", code: "INTERNAL_ERROR" });
       }
 
       if (prog) {
@@ -85,7 +85,7 @@ export default async function challengesRoutes(fastify) {
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
 
     if (userErr) {
-      return reply.status(500).send({ error: "Failed to initialise user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
     }
 
     // Verify the challenge exists
@@ -96,7 +96,7 @@ export default async function challengesRoutes(fastify) {
       .maybeSingle();
 
     if (challengeErr) {
-      return reply.status(500).send({ error: "Failed to verify challenge", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to verify challenge", code: "INTERNAL_ERROR" });
     }
     if (!challenge) {
       return reply.status(404).send({ error: "Challenge not found", code: "NOT_FOUND" });
@@ -133,7 +133,7 @@ export default async function challengesRoutes(fastify) {
       );
 
     if (upsertErr) {
-      return reply.status(500).send({ error: "Failed to update progress", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to update progress", code: "INTERNAL_ERROR" });
     }
 
     return reply.status(200).send({ updated: true, progress: newProgress, completed });

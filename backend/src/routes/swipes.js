@@ -75,7 +75,7 @@ export default async function swipesRoutes(fastify) {
       try {
         entitlement = await getPackEntitlement(deviceId, source_pack_id);
       } catch {
-        return reply.status(500).send({ error: "Failed to check entitlement", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to check entitlement", code: "INTERNAL_ERROR" });
       }
       if (entitlement.access !== "full") {
         return reply.status(403).send({
@@ -108,7 +108,7 @@ export default async function swipesRoutes(fastify) {
     ]);
 
     if (userFetchErr) {
-      return reply.status(500).send({ error: "Failed to fetch user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch user", code: "INTERNAL_ERROR" });
     }
 
     // ── Streak logic ───────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ export default async function swipesRoutes(fastify) {
 
     if (userUpsertErr) {
       request.log.error({ err: userUpsertErr }, "swipes: failed to upsert user");
-      return reply.status(500).send({ error: "Failed to update user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to update user", code: "INTERNAL_ERROR" });
     }
 
     // ── Insert swipe event — always recorded regardless of source ─────────────
@@ -155,7 +155,7 @@ export default async function swipesRoutes(fastify) {
 
     if (swipeErr) {
       request.log.error({ err: swipeErr }, "swipes: failed to insert swipe_event");
-      return reply.status(500).send({ error: "Failed to record swipe", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to record swipe", code: "INTERNAL_ERROR" });
     }
 
     // ── Update behavioural preference signals ─────────────────────────────────
@@ -177,7 +177,7 @@ export default async function swipesRoutes(fastify) {
 
       if (prefErr) {
         request.log.error({ err: prefErr }, "swipes: failed to upsert user_preferences");
-        return reply.status(500).send({ error: "Failed to update preferences", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to update preferences", code: "INTERNAL_ERROR" });
       }
 
       // Fire-and-forget: update semantic vector on deep engagement

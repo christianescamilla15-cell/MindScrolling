@@ -10,7 +10,7 @@ export default async function vaultRoutes(fastify) {
       .eq("device_id", request.deviceId)
       .order("saved_at", { ascending: false });
 
-    if (error) return reply.status(500).send({ error: "Failed to load vault", code: "DB_ERROR" });
+    if (error) return reply.status(500).send({ error: "Failed to load vault", code: "INTERNAL_ERROR" });
 
     return reply.send({ data: (data || []).map(r => ({ ...r.quotes, saved_at: r.saved_at })) });
   });
@@ -69,8 +69,11 @@ export default async function vaultRoutes(fastify) {
       ops.push(supabase.rpc("increment_vault", { p_device_id: deviceId, p_category: quote.category }));
     }
 
-    const [{ error }] = await Promise.all(ops);
-    if (error) return reply.status(500).send({ error: "Failed to save quote", code: "DB_ERROR" });
+    const [{ error: insertErr }, rpcResult] = await Promise.all(ops);
+    if (insertErr) return reply.status(500).send({ error: "Failed to save quote", code: "INTERNAL_ERROR" });
+    if (rpcResult?.error) {
+      fastify.log.error({ err: rpcResult.error }, "vault/save: increment_vault RPC failed — preference count diverged");
+    }
 
     // Fire-and-forget: update semantic preference vector (strongest signal α=0.25)
     updatePreferenceVector(deviceId, quote_id, "vault").catch(() => {});
@@ -96,7 +99,7 @@ export default async function vaultRoutes(fastify) {
       .eq("device_id", deviceId)
       .eq("quote_id", quote_id);
 
-    if (error) return reply.status(500).send({ error: "Failed to remove quote", code: "DB_ERROR" });
+    if (error) return reply.status(500).send({ error: "Failed to remove quote", code: "INTERNAL_ERROR" });
     if (count === 0) return reply.status(404).send({ error: "Quote not in vault", code: "NOT_FOUND" });
 
     // Fire-and-forget decrement

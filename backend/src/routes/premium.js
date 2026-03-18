@@ -48,7 +48,7 @@ export default async function premiumRoutes(fastify) {
 
     if (userErr) {
       request.log.error({ err: userErr }, "premium/status: DB error");
-      return reply.status(500).send({ error: "Failed to load status", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to load status", code: "INTERNAL_ERROR" });
     }
 
     const isDev = process.env.NODE_ENV !== "production";
@@ -127,9 +127,14 @@ export default async function premiumRoutes(fastify) {
     const deviceId = request.deviceId;
 
     // Ensure user row exists
-    await supabase
+    const { error: upsertErr } = await supabase
       .from("users")
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
+
+    if (upsertErr) {
+      fastify.log.error({ err: upsertErr }, "premium/start-trial: user upsert failed");
+      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
+    }
 
     const now = new Date().toISOString();
     const { data: updated, error } = await supabase
@@ -144,7 +149,7 @@ export default async function premiumRoutes(fastify) {
       .select("trial_start_date");
 
     if (error) {
-      return reply.status(500).send({ error: "Failed to start trial", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to start trial", code: "INTERNAL_ERROR" });
     }
 
     if (!updated || updated.length === 0) {
@@ -211,7 +216,7 @@ export default async function premiumRoutes(fastify) {
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
 
     if (userUpsertErr) {
-      return reply.status(500).send({ error: "Failed to initialise user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
     }
 
     const { error: purchaseErr } = await supabase
@@ -230,7 +235,7 @@ export default async function premiumRoutes(fastify) {
 
     if (purchaseErr) {
       request.log.error({ err: purchaseErr }, "premium/purchase/verify: failed to insert purchase");
-      return reply.status(500).send({ error: "Failed to record purchase", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to record purchase", code: "INTERNAL_ERROR" });
     }
 
     const { error: updateErr } = await supabase
@@ -244,7 +249,7 @@ export default async function premiumRoutes(fastify) {
       .eq("device_id", deviceId);
 
     if (updateErr) {
-      return reply.status(500).send({ error: "Failed to upgrade user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to upgrade user", code: "INTERNAL_ERROR" });
     }
 
     // Audit log — premium_purchased
@@ -330,7 +335,7 @@ export default async function premiumRoutes(fastify) {
 
     if (insideLookupErr || packLookupErr) {
       request.log.error({ insideLookupErr, packLookupErr }, "premium/restore: lookup error");
-      return reply.status(500).send({ error: "Failed to look up purchase", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to look up purchase", code: "INTERNAL_ERROR" });
     }
 
     const hasInside = Boolean(existingInsidePurchase);
@@ -354,7 +359,7 @@ export default async function premiumRoutes(fastify) {
 
     if (userUpsertErr) {
       request.log.error({ err: userUpsertErr }, "premium/restore: user upsert failed");
-      return reply.status(500).send({ error: "Failed to restore purchase", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to restore purchase", code: "INTERNAL_ERROR" });
     }
 
     // ── Restore Inside ────────────────────────────────────────────────────────
@@ -386,7 +391,7 @@ export default async function premiumRoutes(fastify) {
           { purchaseInsertErr, upgradeErr },
           "premium/restore: failed to restore Inside"
         );
-        return reply.status(500).send({ error: "Failed to restore purchase", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to restore purchase", code: "INTERNAL_ERROR" });
       }
     }
 
@@ -496,7 +501,7 @@ export default async function premiumRoutes(fastify) {
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
 
     if (userUpsertErr) {
-      return reply.status(500).send({ error: "Failed to initialise user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
     }
 
     const { error: purchaseErr } = await supabase
@@ -509,7 +514,7 @@ export default async function premiumRoutes(fastify) {
       });
 
     if (purchaseErr) {
-      return reply.status(500).send({ error: "Failed to record purchase", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to record purchase", code: "INTERNAL_ERROR" });
     }
 
     const { error: upgradeErr } = await supabase
@@ -523,7 +528,7 @@ export default async function premiumRoutes(fastify) {
       .eq("device_id", deviceId);
 
     if (upgradeErr) {
-      return reply.status(500).send({ error: "Failed to activate premium", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to activate premium", code: "INTERNAL_ERROR" });
     }
 
     return reply.status(200).send({ ok: true, is_premium: true, unlocked: true });
@@ -555,7 +560,7 @@ export default async function premiumRoutes(fastify) {
 
     if (lookupErr) {
       request.log.error({ err: lookupErr }, "premium/redeem: lookup failed");
-      return reply.status(500).send({ error: "Failed to validate code", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to validate code", code: "INTERNAL_ERROR" });
     }
 
     if (!codeRow) {
@@ -580,12 +585,17 @@ export default async function premiumRoutes(fastify) {
 
     if (redeemErr) {
       request.log.error({ err: redeemErr }, "premium/redeem: failed to mark code");
-      return reply.status(500).send({ error: "Failed to redeem code", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to redeem code", code: "INTERNAL_ERROR" });
     }
 
-    await supabase
+    const { error: userUpsertErr } = await supabase
       .from("users")
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
+
+    if (userUpsertErr) {
+      fastify.log.error({ err: userUpsertErr }, "premium/redeem: user upsert failed — code marked redeemed but premium NOT granted");
+      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
+    }
 
     const { error: upgradeErr } = await supabase
       .from("users")
@@ -600,7 +610,7 @@ export default async function premiumRoutes(fastify) {
 
     if (upgradeErr) {
       request.log.error({ err: upgradeErr }, "premium/redeem: failed to upgrade user");
-      return reply.status(500).send({ error: "Failed to activate premium", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to activate premium", code: "INTERNAL_ERROR" });
     }
 
     supabase.from("premium_audit_log").insert({

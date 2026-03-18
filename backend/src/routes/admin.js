@@ -76,27 +76,25 @@ export default async function adminRoutes(fastify) {
     const codeCount = Math.min(Math.max(1, Number(count) || 1), 50); // max 50 at once
     const codes = [];
 
-    for (let i = 0; i < codeCount; i++) {
-      const code = generateCode();
-      const { data, error } = await supabase
-        .from("premium_activation_codes")
-        .insert({
-          code,
-          type: "lifetime",
-          created_by: "admin",
-          assigned_email,
-          notes,
-          expires_at,
-        })
-        .select("id, code, created_at")
-        .single();
+    const inserts = Array.from({ length: codeCount }, () => ({
+      code: generateCode(),
+      type: "lifetime",
+      created_by: "admin",
+      assigned_email,
+      notes,
+      expires_at,
+    }));
 
-      if (error) {
-        request.log.error({ err: error }, "admin/codes/create: insert failed");
-        continue;
-      }
-      codes.push(data);
+    const { data: insertedCodes, error: bulkErr } = await supabase
+      .from("premium_activation_codes")
+      .insert(inserts)
+      .select("id, code, created_at");
+
+    if (bulkErr) {
+      request.log.error({ err: bulkErr }, "admin/codes/create: bulk insert failed");
+      return reply.status(500).send({ error: "Failed to create codes", code: "INTERNAL_ERROR" });
     }
+    codes.push(...(insertedCodes ?? []));
 
     // Audit
     await supabase.from("premium_audit_log").insert({
@@ -154,10 +152,15 @@ export default async function adminRoutes(fastify) {
       });
     }
 
-    await supabase
+    const { error: revokeErr } = await supabase
       .from("premium_activation_codes")
       .update({ revoked: true })
       .eq("id", codeRow.id);
+
+    if (revokeErr) {
+      fastify.log.error({ err: revokeErr }, "admin/codes/revoke: DB update failed");
+      return reply.status(500).send({ error: "Failed to revoke code", code: "INTERNAL_ERROR" });
+    }
 
     // Audit
     await supabase.from("premium_audit_log").insert({
@@ -197,7 +200,7 @@ export default async function adminRoutes(fastify) {
     const { data, error } = await query;
 
     if (error) {
-      return reply.status(500).send({ error: "Failed to list codes", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to list codes", code: "INTERNAL_ERROR" });
     }
 
     return reply.send({
@@ -223,7 +226,7 @@ export default async function adminRoutes(fastify) {
       .limit(limit);
 
     if (error) {
-      return reply.status(500).send({ error: "Failed to list audit log", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to list audit log", code: "INTERNAL_ERROR" });
     }
 
     return reply.send({ count: data.length, events: data });

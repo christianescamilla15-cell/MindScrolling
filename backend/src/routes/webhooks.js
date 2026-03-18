@@ -124,7 +124,7 @@ export default async function webhooksRoutes(fastify) {
 
       if (updateErr) {
         request.log.error({ err: updateErr, deviceId, type }, "revenuecat: failed to grant premium");
-        return reply.status(500).send({ error: "Failed to grant premium", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to grant premium", code: "INTERNAL_ERROR" });
       }
 
       // Audit

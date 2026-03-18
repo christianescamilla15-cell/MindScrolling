@@ -35,7 +35,7 @@ export default async function profileRoutes(fastify) {
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
 
     if (userErr) {
-      return reply.status(500).send({ error: "Failed to initialise user", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
     }
 
     // Upsert profile
@@ -54,7 +54,7 @@ export default async function profileRoutes(fastify) {
       );
 
     if (profileErr) {
-      return reply.status(500).send({ error: "Failed to save profile", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to save profile", code: "INTERNAL_ERROR" });
     }
 
     return reply.status(200).send({ ok: true });
@@ -74,7 +74,7 @@ export default async function profileRoutes(fastify) {
       .maybeSingle();
 
     if (error) {
-      return reply.status(500).send({ error: "Failed to fetch profile", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch profile", code: "INTERNAL_ERROR" });
     }
 
     return reply.send({ data: data ?? null });
