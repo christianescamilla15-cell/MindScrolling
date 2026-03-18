@@ -17,7 +17,7 @@
     "@fastify/static": "^7.0.4",
     "@sentry/node": "^10.44.0",
     "@supabase/supabase-js": "^2.45.4",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.3.1",
     "fastify": "^4.28.1",
     "fastify-plugin": "^4.5.1"
   }
