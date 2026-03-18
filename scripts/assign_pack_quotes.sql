@@ -26,7 +26,7 @@ ORDER BY pack_name, lang;
 -- SECTION 1: stoicism_deep — EN
 -- Target authors: Marcus Aurelius, Seneca, Epictetus, Zeno of Citium,
 --   Cleanthes, Chrysippus, Heraclitus, Epictetus, Epicurus (crossover)
--- Target categories: stoicism, discipline, resilience
+-- Target categories: stoicism, resilience (NOT discipline — discipline stays in free feed)
 -- Strategy: assign quotes from pack_name IN ('free','stoicism_pack')
 --   with stoic authors first, then category fallback, capped at 500.
 -- ──────────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ WHERE id IN (
         'Epicurus'
       )
       OR (
-        category IN ('stoicism', 'discipline', 'resilience')
+        category IN ('stoicism', 'resilience')
         AND author NOT IN (
           -- exclude authors firmly assigned to other packs
           'Jean-Paul Sartre', 'Albert Camus', 'Friedrich Nietzsche',
@@ -100,7 +100,7 @@ WHERE id IN (
         'Epicurus'
       )
       OR (
-        category IN ('stoicism', 'discipline', 'resilience')
+        category IN ('stoicism', 'resilience')
         AND author NOT IN (
           'Jean-Paul Sartre', 'Albert Camus', 'Friedrich Nietzsche',
           'Søren Kierkegaard', 'Soren Kierkegaard', 'Simone de Beauvoir',
