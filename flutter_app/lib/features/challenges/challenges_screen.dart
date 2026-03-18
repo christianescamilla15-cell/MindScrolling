@@ -31,7 +31,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
 
     // Reload challenge when language changes (translations come from backend)
     ref.listen(settingsStateProvider, (prev, next) {
-      if (prev?.lang != next.lang) {
+      if (prev != null && prev.lang != next.lang) {
         ref.read(challengesControllerProvider.notifier).load();
       }
     });

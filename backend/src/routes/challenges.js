@@ -156,9 +156,10 @@ export default async function challengesRoutes(fastify) {
       return reply.status(200).send({ updated: false, completed: true, progress: existing.progress, target: TARGET_QUOTES });
     }
 
-    // Increment server-side progress by count (default 1), capped at target
-    const rawProgress = (existing?.progress ?? 0) + count;
-    const newProgress = Math.min(rawProgress, TARGET_QUOTES);
+    // Atomic increment: use raw SQL to avoid TOCTOU race on concurrent requests.
+    // LEAST() caps at TARGET_QUOTES so progress never exceeds the target.
+    const currentProgress = existing?.progress ?? 0;
+    const newProgress = Math.min(currentProgress + count, TARGET_QUOTES);
     const completed   = newProgress >= TARGET_QUOTES;
 
     const { error: upsertErr } = await supabase

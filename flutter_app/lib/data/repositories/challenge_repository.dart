@@ -11,7 +11,11 @@ class ChallengeRepository {
   final ChallengeRemoteDataSource _remote;
 
   static const _challengeCacheKey = 'mindscroll_challenge_cache';
-  static const _progressCacheKey = 'mindscroll_challenge_progress';
+  /// Progress cache is date-scoped so yesterday's progress doesn't leak into today.
+  static String get _progressCacheKey {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    return 'mindscroll_challenge_progress_$today';
+  }
 
   const ChallengeRepository({
     required ChallengeRemoteDataSource remote,
