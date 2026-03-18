@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../shared/widgets/premium_gate.dart';
 import '../../shared/widgets/radar_chart.dart';
+import '../../shared/widgets/swipe_back_wrapper.dart';
 import '../../app/theme/typography.dart';
 import '../../shared/extensions/context_extensions.dart';
 import 'philosophy_map_controller.dart';
@@ -55,17 +55,13 @@ class _PhilosophyMapScreenState extends ConsumerState<PhilosophyMapScreen>
   Widget build(BuildContext context) {
     final mapState = ref.watch(philosophyMapStateProvider);
 
-    return Scaffold(
+    return SwipeBackWrapper(
+      child: Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              size: 18, color: AppColors.textSecondary),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/feed'),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(context.tr.mapTitle, style: AppTypography.displaySmall),
         centerTitle: false,
         bottom: TabBar(
@@ -112,6 +108,7 @@ class _PhilosophyMapScreenState extends ConsumerState<PhilosophyMapScreen>
                     ),
         ),
       ),
+    ),
     );
   }
 }

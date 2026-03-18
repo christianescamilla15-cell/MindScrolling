@@ -7,6 +7,7 @@ import '../../app/theme/typography.dart';
 import '../../core/providers/core_providers.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/author_avatar.dart';
+import '../../shared/widgets/swipe_back_wrapper.dart';
 import '../settings/settings_controller.dart';
 
 /// Author detail screen — shows bio, top quotes, and category distribution.
@@ -55,7 +56,8 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SwipeBackWrapper(
+      child: Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
@@ -63,11 +65,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
           SliverAppBar(
             backgroundColor: AppColors.background,
             pinned: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new,
-                  size: 18, color: AppColors.textSecondary),
-              onPressed: () => context.canPop() ? context.pop() : context.go('/feed'),
-            ),
+            automaticallyImplyLeading: false,
             title: Text(widget.authorName, style: AppTypography.displaySmall),
           ),
 
@@ -133,7 +131,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
                   const SizedBox(height: 4),
                   Center(
                     child: Text(
-                      '${_data!['total_quotes']} quotes',
+                      context.tr.nQuotes(_data!['total_quotes'] as int? ?? 0),
                       style: AppTypography.caption.copyWith(color: AppColors.textMuted),
                     ),
                   ),
@@ -198,7 +196,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                cat,
+                                context.tr.categoryLabels[cat] ?? cat,
                                 style: AppTypography.caption.copyWith(
                                   color: color,
                                   fontSize: 10,
@@ -215,6 +213,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
             ),
         ],
       ),
+    ),
     );
   }
 }

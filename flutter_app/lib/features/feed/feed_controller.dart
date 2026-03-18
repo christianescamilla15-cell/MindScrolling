@@ -339,6 +339,25 @@ class FeedController extends StateNotifier<FeedState> {
   }
 
   // -------------------------------------------------------------------------
+  // advanceReflectionCard — used when swiping or auto-dismissing a reflection
+  // card (or evolution card). Advances currentIndex without incrementing the
+  // daily swipe counter (reflections). Haptics are still triggered so the
+  // interaction feels responsive.
+  // -------------------------------------------------------------------------
+
+  void advanceReflectionCard() {
+    HapticsService.lightImpact();
+    final newIndex = state.currentIndex + 1;
+    state = state.copyWith(currentIndex: newIndex);
+    _swipeStartTime = DateTime.now();
+
+    // Trigger prefetch when approaching end of buffer.
+    if (newIndex >= state.items.length - AppConstants.feedPageSize ~/ 4) {
+      loadMore().ignore();
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
 

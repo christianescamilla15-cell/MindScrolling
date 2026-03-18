@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../app/theme/colors.dart';
@@ -8,6 +7,7 @@ import '../../app/theme/typography.dart';
 import '../../data/models/quote_model.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/author_avatar.dart';
+import '../../shared/widgets/swipe_back_wrapper.dart';
 import '../share_export/share_export_service.dart';
 import 'vault_controller.dart';
 
@@ -43,7 +43,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   Widget build(BuildContext context) {
     final vaultState = ref.watch(vaultStateProvider);
 
-    return Container(
+    return SwipeBackWrapper(
+      child: Container(
       decoration: const BoxDecoration(
         color: Color(0xFF1C1C22),
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -86,9 +87,6 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                           size: 22, color: AppColors.textSecondary),
                     ),
                   ),
-                _CloseButton(
-                  onTap: widget.onClose ?? () => context.canPop() ? context.pop() : context.go('/feed'),
-                ),
               ],
             ),
           ),
@@ -113,6 +111,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
+    ),
     );
   }
 
@@ -156,31 +155,6 @@ class _CountBadge extends StatelessWidget {
       child: Text(
         '$count',
         style: AppTypography.labelSmall.copyWith(color: AppColors.vault),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Close button
-// ---------------------------------------------------------------------------
-
-class _CloseButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _CloseButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.close, size: 18, color: AppColors.textSecondary),
       ),
     );
   }

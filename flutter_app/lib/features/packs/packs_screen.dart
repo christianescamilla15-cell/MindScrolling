@@ -6,6 +6,7 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/providers/core_providers.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/swipe_back_wrapper.dart';
 import '../settings/settings_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -61,17 +62,13 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
   Widget build(BuildContext context) {
     final tr = context.tr;
 
-    return Scaffold(
+    return SwipeBackWrapper(
+      child: Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              size: 18, color: AppColors.textSecondary),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/feed'),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(tr.premiumPacks, style: AppTypography.displaySmall),
       ),
       body: _loading
@@ -95,6 +92,7 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
                           style: AppTypography.bodyMedium
                               .copyWith(color: AppColors.textMuted)))
                   : _PackList(packs: _packs!, userState: _userState),
+    ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,6 +48,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   // Swipe direction overlay state
   String? _swipeDirection;
   double _swipeIntensity = 0.0;
+
+  // Auto-dismiss timer for reflection / evolution cards (Fix 2)
+  Timer? _reflectionDismissTimer;
+  // Track which feed index the current timer was started for, so we do not
+  // restart it unnecessarily on every build.
+  int? _reflectionTimerIndex;
 
   @override
   void initState() {
@@ -144,8 +152,36 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _reflectionDismissTimer?.cancel();
     _swiperController.dispose();
     super.dispose();
+  }
+
+  // ─── Reflection card auto-dismiss timer ──────────────────────────────────────
+
+  /// Starts (or restarts) the 4-second auto-dismiss timer for reflection cards.
+  ///
+  /// [index] is the feed index of the current reflection card. The timer is
+  /// only started once per index — subsequent builds caused by unrelated state
+  /// changes will not reset the countdown.
+  void _startReflectionDismissTimer(int index) {
+    if (_reflectionTimerIndex == index && _reflectionDismissTimer?.isActive == true) {
+      return; // Timer already running for this card.
+    }
+    _reflectionDismissTimer?.cancel();
+    _reflectionTimerIndex = index;
+    _reflectionDismissTimer = Timer(const Duration(seconds: 4), () {
+      if (!mounted) return;
+      // Programmatic swipe upwards triggers _onSwipe which calls
+      // advanceReflectionCard() — no counter increment.
+      _swiperController.swipe(CardSwiperDirection.top);
+    });
+  }
+
+  void _cancelReflectionDismissTimer() {
+    _reflectionDismissTimer?.cancel();
+    _reflectionDismissTimer = null;
+    _reflectionTimerIndex = null;
   }
 
   // ─── Swipe handler ───────────────────────────────────────────────────────────
@@ -155,6 +191,28 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     int? currentIndex,
     CardSwiperDirection direction,
   ) {
+    final state = ref.read(feedControllerProvider);
+    final swipedItem = (previousIndex < state.items.length)
+        ? state.items[previousIndex]
+        : null;
+
+    // Fix 3 — Reflection / evolution card: block horizontal swipes.
+    // Returning false causes the card to snap back without any side-effects.
+    if (swipedItem != null &&
+        (swipedItem.isReflectionCard || swipedItem.isEvolutionCard) &&
+        (direction == CardSwiperDirection.left ||
+            direction == CardSwiperDirection.right)) {
+      // Reset overlay so the direction indicator clears.
+      setState(() {
+        _swipeDirection = null;
+        _swipeIntensity = 0.0;
+      });
+      return false; // Card snaps back; no state change.
+    }
+
+    // Always cancel the auto-dismiss timer when the user swipes manually.
+    _cancelReflectionDismissTimer();
+
     final dirStr = switch (direction) {
       CardSwiperDirection.left => 'left',
       CardSwiperDirection.right => 'right',
@@ -163,14 +221,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       _ => 'left',
     };
 
-    // Soft paywall card — dismiss without counting as a quote swipe (US-B07).
-    final state = ref.read(feedControllerProvider);
-    final swipedItem = (previousIndex < state.items.length)
-        ? state.items[previousIndex]
-        : null;
     if (swipedItem != null && swipedItem.isSoftPaywallCard) {
-      // Advance index without incrementing reflections count.
+      // Soft paywall card — dismiss without counting as a quote swipe (US-B07).
       ref.read(feedControllerProvider.notifier).advanceIndex();
+    } else if (swipedItem != null &&
+        (swipedItem.isReflectionCard || swipedItem.isEvolutionCard)) {
+      // Fix 1 — Reflection / evolution card: advance without incrementing
+      // the daily swipe counter.
+      ref.read(feedControllerProvider.notifier).advanceReflectionCard();
     } else {
       ref.read(feedControllerProvider.notifier).onSwipe(dirStr);
     }
@@ -345,6 +403,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         }
 
         final item = state.items[index];
+
+        // Fix 2 — Start auto-dismiss timer when a reflection / evolution card
+        // becomes the active (top) card. The timer check is index-gated so
+        // it only fires once per card, not on every build frame.
+        if ((item.isReflectionCard || item.isEvolutionCard) &&
+            index == state.currentIndex) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _startReflectionDismissTimer(index);
+          });
+        }
+
         return _buildCard(context, item, state, controller, isPremium);
       },
     );
