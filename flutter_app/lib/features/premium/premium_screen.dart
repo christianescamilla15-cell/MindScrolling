@@ -90,14 +90,14 @@ class _PremiumBody extends ConsumerWidget {
           // ── Success message ─────────────────────────────────────────────
           if (ps.successMessage != null)
             _StatusMessage(
-              message: ps.successMessage!,
+              message: _resolveMessage(context, ps.successMessage!),
               isError: false,
             ),
 
           // ── Error message ───────────────────────────────────────────────
           if (ps.error != null)
             _StatusMessage(
-              message: ps.error!,
+              message: _resolveMessage(context, ps.error!),
               isError: true,
             ),
 
@@ -455,6 +455,22 @@ class _TableRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Key → localized string resolver
+// ---------------------------------------------------------------------------
+
+String _resolveMessage(BuildContext context, String key) {
+  final tr = context.tr;
+  switch (key) {
+    case 'purchaseSuccess':  return tr.purchaseSuccess;
+    case 'purchaseFailed':   return tr.purchaseFailed;
+    case 'restoreSuccess':   return tr.restoreSuccess;
+    case 'restoreFailed':    return tr.restoreFailed;
+    case 'noPurchasesFound': return tr.noPurchasesFound;
+    default:                 return key; // pass-through for unexpected values
   }
 }
 

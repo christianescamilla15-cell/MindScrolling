@@ -19,6 +19,10 @@ class InsightsRepository {
   Future<ApiResult<InsightModel?>> getWeeklyInsight({String lang = 'en'}) async {
     try {
       final json = await _remote.getWeeklyInsight(lang: lang);
+      // Backend returns premium_required: true for free users
+      if (json['premium_required'] == true) {
+        return const ApiError('premium_required', code: 403);
+      }
       final insightText = json['insight'] as String?;
       if (insightText == null || insightText.trim().isEmpty) {
         return const ApiSuccess(null);

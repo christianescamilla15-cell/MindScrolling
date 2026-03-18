@@ -72,7 +72,13 @@ export async function getPackEntitlement(deviceId, packId, client = supabase) {
   // Grandfathering: pack must have been released before the cutoff.
   // All 3 current packs are backfilled to 2026-01-01 in migration 009.
   if (userRow?.is_premium === true) {
-    // Fetch the pack's released_at to determine grandfathering.
+    // Performance: KNOWN_PACK_IDS are all backfilled to 2026-01-01 (pre-cutoff).
+    // Skip the quotes table scan for known packs — return full access directly.
+    if (KNOWN_PACK_IDS.has(packId)) {
+      return { access: "full", reason: "inside_grandfathered" };
+    }
+
+    // Unknown (future) pack: query DB to determine grandfathering.
     const { data: packRow } = await client
       .from("quotes")
       .select("released_at")

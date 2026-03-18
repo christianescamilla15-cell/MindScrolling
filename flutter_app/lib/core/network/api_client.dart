@@ -130,7 +130,7 @@ class ApiClient {
     try {
       final err = jsonDecode(response.body);
       if (err is Map) {
-        message = (err['message'] ?? err['error'] ?? message).toString();
+        message = (err['error'] ?? message).toString();
       }
     } catch (_) {}
 

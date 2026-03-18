@@ -1,6 +1,8 @@
 import { supabase }                from "../db/client.js";
 import { updatePreferenceVector } from "../services/embeddings.js";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function vaultRoutes(fastify) {
   /** GET /vault — list saved quotes */
   fastify.get("/", async (request, reply) => {
@@ -22,6 +24,7 @@ export default async function vaultRoutes(fastify) {
     const { deviceId } = request;
     const { quote_id } = request.body ?? {};
     if (!quote_id) return reply.status(400).send({ error: "quote_id is required", code: "MISSING_FIELD" });
+    if (!UUID_RE.test(quote_id)) return reply.status(400).send({ error: "quote_id must be a valid UUID", code: "INVALID_FIELD" });
 
     // Check for duplicate first (avoids unnecessary limit check for re-saves)
     const { data: existing } = await supabase
@@ -85,6 +88,10 @@ export default async function vaultRoutes(fastify) {
   fastify.delete("/:id", async (request, reply) => {
     const { deviceId }   = request;
     const { id: quote_id } = request.params;
+
+    if (!UUID_RE.test(quote_id)) {
+      return reply.status(400).send({ error: "Invalid quote ID format", code: "INVALID_FIELD" });
+    }
 
     // Fetch category before deleting (for preference signal decrement)
     const { data: quote } = await supabase

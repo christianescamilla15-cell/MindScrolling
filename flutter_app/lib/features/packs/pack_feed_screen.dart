@@ -89,9 +89,14 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
       final api = ref.read(apiClientProvider);
       final lang = ref.read(settingsStateProvider).lang;
 
-      final cursorParam = cursor != null ? '&cursor=$cursor' : '';
       final response = await api.get(
-          '/packs/${widget.packId}/feed?lang=$lang&limit=20$cursorParam');
+        '/packs/${widget.packId}/feed',
+        queryParams: {
+          'lang': lang,
+          'limit': '20',
+          if (cursor != null) 'cursor': cursor,
+        },
+      );
 
       final rawQuotes = (response['data'] as List?)
               ?.map((q) => QuoteModel.fromJson(q as Map<String, dynamic>))
@@ -107,12 +112,13 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
         setState(() {
           if (cursor == null) {
             _quotes = rawQuotes;
+            _cardShownAt = DateTime.now(); // reset dwell timer after first page loads
           } else {
             _quotes = [..._quotes, ...rawQuotes];
           }
           _hasMore = hasMore;
           _nextCursor = nextCursor;
-          _quoteCount = qCount;
+          _quoteCount = qCount > 0 ? qCount : rawQuotes.length;
           _loading = false;
           _loadingMore = false;
         });
@@ -164,7 +170,7 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
       }
     });
     HapticsService.lightImpact();
-    EventLogger.logLike(quote.id);
+    if (!wasLiked) EventLogger.logLike(quote.id);
     try {
       final api = ref.read(apiClientProvider);
       await api.post('/quotes/${quote.id}/like');
@@ -523,7 +529,7 @@ class _PackQuoteCard extends StatelessWidget {
                             size: 14, color: AppColors.textMuted),
                         const SizedBox(width: 6),
                         Text(
-                          'Swipe to explore',
+                          context.tr.swipeToExplore,
                           style: AppTypography.caption.copyWith(
                             color: AppColors.textMuted,
                             fontSize: 11,

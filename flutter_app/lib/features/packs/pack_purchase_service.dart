@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
@@ -148,7 +149,7 @@ class PackPurchaseService {
 
     try {
       final api = ref.read(apiClientProvider);
-      final store = Platform.isIOS ? 'ios' : 'android';
+      final store = (!kIsWeb && Platform.isIOS) ? 'ios' : 'android';
 
       // Use actual price from store cache; fall back to 2.99 only if unavailable.
       final cachedProduct = _productCache[purchase.productID];

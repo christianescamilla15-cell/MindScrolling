@@ -88,6 +88,11 @@ export default async function webhooksRoutes(fastify) {
     if (!deviceId) {
       return reply.status(400).send({ error: "Missing app_user_id", code: "INVALID_PAYLOAD" });
     }
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(String(deviceId))) {
+      request.log.warn({ deviceId, type }, "revenuecat: ignoring event with non-UUID app_user_id");
+      return reply.status(400).send({ error: "Invalid app_user_id format", code: "INVALID_PAYLOAD" });
+    }
 
     request.log.info(
       { type, deviceId, productId, store, environment },
@@ -116,7 +121,7 @@ export default async function webhooksRoutes(fastify) {
         .from("users")
         .update({
           is_premium:           true,
-          premium_status:       "active",
+          premium_status:       "premium_onetime",
           premium_source:       premiumSource,
           premium_activated_at: purchasedAt,
         })

@@ -42,6 +42,9 @@ abstract class AppStrings {
   String get interest;
   String get goal;
   String get language;
+  String get profileTitle;
+  String get profileEdit;
+  String get profileInfo;
 
   // ------------------------------------------------------------------
   // Features
@@ -172,6 +175,10 @@ abstract class AppStrings {
   String get justGenerated;
   String get yesterday;
   String get daysAgo;
+  String get insightPremiumTitle;
+  String get insightPremiumBody;
+  String get upgradeToPremium;
+  String hoursAgo(int hours);
 
   // ------------------------------------------------------------------
   // Vault screen
@@ -370,6 +377,7 @@ abstract class AppStrings {
   // Soft paywall dismiss hint
   // ------------------------------------------------------------------
   String get swipeToContinue;
+  String get swipeUp;
 
   // ------------------------------------------------------------------
   // Pack monetization (Block B)

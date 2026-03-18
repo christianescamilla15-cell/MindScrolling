@@ -37,6 +37,7 @@ class FeedController extends StateNotifier<FeedState> {
 
   static const _kSwipeCountKey = 'mindscroll_swipe_count';
   static const _kSwipeDateKey = 'mindscroll_swipe_date';
+  static const _kStreakKey = 'mindscroll_streak';
 
   /// Load daily swipe count — tries backend first (survives reinstall),
   /// falls back to local SharedPreferences.
@@ -51,21 +52,24 @@ class FeedController extends StateNotifier<FeedState> {
 
   void _loadLocalSwipeCount(SharedPreferences prefs, String today) {
     final savedDate = prefs.getString(_kSwipeDateKey);
+    final savedStreak = prefs.getInt(_kStreakKey) ?? 0;
     if (savedDate == today) {
       final count = prefs.getInt(_kSwipeCountKey) ?? 0;
-      state = state.copyWith(reflections: count);
+      state = state.copyWith(reflections: count, streak: savedStreak);
     } else {
       prefs.setString(_kSwipeDateKey, today);
       prefs.setInt(_kSwipeCountKey, 0);
+      state = state.copyWith(streak: savedStreak);
     }
   }
 
-  /// Save swipe count after each swipe.
+  /// Save swipe count and streak after each swipe.
   Future<void> _persistSwipeCount(int count) async {
     final prefs = await SharedPreferences.getInstance();
     final today = DateTime.now().toIso8601String().substring(0, 10);
     await prefs.setString(_kSwipeDateKey, today);
     await prefs.setInt(_kSwipeCountKey, count);
+    await prefs.setInt(_kStreakKey, state.streak);
   }
 
   // -------------------------------------------------------------------------
@@ -77,7 +81,8 @@ class FeedController extends StateNotifier<FeedState> {
     _cursor = null;
     // Preserve swipe count when reloading feed (language change, app resume)
     final currentReflections = state.reflections;
-    state = FeedState.initial().copyWith(reflections: currentReflections);
+    final currentStreak = state.streak;
+    state = FeedState.initial().copyWith(reflections: currentReflections, streak: currentStreak);
 
     final result = await _repository.getFeed(lang: _lang, cursor: null);
     result.when(

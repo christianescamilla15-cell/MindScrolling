@@ -211,6 +211,23 @@ export default async function premiumRoutes(fastify) {
 
     const now = new Date().toISOString();
 
+    // Idempotency check — return early if this transaction was already recorded
+    const idFilter = transaction_id || purchase_token;
+    const idField  = transaction_id ? "transaction_id" : "purchase_token";
+    if (idFilter) {
+      const { data: existingPurchase } = await supabase
+        .from("purchases")
+        .select("id, status")
+        .eq("device_id", deviceId)
+        .eq(idField, idFilter)
+        .in("status", ["verified", "restored"])
+        .maybeSingle();
+
+      if (existingPurchase) {
+        return reply.send({ success: true, status: "already_verified" });
+      }
+    }
+
     const { error: userUpsertErr } = await supabase
       .from("users")
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
@@ -291,47 +308,58 @@ export default async function premiumRoutes(fastify) {
     }
 
     // ── Look up existing Inside purchase across all devices ───────────────────
-    let insideQuery = supabase
-      .from("purchases")
-      .select("id, device_id, status")
-      .eq("store", store)
-      .eq("status", "verified");
-
-    if (purchase_token && transaction_id) {
-      // Use two separate .eq() conditions joined with .or() to avoid raw string
-      // interpolation (SQL injection vector via PostgREST filter syntax).
-      insideQuery = insideQuery.or(
-        `purchase_token.eq."${String(purchase_token).replace(/"/g, '\\"')}",transaction_id.eq."${String(transaction_id).replace(/"/g, '\\"')}"`
-      );
-    } else if (purchase_token) {
-      insideQuery = insideQuery.eq("purchase_token", purchase_token);
-    } else {
-      insideQuery = insideQuery.eq("transaction_id", transaction_id);
+    // SECURITY: Never use .or() with string interpolation of user input — PostgREST
+    // filter syntax allows injection via metacharacters (`,`, `)`, `.eq.`).
+    // Instead, run two separate parameterised .eq() queries and merge in app code.
+    async function findInsidePurchase() {
+      const base = supabase.from("purchases").select("id, device_id, status")
+        .eq("store", store).eq("status", "verified");
+      if (purchase_token && transaction_id) {
+        const [byToken, byTxId] = await Promise.all([
+          base.eq("purchase_token", purchase_token).limit(1).maybeSingle(),
+          supabase.from("purchases").select("id, device_id, status")
+            .eq("store", store).eq("status", "verified")
+            .eq("transaction_id", transaction_id).limit(1).maybeSingle(),
+        ]);
+        if (byToken.error) return { data: null, error: byToken.error };
+        if (byTxId.error)  return { data: null, error: byTxId.error };
+        return { data: byToken.data ?? byTxId.data, error: null };
+      }
+      if (purchase_token) return base.eq("purchase_token", purchase_token).limit(1).maybeSingle();
+      return base.eq("transaction_id", transaction_id).limit(1).maybeSingle();
     }
 
-    // ── Look up existing pack purchases by token or transaction_id ────────────
-    let packQuery = supabase
-      .from("pack_purchases")
-      .select("id, device_id, pack_id, store, product_id, amount, currency")
-      .in("status", ["verified", "restored"]);
-
-    if (purchase_token && transaction_id) {
-      packQuery = packQuery.or(
-        `purchase_token.eq."${String(purchase_token).replace(/"/g, '\\"')}",transaction_id.eq."${String(transaction_id).replace(/"/g, '\\"')}"`
-      );
-    } else if (purchase_token) {
-      packQuery = packQuery.eq("purchase_token", purchase_token);
-    } else {
-      packQuery = packQuery.eq("transaction_id", transaction_id);
+    async function findPackPurchases() {
+      const base = supabase.from("pack_purchases")
+        .select("id, device_id, pack_id, store, product_id, amount, currency")
+        .in("status", ["verified", "restored"]);
+      if (purchase_token && transaction_id) {
+        const [byToken, byTxId] = await Promise.all([
+          base.eq("purchase_token", purchase_token),
+          supabase.from("pack_purchases")
+            .select("id, device_id, pack_id, store, product_id, amount, currency")
+            .in("status", ["verified", "restored"])
+            .eq("transaction_id", transaction_id),
+        ]);
+        if (byToken.error) return { data: null, error: byToken.error };
+        if (byTxId.error)  return { data: null, error: byTxId.error };
+        // Merge and deduplicate by id
+        const seen = new Set();
+        const merged = [...(byToken.data || []), ...(byTxId.data || [])].filter(r => {
+          if (seen.has(r.id)) return false;
+          seen.add(r.id);
+          return true;
+        });
+        return { data: merged, error: null };
+      }
+      if (purchase_token) return base.eq("purchase_token", purchase_token);
+      return base.eq("transaction_id", transaction_id);
     }
 
     const [
       { data: existingInsidePurchase, error: insideLookupErr },
       { data: existingPackPurchases, error: packLookupErr },
-    ] = await Promise.all([
-      insideQuery.limit(1).maybeSingle(),
-      packQuery,
-    ]);
+    ] = await Promise.all([findInsidePurchase(), findPackPurchases()]);
 
     if (insideLookupErr || packLookupErr) {
       request.log.error({ insideLookupErr, packLookupErr }, "premium/restore: lookup error");
@@ -578,22 +606,17 @@ export default async function premiumRoutes(fastify) {
 
     const now = new Date().toISOString();
 
-    const { error: redeemErr } = await supabase
-      .from("premium_activation_codes")
-      .update({ is_redeemed: true, redeemed_by: deviceId, redeemed_at: now })
-      .eq("id", codeRow.id);
-
-    if (redeemErr) {
-      request.log.error({ err: redeemErr }, "premium/redeem: failed to mark code");
-      return reply.status(500).send({ error: "Failed to redeem code", code: "INTERNAL_ERROR" });
-    }
+    // TOCTOU fix: grant premium FIRST, then mark code as redeemed.
+    // If the mark-as-redeemed step fails, the code is still technically valid but the user
+    // already has premium — a safe-to-retry outcome vs. the previous order where the code
+    // was consumed with no premium granted.
 
     const { error: userUpsertErr } = await supabase
       .from("users")
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
 
     if (userUpsertErr) {
-      fastify.log.error({ err: userUpsertErr }, "premium/redeem: user upsert failed — code marked redeemed but premium NOT granted");
+      fastify.log.error({ err: userUpsertErr }, "premium/redeem: user upsert failed");
       return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
     }
 
@@ -611,6 +634,18 @@ export default async function premiumRoutes(fastify) {
     if (upgradeErr) {
       request.log.error({ err: upgradeErr }, "premium/redeem: failed to upgrade user");
       return reply.status(500).send({ error: "Failed to activate premium", code: "INTERNAL_ERROR" });
+    }
+
+    // Mark code as redeemed only after premium is confirmed granted
+    const { error: redeemErr } = await supabase
+      .from("premium_activation_codes")
+      .update({ is_redeemed: true, redeemed_by: deviceId, redeemed_at: now })
+      .eq("id", codeRow.id);
+
+    if (redeemErr) {
+      // Premium was already granted above — log but don't fail the response.
+      // The code will be redeemable again but the user already has premium.
+      request.log.error({ err: redeemErr }, "premium/redeem: failed to mark code as redeemed — user already has premium");
     }
 
     supabase.from("premium_audit_log").insert({

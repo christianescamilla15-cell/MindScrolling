@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/user_profile_model.dart';
+import '../../shared/extensions/context_extensions.dart';
 import 'profile_controller.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -48,14 +49,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(context.tr.profileTitle),
         actions: [
           if (!ps.isEditing)
             TextButton(
               onPressed: () =>
                   ref.read(profileControllerProvider.notifier).setEditing(true),
               child: Text(
-                'Edit',
+                context.tr.profileEdit,
                 style: AppTypography.buttonLabel.copyWith(
                   color: AppColors.stoicism,
                 ),
@@ -79,11 +80,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
 
                   const SizedBox(height: 28),
-                  const _SectionTitle('Profile Info'),
+                  _SectionTitle(context.tr.profileInfo),
                   const SizedBox(height: 12),
 
                   // ── Age range ──────────────────────────────────────────
-                  _FieldLabel('Age Range'),
+                  _FieldLabel(context.tr.ageRange),
                   const SizedBox(height: 6),
                   _ChipSelector(
                     options: UserProfileModel.ageRanges,
@@ -95,7 +96,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(height: 16),
 
                   // ── Interest ───────────────────────────────────────────
-                  _FieldLabel('Interest'),
+                  _FieldLabel(context.tr.interest),
                   const SizedBox(height: 6),
                   _ChipSelector(
                     options: UserProfileModel.interests,
@@ -107,7 +108,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(height: 16),
 
                   // ── Goal ───────────────────────────────────────────────
-                  _FieldLabel('Goal'),
+                  _FieldLabel(context.tr.goal),
                   const SizedBox(height: 6),
                   _ChipSelector(
                     options: UserProfileModel.goals,
@@ -119,7 +120,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(height: 16),
 
                   // ── Language ───────────────────────────────────────────
-                  _FieldLabel('Language'),
+                  _FieldLabel(context.tr.language),
                   const SizedBox(height: 6),
                   _ChipSelector(
                     options: const ['en', 'es'],

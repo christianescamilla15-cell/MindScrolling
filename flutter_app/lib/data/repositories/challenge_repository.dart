@@ -21,9 +21,9 @@ class ChallengeRepository {
 
   /// Fetches today's challenge from the server and caches it locally.
   /// Falls back to the cached challenge (or a hard-coded default) on failure.
-  Future<ApiResult<ChallengeModel>> getTodayChallenge() async {
+  Future<ApiResult<ChallengeModel>> getTodayChallenge({String lang = 'en'}) async {
     try {
-      final json = await _remote.getTodayChallenge();
+      final json = await _remote.getTodayChallenge(lang: lang);
       // Backend returns { challenge: {...}, progress: {...} }
       final challengeData = json['challenge'] as Map<String, dynamic>? ?? json;
       final progressData = json['progress'] as Map<String, dynamic>?;
@@ -87,8 +87,8 @@ class ChallengeRepository {
   Future<ApiResult<PhilosophyMapModel>> getPhilosophyMap() async {
     try {
       final json = await _remote.getMap();
-      final data = json['data'] as Map<String, dynamic>? ?? json;
-      return ApiSuccess(PhilosophyMapModel.fromJson(data));
+      // Backend returns { current, snapshot, snapshot_date } directly — no 'data' wrapper
+      return ApiSuccess(PhilosophyMapModel.fromJson(json));
     } catch (e) {
       return ApiError('Failed to load philosophy map: $e');
     }

@@ -88,6 +88,15 @@ class StringsEs implements AppStrings {
   @override
   String get language => 'Idioma';
 
+  @override
+  String get profileTitle => 'Perfil';
+
+  @override
+  String get profileEdit => 'Editar';
+
+  @override
+  String get profileInfo => 'Información del perfil';
+
   // ------------------------------------------------------------------
   // Features
   // ------------------------------------------------------------------
@@ -381,6 +390,19 @@ class StringsEs implements AppStrings {
   @override
   String get daysAgo => 'días atrás';
 
+  @override
+  String get insightPremiumTitle => 'Desbloquea tu Perspectiva Semanal';
+
+  @override
+  String get insightPremiumBody =>
+      'Las perspectivas filosóficas generadas por IA son una función exclusiva de MindScrolling Inside. Actualiza para recibir tu reflexión semanal personalizada.';
+
+  @override
+  String get upgradeToPremium => 'Actualizar a Inside';
+
+  @override
+  String hoursAgo(int hours) => 'hace ${hours}h';
+
   // ------------------------------------------------------------------
   // Vault screen
   // ------------------------------------------------------------------
@@ -657,6 +679,7 @@ class StringsEs implements AppStrings {
 
   // Soft paywall dismiss hint
   @override String get swipeToContinue => 'Desliza para continuar';
+  @override String get swipeUp => 'Desliza hacia arriba';
 
   // Pack monetization (Block B)
   @override String get packIncluded            => 'Incluido';

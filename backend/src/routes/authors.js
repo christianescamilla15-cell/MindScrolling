@@ -7,7 +7,8 @@ export default async function authorsRoutes(fastify) {
    * Query: ?lang=en|es
    */
   fastify.get("/", async (request, reply) => {
-    const lang = request.query.lang || "en";
+    const rawLang = request.query.lang || "en";
+    const lang = rawLang === "es" ? "es" : "en";
     const bioCol = lang === "es" ? "bio_es" : "bio_en";
 
     const { data, error } = await supabase
@@ -40,7 +41,8 @@ export default async function authorsRoutes(fastify) {
    */
   fastify.get("/:slug", async (request, reply) => {
     const { slug } = request.params;
-    const lang = request.query.lang || "en";
+    const rawLang = request.query.lang || "en";
+    const lang = rawLang === "es" ? "es" : "en";
     const bioCol = lang === "es" ? "bio_es" : "bio_en";
 
     if (!slug) {
@@ -71,7 +73,7 @@ export default async function authorsRoutes(fastify) {
       .select("id, text, category, lang, author")
       .eq("lang", lang)
       .eq("author", author.name)
-      .limit(20);
+      .limit(5);
 
     if (quotesResult.error) {
       fastify.log.error({ err: quotesResult.error, slug }, "GET /authors/:slug — quotes fetch error");
@@ -103,7 +105,7 @@ export default async function authorsRoutes(fastify) {
       total_quotes: author.quote_count,
       dominant_category: dominant,
       categories,
-      top_quotes: authorQuotes.slice(0, 5).map((q) => ({
+      top_quotes: authorQuotes.map((q) => ({
         id: q.id,
         text: q.text,
         category: q.category,

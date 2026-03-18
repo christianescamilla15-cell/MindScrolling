@@ -88,6 +88,15 @@ class StringsEn implements AppStrings {
   @override
   String get language => 'Language';
 
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileEdit => 'Edit';
+
+  @override
+  String get profileInfo => 'Profile Info';
+
   // ------------------------------------------------------------------
   // Features
   // ------------------------------------------------------------------
@@ -132,7 +141,6 @@ class StringsEn implements AppStrings {
   // ------------------------------------------------------------------
   // Actions / toasts
   // ------------------------------------------------------------------
-  @override
   @override
   String get or => 'or';
 
@@ -381,6 +389,19 @@ class StringsEn implements AppStrings {
 
   @override
   String get daysAgo => 'days ago';
+
+  @override
+  String get insightPremiumTitle => 'Unlock Your Weekly Insight';
+
+  @override
+  String get insightPremiumBody =>
+      'AI-powered philosophical insights are a MindScrolling Inside feature. Upgrade to receive your personalised weekly reflection.';
+
+  @override
+  String get upgradeToPremium => 'Upgrade to Inside';
+
+  @override
+  String hoursAgo(int hours) => '${hours}h ago';
 
   // ------------------------------------------------------------------
   // Vault screen
@@ -657,6 +678,7 @@ class StringsEn implements AppStrings {
 
   // Soft paywall dismiss hint
   @override String get swipeToContinue => 'Swipe to continue';
+  @override String get swipeUp => 'Swipe up';
 
   // Pack monetization (Block B)
   @override String get packIncluded            => 'Included';

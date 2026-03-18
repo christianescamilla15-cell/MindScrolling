@@ -63,6 +63,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     if (state.isLoading) {
       return _LoadingView();
     }
+    if (state.premiumRequired) {
+      return _PremiumPromptView(
+        onUpgrade: () => context.push('/premium'),
+      );
+    }
     if (state.error != null && state.insight == null) {
       return _ErrorView(
         message: state.error!,
@@ -307,7 +312,7 @@ class _InsightView extends StatelessWidget {
     final now = DateTime.now();
     final diff = now.difference(dt);
     if (diff.inMinutes < 60) return tr.justGenerated;
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inHours < 24) return tr.hoursAgo(diff.inHours);
     if (diff.inDays == 1) return tr.yesterday;
     return '${diff.inDays} ${tr.daysAgo}';
   }
@@ -432,6 +437,66 @@ class _TipCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Premium prompt ───────────────────────────────────────────────────────────
+
+class _PremiumPromptView extends StatelessWidget {
+  final VoidCallback onUpgrade;
+
+  const _PremiumPromptView({required this.onUpgrade});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              size: 56,
+              color: AppColors.philosophy.withOpacity(0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              context.tr.insightPremiumTitle,
+              style: AppTypography.displaySmall.copyWith(
+                color: AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.tr.insightPremiumBody,
+              style: AppTypography.bodyMedium
+                  .copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            FilledButton(
+              onPressed: onUpgrade,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.philosophy,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: Text(
+                context.tr.upgradeToPremium,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

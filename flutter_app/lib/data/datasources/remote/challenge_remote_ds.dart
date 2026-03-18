@@ -7,8 +7,8 @@ class ChallengeRemoteDataSource {
 
   /// GET /challenges/today
   /// Returns { id, code, title, description, active_date }
-  Future<Map<String, dynamic>> getTodayChallenge() async {
-    return _apiClient.get('/challenges/today');
+  Future<Map<String, dynamic>> getTodayChallenge({String lang = 'en'}) async {
+    return _apiClient.get('/challenges/today', queryParams: {'lang': lang});
   }
 
   /// POST /challenges/:id/progress  with { progress, completed }

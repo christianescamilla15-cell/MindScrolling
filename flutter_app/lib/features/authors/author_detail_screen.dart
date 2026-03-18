@@ -51,6 +51,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
         }
         // Wait 2s before retry
         await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
       }
     }
   }

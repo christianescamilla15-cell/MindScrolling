@@ -42,10 +42,21 @@ function generateCode() {
 export default async function adminRoutes(fastify) {
   // Stricter rate limit for admin routes (10 req/min vs 60 global)
   fastify.addHook("preHandler", async (request, reply) => {
+    // Defence-in-depth: enforce admin secret on every admin route via shared hook.
+    // Individual handlers also call requireAdmin(), but this ensures protection even
+    // if a future handler forgets to do so.
+    if (!requireAdmin(request, reply)) return;
+
     // Simple in-memory rate limit for admin
     const ip = request.ip;
     const now = Date.now();
     if (!adminRoutes._rateMap) adminRoutes._rateMap = new Map();
+    // Evict expired entries to prevent unbounded memory growth
+    if (adminRoutes._rateMap.size > 500) {
+      for (const [k, v] of adminRoutes._rateMap) {
+        if (now > v.resetAt) adminRoutes._rateMap.delete(k);
+      }
+    }
     const entry = adminRoutes._rateMap.get(ip) || { count: 0, resetAt: now + 60000 };
     if (now > entry.resetAt) {
       entry.count = 0;
@@ -96,8 +107,8 @@ export default async function adminRoutes(fastify) {
     }
     codes.push(...(insertedCodes ?? []));
 
-    // Audit
-    await supabase.from("premium_audit_log").insert({
+    // Audit — fire-and-forget: audit failure must not fail the action
+    supabase.from("premium_audit_log").insert({
       device_id: null,
       event_type: "codes_created",
       source: "admin",
@@ -107,7 +118,7 @@ export default async function adminRoutes(fastify) {
         notes,
         codes: codes.map((c) => c.code),
       },
-    });
+    }).catch(() => {});
 
     return reply.send({
       created: codes.length,
@@ -162,13 +173,13 @@ export default async function adminRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to revoke code", code: "INTERNAL_ERROR" });
     }
 
-    // Audit
-    await supabase.from("premium_audit_log").insert({
+    // Audit — fire-and-forget: audit failure must not fail the action
+    supabase.from("premium_audit_log").insert({
       device_id: null,
       event_type: "code_revoked",
       source: "admin",
       metadata: { code: cleanCode, code_id: codeRow.id },
-    });
+    }).catch(() => {});
 
     return reply.send({ revoked: true, code: cleanCode });
   });
@@ -182,10 +193,18 @@ export default async function adminRoutes(fastify) {
     if (!requireAdmin(request, reply)) return;
 
     const status = request.query.status || "all";
+    const VALID_STATUSES = ["all", "active", "redeemed", "revoked"];
+    if (!VALID_STATUSES.includes(status)) {
+      return reply.status(400).send({
+        error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`,
+        code: "INVALID_PARAM",
+      });
+    }
 
+    // Exclude redeemed_by (device_id of the user who redeemed) — PII
     let query = supabase
       .from("premium_activation_codes")
-      .select("*")
+      .select("id, code, type, created_by, assigned_email, notes, expires_at, is_redeemed, redeemed_at, revoked, created_at")
       .order("created_at", { ascending: false })
       .limit(100);
 

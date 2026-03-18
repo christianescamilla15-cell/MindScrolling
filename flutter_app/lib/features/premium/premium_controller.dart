@@ -190,7 +190,15 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
             isTrial: true,
-            trialDaysLeft: startResponse['trial_days_left'] ?? 7,
+            trialDaysLeft: (startResponse['trial_days_left'] as num?)?.toInt() ?? 7,
+            trialExpired: false,
+          ),
+        );
+      } else if (startResponse['already_active'] == true) {
+        state = AsyncData(
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            isTrial: true,
+            trialDaysLeft: (startResponse['trial_days_left'] as num?)?.toInt() ?? 7,
             trialExpired: false,
           ),
         );
@@ -249,16 +257,22 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
 
     result.when(
       success: (premiumState) {
+        final snap = state.valueOrNull ?? const PremiumUiState();
         state = AsyncData(
-          current.copyWith(
+          snap.copyWith(
             premiumState: premiumState,
             isLoading: false,
+            isTrial: premiumState.isPremium ? false : snap.isTrial,
+            trialExpired: premiumState.isPremium ? false : snap.trialExpired,
           ),
         );
       },
       failure: (message, _) {
         state = AsyncData(
-          current.copyWith(isLoading: false, error: message),
+          (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            isLoading: false,
+            error: message,
+          ),
         );
       },
     );

@@ -280,7 +280,7 @@ export default async function packsRoutes(fastify) {
           quotes_remaining_after_preview: null,
         },
         quotes: [],
-        is_preview_complete: false,
+        is_preview_complete: null,
         redirect_to_feed: true,
         paywall: null,
       });
@@ -291,9 +291,11 @@ export default async function packsRoutes(fastify) {
     const userState =
       entitlement.access === "preview_trial" ? "trial" : "free";
 
-    // Fetch curated preview quotes ordered by rank
+    // Fetch ALL curated preview quotes (no rank cap) to know how many exist.
+    // We then slice to previewQuota for the response, and determine isPreviewComplete
+    // based on whether all available previews have been served.
     const [
-      { data: previewQuotes, error: quotesErr },
+      { data: allPreviewQuotes, error: quotesErr },
       { count: previewTotalCount },
     ] = await Promise.all([
       supabase
@@ -304,7 +306,6 @@ export default async function packsRoutes(fastify) {
         .eq("pack_name", id)
         .eq("lang", lang)
         .eq("is_pack_preview", true)
-        .lte("pack_preview_rank", previewQuota)
         .order("pack_preview_rank", { ascending: true }),
 
       supabase
@@ -313,6 +314,9 @@ export default async function packsRoutes(fastify) {
         .eq("pack_name", id)
         .eq("lang", lang),
     ]);
+
+    // Slice to user's quota — the rest are not shown yet
+    const previewQuotes = (allPreviewQuotes ?? []).slice(0, previewQuota);
 
     if (quotesErr) {
       request.log.error({ err: quotesErr }, "packs/preview: DB error");
@@ -334,8 +338,13 @@ export default async function packsRoutes(fastify) {
       is_locked: false,
     }));
 
-    // Preview is complete when we have served the full quota (or fewer exist)
-    const isPreviewComplete = previewQuotes.length <= previewQuota;
+    // Preview is complete when:
+    // - the user has seen their full quota, OR
+    // - fewer preview quotes exist than the quota (all available content has been served)
+    const totalAvailablePreview = (allPreviewQuotes ?? []).length;
+    const isPreviewComplete =
+      previewQuotes.length >= previewQuota ||
+      totalAvailablePreview <= previewQuota;
     const copy = PAYWALL_COPY[lang] ?? PAYWALL_COPY.en;
 
     // Paywall block — always null when preview not yet complete

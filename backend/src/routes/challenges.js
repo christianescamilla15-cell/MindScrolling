@@ -73,10 +73,9 @@ export default async function challengesRoutes(fastify) {
       if (typeof clientProgress !== "number" || !Number.isInteger(clientProgress) || clientProgress < 0) {
         return reply.status(400).send({ error: "progress must be a non-negative integer", code: "INVALID_FIELD" });
       }
-      // Reject client-side completion claims
-      if (clientProgress >= TARGET_QUOTES) {
-        return reply.status(400).send({ error: "Progress can only be incremented by 1 per call", code: "INVALID_FIELD" });
-      }
+      // Note: clientProgress is informational only — server always increments by 1.
+      // No upper bound rejection: a cached clientProgress >= TARGET_QUOTES is valid
+      // because the server's idempotency check (existing?.completed) handles it.
     }
 
     // Ensure user row exists

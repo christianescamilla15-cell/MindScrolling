@@ -1,21 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/providers/core_providers.dart';
-import '../../data/datasources/remote/challenge_remote_ds.dart';
 import '../../data/models/philosophy_map_model.dart';
-import '../../data/repositories/challenge_repository.dart';
-
-// ---------------------------------------------------------------------------
-// Repository provider
-// ---------------------------------------------------------------------------
-
-final challengeRepositoryProvider =
-    Provider<ChallengeRepository>((ref) {
-  final api = ref.watch(apiClientProvider);
-  return ChallengeRepository(
-    remote: ChallengeRemoteDataSource(api),
-  );
-});
+import '../challenges/challenges_controller.dart'
+    show challengeRepositoryProvider;
 
 // ---------------------------------------------------------------------------
 // State

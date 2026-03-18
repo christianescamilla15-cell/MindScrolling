@@ -35,7 +35,8 @@ class _RedeemCodeScreenState extends ConsumerState<RedeemCodeScreen> {
 
   Future<void> _redeemCode() async {
     final code = _controller.text.trim().toUpperCase();
-    if (code.length < 6) {
+    // MIND-XXXX-XXXX format = 14 characters
+    if (!RegExp(r'^MIND-[A-Z0-9]{4}-[A-Z0-9]{4}$').hasMatch(code)) {
       setState(() => _error = context.tr.invalidCodeFormat);
       return;
     }

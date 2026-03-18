@@ -3,11 +3,12 @@ import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/colors.dart';
-import '../../app/theme/typography.dart';
 import 'dart:io';
 
-import '../../app/theme/colors.dart' show AppColors;
+import 'package:flutter/foundation.dart';
+
+import '../../app/theme/colors.dart';
+import '../../app/theme/typography.dart';
 import '../../core/providers/core_providers.dart';
 import '../../core/utils/haptics_service.dart';
 import '../../data/models/quote_model.dart';
@@ -73,8 +74,10 @@ class _PackPreviewScreenState extends ConsumerState<PackPreviewScreen> {
     try {
       final api = ref.read(apiClientProvider);
       final lang = ref.read(settingsStateProvider).lang;
-      final response =
-          await api.get('/packs/${widget.packId}/preview?lang=$lang');
+      final response = await api.get(
+        '/packs/${widget.packId}/preview',
+        queryParams: {'lang': lang},
+      );
 
       // Case 1: entitled user → redirect to full feed
       if (response['redirect_to_feed'] == true) {
@@ -131,7 +134,7 @@ class _PackPreviewScreenState extends ConsumerState<PackPreviewScreen> {
     setState(() => _buying = true);
 
     // Resolve product ID from paywall data (iOS vs Android) or derive from packId.
-    final productId = Platform.isIOS
+    final productId = (!kIsWeb && Platform.isIOS)
         ? (_paywallData?['product_id_ios'] as String?)
         : (_paywallData?['product_id_android'] as String?);
 
@@ -438,7 +441,7 @@ class _PreviewQuoteCard extends StatelessWidget {
                           color: AppColors.textMuted, size: 18),
                       const SizedBox(width: 4),
                       Text(
-                        'Swipe up',
+                        context.tr.swipeUp,
                         style: AppTypography.caption
                             .copyWith(color: AppColors.textMuted, fontSize: 11),
                       ),

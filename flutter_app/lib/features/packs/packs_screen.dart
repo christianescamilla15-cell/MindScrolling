@@ -36,7 +36,7 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     try {
       final api = ref.read(apiClientProvider);
       final lang = ref.read(settingsStateProvider).lang;
-      final response = await api.get('/packs?lang=$lang');
+      final response = await api.get('/packs', queryParams: {'lang': lang});
       final list = (response['packs'] as List?)?.cast<Map<String, dynamic>>();
       // user_state is a root-level field from GET /packs (e.g. 'inside', 'pack_owner', 'free')
       final userState = response['user_state'] as String?;
@@ -131,10 +131,12 @@ class _PackCard extends StatelessWidget {
     final color = _parseColor(pack['color'] as String? ?? '#14B8A6');
     final name = pack['name'] as String? ?? '';
     final description = pack['description'] as String? ?? '';
-    final quoteCount = pack['quote_count'] as int? ?? 0;
+    final quoteCount = (pack['quote_count'] as num?)?.toInt() ?? 0;
     final icon = _mapIcon(pack['icon'] as String? ?? 'auto_awesome');
     final accessStatus = pack['access_status'] as String? ?? 'preview_only';
-    final priceUsd = (pack['price'] as Map<String, dynamic>?)?['usd'] as String? ?? '2.99';
+    final priceUsd = pack['price'] is Map
+        ? (pack['price'] as Map)['usd']?.toString() ?? '2.99'
+        : pack['price']?.toString() ?? '2.99';
     final packId = pack['id'] as String? ?? '';
     final packColorHex = pack['color'] as String? ?? '#14B8A6';
 

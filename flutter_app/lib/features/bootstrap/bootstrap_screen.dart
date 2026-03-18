@@ -40,17 +40,14 @@ class _BootstrapScreenState extends State<BootstrapScreen>
   }
 
   Future<void> _bootstrap() async {
-    // Run device-id setup and route resolution in parallel.
-    final results = await Future.wait([
-      _controller.ensureDeviceId(),
-      _controller.initialRoute(),
-    ]);
+    // Device ID is already resolved in main() before runApp() — no need to
+    // call ensureDeviceId() again here (MED-05).
+    final route = await _controller.initialRoute();
 
     // Brief minimum splash so the logo doesn't flash too fast.
     await Future.delayed(const Duration(milliseconds: 800));
 
     if (!mounted) return;
-    final route = results[1] as String;
     context.go(route);
   }
 

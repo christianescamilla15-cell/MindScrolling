@@ -65,7 +65,8 @@ export default async function mindProfileRoutes(fastify) {
    */
   fastify.get("/daily", async (request, reply) => {
     const { deviceId } = request;
-    const lang = request.query.lang || "en";
+    const rawLang = request.query.lang || "en";
+    const lang = rawLang === "es" ? "es" : "en";
     const today = new Date().toISOString().slice(0, 10);
 
     // ── Parallel fetch ───────────────────────────────────────────────────

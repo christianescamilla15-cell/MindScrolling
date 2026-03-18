@@ -21,10 +21,10 @@ class QuoteModel {
 
   factory QuoteModel.fromJson(Map<String, dynamic> json) {
     return QuoteModel(
-      id: json['id'] as String,
-      text: json['text'] as String,
-      author: json['author'] as String,
-      category: json['category'] as String,
+      id: json['id'] as String? ?? '',
+      text: json['text'] as String? ?? '',
+      author: json['author'] as String? ?? '',
+      category: json['category'] as String? ?? '',
       lang: json['lang'] as String? ?? 'en',
       swipeDir: json['swipe_dir'] as String? ?? '',
       packName: json['pack_name'] as String? ?? '',

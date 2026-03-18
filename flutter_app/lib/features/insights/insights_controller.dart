@@ -25,12 +25,14 @@ class InsightsState {
   final bool isLoading;
   final bool isRefreshing;
   final String? error;
+  final bool premiumRequired;
 
   const InsightsState({
     this.insight,
     this.isLoading = false,
     this.isRefreshing = false,
     this.error,
+    this.premiumRequired = false,
   });
 
   InsightsState copyWith({
@@ -38,6 +40,7 @@ class InsightsState {
     bool? isLoading,
     bool? isRefreshing,
     String? error,
+    bool? premiumRequired,
     bool clearInsight = false,
     bool clearError = false,
   }) {
@@ -46,6 +49,7 @@ class InsightsState {
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       error: clearError ? null : (error ?? this.error),
+      premiumRequired: premiumRequired ?? this.premiumRequired,
     );
   }
 }
@@ -74,13 +78,17 @@ class InsightsController extends AsyncNotifier<InsightsState> {
       success: (insight) {
         state = AsyncData(InsightsState(insight: insight));
       },
-      failure: (message, _) {
-        state = AsyncData(
-          InsightsState(
-            insight: current.insight, // keep stale data if any
-            error: message,
-          ),
-        );
+      failure: (message, code) {
+        if (code == 403 && message == 'premium_required') {
+          state = AsyncData(const InsightsState(premiumRequired: true));
+        } else {
+          state = AsyncData(
+            InsightsState(
+              insight: current.insight, // keep stale data if any
+              error: message,
+            ),
+          );
+        }
       },
     );
   }
@@ -96,10 +104,18 @@ class InsightsController extends AsyncNotifier<InsightsState> {
       success: (insight) {
         state = AsyncData(InsightsState(insight: insight));
       },
-      failure: (message, _) {
-        state = AsyncData(
-          current.copyWith(isRefreshing: false, error: message),
-        );
+      failure: (message, code) {
+        if (code == 403 && message == 'premium_required') {
+          // Preserve stale insight so it remains visible while the gate is shown
+          state = AsyncData(current.copyWith(
+            isRefreshing: false,
+            premiumRequired: true,
+          ));
+        } else {
+          state = AsyncData(
+            current.copyWith(isRefreshing: false, error: message),
+          );
+        }
       },
     );
   }

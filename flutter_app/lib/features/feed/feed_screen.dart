@@ -45,6 +45,8 @@ class FeedScreen extends ConsumerStatefulWidget {
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   final CardSwiperController _swiperController = CardSwiperController();
   bool _showHint = false;
+  bool _trialExpiredDialogShown = false;
+  ProviderSubscription<AsyncValue<PremiumUiState>>? _premiumSub;
 
   // Swipe direction overlay state
   String? _swipeDirection;
@@ -67,10 +69,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       feedCtrl.loadInitialFeed(lang);
 
       // Listen for trial expiry — show dialog when premium status finishes loading
-      ref.listenManual(premiumControllerProvider, (prev, next) {
+      _premiumSub = ref.listenManual(premiumControllerProvider, (prev, next) {
         final ps = next.valueOrNull;
-        if (ps != null && !ps.isLoading && ps.trialExpired && !ps.premiumState.isPremium) {
-          if (mounted) _showTrialExpiredDialog(context);
+        if (ps != null && !ps.isLoading && ps.trialExpired &&
+            !ps.premiumState.isPremium && !_trialExpiredDialogShown) {
+          if (mounted) {
+            _trialExpiredDialogShown = true;
+            _showTrialExpiredDialog(context);
+          }
         }
       });
 
@@ -153,6 +159,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _premiumSub?.close();
     _reflectionDismissTimer?.cancel();
     _swiperController.dispose();
     super.dispose();
@@ -271,10 +278,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (prev != null && next.streak != prev.streak && mounted) {
         StreakMilestoneDialog.checkAndShow(context, next.streak);
       }
-      // Challenge auto-complete at 8 swipes
+      // Challenge auto-complete when reflections reach the challenge target
+      final challengeTarget = ref.read(challengeStateProvider).target;
       if (prev != null &&
-          next.reflections >= 8 &&
-          prev.reflections < 8 &&
+          next.reflections >= challengeTarget &&
+          prev.reflections < challengeTarget &&
           mounted) {
         ref
             .read(challengesControllerProvider.notifier)
@@ -371,6 +379,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
 
     return CardSwiper(
+      key: const ValueKey('main_feed_swiper'),
       controller: _swiperController,
       cardsCount: state.items.length,
       initialIndex: state.currentIndex,
@@ -642,7 +651,7 @@ const _kLoadingQuotes = [
   ('"The unexamined life is not worth living."', 'Socrates'),
   ('"He who has a why to live can bear almost any how."', 'Nietzsche'),
   ('"You have power over your mind, not outside events. Realise this, and you will find strength."', 'Marcus Aurelius'),
-  ('"The only way to do great work is to love what you do."', 'Seneca'),
+  ('"It is not that I\'m so smart, it\'s just that I stay with problems longer."', 'Einstein'),
   ('"Man is condemned to be free."', 'Sartre'),
   ('"Waste no more time arguing about what a good man should be. Be one."', 'Marcus Aurelius'),
 ];

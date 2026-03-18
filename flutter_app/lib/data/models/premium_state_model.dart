@@ -34,7 +34,9 @@ class PremiumStateModel {
         : <String>[];
 
     return PremiumStateModel(
-      isPremium: json['is_premium'] as bool? ?? false,
+      // is_paid_premium = true only for verified paid users (not trial).
+      // is_premium = true for both trial AND paid — used for feature gating, not UI state.
+      isPremium: json['is_paid_premium'] as bool? ?? false,
       purchaseType: json['purchase_type'] as String?,
       purchasedAt: purchasedAt,
       ownedPacks: ownedPacks,

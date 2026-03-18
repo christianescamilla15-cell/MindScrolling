@@ -5,6 +5,7 @@ import '../../core/providers/core_providers.dart';
 import '../../data/datasources/remote/challenge_remote_ds.dart';
 import '../../data/models/challenge_model.dart';
 import '../../data/repositories/challenge_repository.dart';
+import '../settings/settings_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Repository provider
@@ -78,7 +79,8 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
   Future<void> load() async {
     state = const AsyncLoading();
 
-    final challengeResult = await _repo.getTodayChallenge();
+    final lang = ref.read(settingsStateProvider).lang;
+    final challengeResult = await _repo.getTodayChallenge(lang: lang);
 
     challengeResult.when(
       success: (challenge) async {

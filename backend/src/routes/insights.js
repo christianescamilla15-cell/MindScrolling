@@ -21,7 +21,8 @@ async function safeQuery(queryFn) {
 export default async function insightsRoutes(fastify) {
   fastify.get("/weekly", async (request, reply) => {
     const { deviceId } = request;
-    const lang = request.query.lang || request.headers["accept-language"]?.slice(0, 2) || "en";
+    const rawLang = request.query.lang || request.headers["accept-language"]?.slice(0, 2) || "en";
+    const lang = rawLang === "es" ? "es" : "en";
 
     // Premium check: AI insights are a MindScrolling Inside feature
     // Skip in dev mode; in production, require premium OR active trial

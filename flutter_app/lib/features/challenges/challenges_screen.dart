@@ -179,7 +179,7 @@ class _ProgressRing extends StatelessWidget {
             strokeWidth: 10,
             backgroundColor: Colors.transparent,
             valueColor: AlwaysStoppedAnimation<Color>(
-              completed ? AppColors.stoicism : AppColors.stoicism,
+              completed ? AppColors.philosophy : AppColors.stoicism,
             ),
             strokeCap: StrokeCap.round,
           ),

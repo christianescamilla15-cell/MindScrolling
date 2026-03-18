@@ -247,6 +247,8 @@ export default async function quotesRoutes(fastify) {
           .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at")
           .eq("lang", effectiveLang)
           .eq("category", cat)
+          // Mirror the get_feed_candidates filter: pack quotes never appear in the free feed
+          .or("pack_name.eq.free,pack_name.is.null")
           .limit(perCategory);
         if (!isPremium) q = q.eq("is_premium", false);
         return q;

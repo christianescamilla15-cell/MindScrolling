@@ -9,7 +9,7 @@ class InsightModel {
   });
 
   factory InsightModel.fromJson(Map<String, dynamic> json) => InsightModel(
-        insight: json['insight'] as String,
+        insight: json['insight'] as String? ?? '',
         generatedAt: json['generated_at'] != null
             ? DateTime.tryParse(json['generated_at'] as String)
             : null,

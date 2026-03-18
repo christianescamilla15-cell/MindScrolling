@@ -78,6 +78,7 @@ export default async function mapRoutes(fastify) {
           discipline_score:  Number(snapRow.discipline_score),
           reflection_score:  Number(snapRow.reflection_score),
           philosophy_score:  Number(snapRow.philosophy_score),
+          created_at:        snapRow.created_at,
         }
       : null;
 
@@ -94,6 +95,22 @@ export default async function mapRoutes(fastify) {
    */
   fastify.post("/snapshot", async (request, reply) => {
     const deviceId = request.deviceId;
+
+    // Rate-limit: one snapshot per 23 hours per device to prevent DB bloat
+    const { data: recentSnap } = await supabase
+      .from("user_preference_snapshots")
+      .select("created_at")
+      .eq("device_id", deviceId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (recentSnap) {
+      const elapsed = Date.now() - new Date(recentSnap.created_at).getTime();
+      if (elapsed < 23 * 3600 * 1000) {
+        return reply.status(200).send({ ok: true, skipped: true });
+      }
+    }
 
     // Ensure user row exists
     const { error: userErr } = await supabase

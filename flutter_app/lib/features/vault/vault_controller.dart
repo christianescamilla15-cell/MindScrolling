@@ -43,74 +43,59 @@ class VaultState {
 }
 
 // ---------------------------------------------------------------------------
-// Controller
+// Notifier — single class, eliminates VaultController intermediary
+//
+// The previous two-class pattern (VaultController + VaultNotifier) broke
+// optimistic updates: VaultController mutated its own StateNotifier state
+// but VaultNotifier only synced manually after each await, so interim state
+// changes (e.g., the optimistic removal) never reached the UI.
 // ---------------------------------------------------------------------------
 
-class VaultController extends StateNotifier<VaultState> {
-  final VaultRepository _repository;
+class VaultNotifier extends AsyncNotifier<VaultState> {
+  @override
+  VaultState build() => const VaultState();
 
-  VaultController(this._repository) : super(const VaultState());
+  VaultRepository get _repo => ref.read(vaultRepositoryProvider);
+
+  VaultState get _current => state.valueOrNull ?? const VaultState();
 
   /// Load saved quotes from the vault.
   Future<void> load() async {
-    state = state.copyWith(isLoading: true, error: null);
-    final result = await _repository.getVault();
+    state = AsyncData(_current.copyWith(isLoading: true, error: null));
+    final result = await _repo.getVault();
     result.when(
       success: (items) {
-        state = state.copyWith(
-          items: List<QuoteModel>.from(items),
-          isLoading: false,
+        state = AsyncData(
+          _current.copyWith(
+            items: List<QuoteModel>.from(items),
+            isLoading: false,
+          ),
         );
       },
       failure: (message, _) {
-        state = state.copyWith(isLoading: false, error: message);
+        state = AsyncData(_current.copyWith(isLoading: false, error: message));
       },
     );
   }
 
   /// Remove a quote from the vault by its ID.
+  /// Optimistic update: UI reflects removal immediately; reverts on failure.
   Future<void> remove(String quoteId) async {
-    // Optimistic update
-    final before = List<QuoteModel>.from(state.items);
-    state = state.copyWith(
-      items: state.items.where((q) => q.id != quoteId).toList(),
+    final before = _current;
+    // Optimistic update — triggers immediate UI rebuild
+    state = AsyncData(
+      before.copyWith(
+        items: before.items.where((q) => q.id != quoteId).toList(),
+      ),
     );
-    final result = await _repository.removeFromVault(quoteId);
+    final result = await _repo.removeFromVault(quoteId);
     if (result.isError) {
-      // Revert on failure
-      state = state.copyWith(items: before);
+      state = AsyncData(before); // revert on failure
     }
   }
 
   /// Returns true if a quote with [id] is currently in the vault state.
-  bool isInVault(String id) => state.items.any((q) => q.id == id);
-}
-
-// ---------------------------------------------------------------------------
-// AsyncNotifier wrapper so the repository can be awaited before first use
-// ---------------------------------------------------------------------------
-
-class VaultNotifier extends AsyncNotifier<VaultState> {
-  late VaultController _ctrl;
-
-  @override
-  VaultState build() {
-    final repo = ref.watch(vaultRepositoryProvider);
-    _ctrl = VaultController(repo);
-    return _ctrl.state;
-  }
-
-  Future<void> load() async {
-    await _ctrl.load();
-    state = AsyncData(_ctrl.state);
-  }
-
-  Future<void> remove(String quoteId) async {
-    await _ctrl.remove(quoteId);
-    state = AsyncData(_ctrl.state);
-  }
-
-  bool isInVault(String id) => _ctrl.isInVault(id);
+  bool isInVault(String id) => _current.items.any((q) => q.id == id);
 }
 
 final vaultControllerProvider =
@@ -124,4 +109,3 @@ final vaultStateProvider = Provider<VaultState>((ref) {
         orElse: () => const VaultState(isLoading: true),
       );
 });
-

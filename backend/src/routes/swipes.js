@@ -85,7 +85,8 @@ export default async function swipesRoutes(fastify) {
       }
     }
 
-    const dwellMs = Math.max(0, Number(dwell_time_ms) || 0);
+    const MAX_DWELL_MS = 300_000; // 5 minutes — cap prevents feed algorithm distortion
+    const dwellMs = Math.min(Math.max(0, Number(dwell_time_ms) || 0), MAX_DWELL_MS);
     const isSkip  = dwellMs < SKIP_THRESHOLD_MS;
 
     // ── Parallel fetch: user row + current preference row ─────────────────────
@@ -130,7 +131,7 @@ export default async function swipesRoutes(fastify) {
       {
         device_id:         deviceId,
         streak,
-        total_reflections: reflections + 1,
+        total_reflections: source !== "preview" ? reflections + 1 : reflections,
         last_active:       todayStr,
       },
       { onConflict: "device_id" }

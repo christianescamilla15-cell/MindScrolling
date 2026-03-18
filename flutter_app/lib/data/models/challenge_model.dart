@@ -15,11 +15,11 @@ class ChallengeModel {
 
   factory ChallengeModel.fromJson(Map<String, dynamic> json) {
     return ChallengeModel(
-      id: json['id'] as String,
-      code: json['code'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      activeDate: json['active_date'] as String,
+      id: json['id'] as String? ?? '',
+      code: json['code'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      activeDate: json['active_date'] as String? ?? '',
     );
   }
 

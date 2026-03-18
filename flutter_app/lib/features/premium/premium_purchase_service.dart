@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
@@ -14,7 +15,7 @@ import '../../data/datasources/local/settings_local_ds.dart';
 const kProductIdAndroid = 'com.mindscrolling.inside';
 const kProductIdIos = 'com.mindscrolling.inside';
 
-String get _productId => Platform.isIOS ? kProductIdIos : kProductIdAndroid;
+String get _productId => (!kIsWeb && Platform.isIOS) ? kProductIdIos : kProductIdAndroid;
 
 // ---------------------------------------------------------------------------
 // Purchase result
@@ -235,8 +236,10 @@ class PremiumPurchaseService {
 // Provider
 // ---------------------------------------------------------------------------
 
+// NOT autoDispose — must persist for the app lifetime so an in-flight purchase
+// completes even if the premium screen is dismissed before the store callback fires.
 final premiumPurchaseServiceProvider =
-    Provider.autoDispose<PremiumPurchaseService>((ref) {
+    Provider<PremiumPurchaseService>((ref) {
   final service = PremiumPurchaseService(ref: ref);
   service.initialize();
   ref.onDispose(service.dispose);
