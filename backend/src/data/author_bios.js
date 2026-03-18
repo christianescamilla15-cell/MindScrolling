@@ -83,7 +83,6 @@ export const AUTHOR_BIOS = {
     "Douglas Adams": "English humorist (1952–2001). 'The Hitchhiker's Guide to the Galaxy.' Life's answer: 42.",
     "Oliver Wendell Holmes Jr.": "American jurist (1841–1935). 30 years on the Supreme Court. Shaped free speech law.",
     "Anatole France": "French novelist and Nobel laureate (1844–1924). Known for ironic, elegant prose.",
-    "Seneca the Younger": "Roman Stoic philosopher, statesman, and playwright (4 BC–65 AD), also known as Lucius Annaeus Seneca. Advisor to Emperor Nero. His 'Letters to Lucilius', 'On the Shortness of Life', and tragedies remain essential reading on how to live with clarity and courage. 'The Younger' distinguishes him from his father, Seneca the Elder, a rhetorician.",
     // ── Remaining 352 authors ─────────────────────────────────────────────────
     "Marie Curie": "Polish-French physicist (1867–1934). First woman to win a Nobel Prize. Won two — Physics and Chemistry. Discovered radium and polonium.",
     "Jim Rohn": "American entrepreneur and motivational speaker (1930–2009). Mentored Tony Robbins. 'You are the average of the five people you spend the most time with.'",
@@ -520,7 +519,6 @@ export const AUTHOR_BIOS = {
     "Douglas Adams": "Autor y humorista inglés (1952–2001). Creó 'La guía del autoestopista galáctico', respondiendo a la pregunta definitiva con '42'.",
     "Oliver Wendell Holmes Jr.": "Jurista estadounidense (1841–1935). 30 años en la Corte Suprema. Sus opiniones sobre libertad de expresión moldearon el derecho constitucional americano.",
     "Anatole France": "Novelista y Nobel francés (1844–1924). Conocido por su prosa irónica y elegante. Defensor de la justicia social y la libertad intelectual.",
-    "Seneca the Younger": "Igual que Séneca — filósofo estoico romano (4 a.C.–65 d.C.). 'El Joven' lo distingue de su padre, Séneca el Viejo, quien fue retórico.",
     // ── Batch 2 — traducidos ──────────────────────────────────────────────────
     "Marie Curie": "Física y química polaco-francesa (1867–1934). Primera mujer en ganar un Premio Nobel. Ganó dos — Física y Química. Descubrió el radio y el polonio.",
     "Jim Rohn": "Empresario y orador motivacional estadounidense (1930–2009). Mentor de Tony Robbins. 'Eres el promedio de las cinco personas con las que más tiempo pasas.'",

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/constants/feed_constants.dart';
+import '../../core/analytics/event_logger.dart';
 import '../../core/providers/core_providers.dart';
 import '../../core/utils/haptics_service.dart';
 import '../../data/models/quote_model.dart';
@@ -54,6 +55,7 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
   String? _nextCursor;
   int _quoteCount = 0;
   bool _buying = false;
+  final Set<String> _likedIds = {};
 
   // MED-05: track when the current card became visible so we can compute dwell_time_ms.
   DateTime _cardShownAt = DateTime.now();
@@ -150,6 +152,23 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
     } catch (_) {
       // Swipe recording failures are silent — they don't interrupt UX.
     }
+  }
+
+  Future<void> _onDoubleTap(QuoteModel quote) async {
+    final wasLiked = _likedIds.contains(quote.id);
+    setState(() {
+      if (wasLiked) {
+        _likedIds.remove(quote.id);
+      } else {
+        _likedIds.add(quote.id);
+      }
+    });
+    HapticsService.lightImpact();
+    EventLogger.logLike(quote.id);
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.post('/quotes/${quote.id}/like');
+    } catch (_) {}
   }
 
   bool _onSwipe(
@@ -289,6 +308,8 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
           packColor: widget.packColor,
           currentIndex: index,
           totalQuotes: _quoteCount,
+          isLiked: _likedIds.contains(quote.id),
+          onDoubleTap: () => _onDoubleTap(quote),
         );
       },
     );
@@ -350,12 +371,16 @@ class _PackQuoteCard extends StatelessWidget {
   final String packColor;
   final int currentIndex;
   final int totalQuotes;
+  final bool isLiked;
+  final VoidCallback onDoubleTap;
 
   const _PackQuoteCard({
     required this.quote,
     required this.packColor,
     required this.currentIndex,
     required this.totalQuotes,
+    required this.isLiked,
+    required this.onDoubleTap,
   });
 
   @override
@@ -364,10 +389,7 @@ class _PackQuoteCard extends StatelessWidget {
     final packAccent = _parseColor(packColor);
 
     return GestureDetector(
-      onDoubleTap: () {
-        // Double-tap triggers a like — here we just show a quick feedback.
-        ScaffoldMessenger.of(context).clearSnackBars();
-      },
+      onDoubleTap: onDoubleTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -506,6 +528,14 @@ class _PackQuoteCard extends StatelessWidget {
                             color: AppColors.textMuted,
                             fontSize: 11,
                           ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          size: 16,
+                          color: isLiked
+                              ? const Color(0xFFF97316)
+                              : AppColors.textMuted,
                         ),
                       ],
                     ),
