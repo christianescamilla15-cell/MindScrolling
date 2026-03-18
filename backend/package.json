@@ -19,6 +19,6 @@
     "@supabase/supabase-js": "^2.45.4",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.1",
-    "fastify-plugin": "^4.5.1"
+    "fastify-plugin": "^5.1.0"
   }
 }
