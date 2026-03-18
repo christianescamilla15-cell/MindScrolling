@@ -95,7 +95,7 @@ export default async function challengesRoutes(fastify) {
       }
     }
 
-    return reply.send({ challenge: activeChallenge, progress });
+    return reply.send({ challenge: activeChallenge, progress, target: 8 });
   });
 
   /**
@@ -155,7 +155,7 @@ export default async function challengesRoutes(fastify) {
 
     // If already completed, return immediately
     if (existing?.completed) {
-      return reply.status(200).send({ updated: false, completed: true, progress: existing.progress });
+      return reply.status(200).send({ updated: false, completed: true, progress: existing.progress, target: TARGET_QUOTES });
     }
 
     // Increment server-side progress by 1
@@ -179,6 +179,6 @@ export default async function challengesRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to update progress", code: "INTERNAL_ERROR" });
     }
 
-    return reply.status(200).send({ updated: true, progress: newProgress, completed });
+    return reply.status(200).send({ updated: true, progress: newProgress, completed, target: TARGET_QUOTES });
   });
 }

@@ -1,6 +1,7 @@
 import { supabase }                from "../db/client.js";
 import { updatePreferenceVector } from "../services/embeddings.js";
 import { getPackEntitlement, KNOWN_PACK_IDS } from "../services/packEntitlement.js";
+import { UUID_RE }                from "../utils/validation.js";
 
 // Dwell thresholds
 const SKIP_THRESHOLD_MS  = 500;    // dwell < 500 ms → quick dismissal
@@ -35,7 +36,6 @@ export default async function swipesRoutes(fastify) {
     // ── Required field validation ──────────────────────────────────────────────
     if (!quote_id)  return reply.status(400).send({ error: "quote_id is required",  code: "MISSING_FIELD" });
 
-    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!UUID_RE.test(quote_id)) {
       return reply.status(400).send({ error: "quote_id must be a valid UUID", code: "INVALID_FIELD" });
     }

@@ -433,13 +433,15 @@ class _NotificationTileState extends State<_NotificationTile> {
       ),
     );
     if (picked != null && mounted) {
+      final dailyTitle = context.tr.dailyReminder;
+      final dailyBody = context.tr.dailyReminderBody;
       setState(() => _time = picked);
       if (_enabled) {
         await NotificationService.scheduleDailyReminder(
           hour: picked.hour,
           minute: picked.minute,
-          title: context.tr.dailyReminder,
-          body: context.tr.dailyReminderBody,
+          title: dailyTitle,
+          body: dailyBody,
         );
       }
     }

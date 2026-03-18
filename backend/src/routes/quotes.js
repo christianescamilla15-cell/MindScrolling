@@ -1,18 +1,6 @@
 import { supabase }              from "../db/client.js";
 import { getPreferenceVector }   from "../services/embeddings.js";
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/** Derive author slug from display name — NFD decomposition strips accents. */
-function authorSlug(name) {
-  if (!name) return "";
-  return name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")   // strip combining diacriticals
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
+import { authorSlug }            from "../utils/validation.js";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

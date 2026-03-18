@@ -23,18 +23,28 @@ export default async function likesRoutes(fastify) {
     }
 
     if (action === "like") {
-      await Promise.all([
+      const [upsertRes, rpcRes] = await Promise.all([
         supabase.from("likes").upsert({ device_id: deviceId, quote_id: id }, { onConflict: "device_id,quote_id" }),
         supabase.rpc("increment_like", { p_device_id: deviceId, p_category: quote.category }),
       ]);
 
+      if (upsertRes.error || rpcRes.error) {
+        request.log.error({ upsertErr: upsertRes.error, rpcErr: rpcRes.error }, "like: DB error");
+        return reply.status(500).send({ error: "Failed to record like", code: "INTERNAL_ERROR" });
+      }
+
       // Fire-and-forget: update semantic preference vector (strong signal α=0.20)
       updatePreferenceVector(deviceId, id, "like").catch(() => {});
     } else {
-      await Promise.all([
+      const [deleteRes, rpcRes] = await Promise.all([
         supabase.from("likes").delete().eq("device_id", deviceId).eq("quote_id", id),
         supabase.rpc("decrement_like", { p_device_id: deviceId, p_category: quote.category }),
       ]);
+
+      if (deleteRes.error || rpcRes.error) {
+        request.log.error({ deleteErr: deleteRes.error, rpcErr: rpcRes.error }, "unlike: DB error");
+        return reply.status(500).send({ error: "Failed to record unlike", code: "INTERNAL_ERROR" });
+      }
       // Note: no vector decrement — EMA naturally decays old signals
     }
 

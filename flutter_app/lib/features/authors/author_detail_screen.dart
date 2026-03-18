@@ -66,7 +66,10 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
             backgroundColor: AppColors.background,
             pinned: true,
             automaticallyImplyLeading: false,
-            title: Text(widget.authorName, style: AppTypography.displaySmall),
+            title: Text(
+              _data?['name'] as String? ?? widget.authorName,
+              style: AppTypography.displaySmall,
+            ),
           ),
 
           if (_loading)
@@ -111,7 +114,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
                   // ── Avatar ──────────────────────────────────────────
                   Center(
                     child: AuthorAvatar(
-                      name: widget.authorName,
+                      name: _data?['name'] as String? ?? widget.authorName,
                       size: 100,
                       accentColor: AppColors.categoryColor(
                         _data!['dominant_category'] ?? 'philosophy',
@@ -123,7 +126,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
                   // ── Name ────────────────────────────────────────────
                   Center(
                     child: Text(
-                      widget.authorName,
+                      _data?['name'] as String? ?? widget.authorName,
                       style: AppTypography.displayMedium,
                       textAlign: TextAlign.center,
                     ),

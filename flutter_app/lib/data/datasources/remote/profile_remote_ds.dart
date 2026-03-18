@@ -11,20 +11,13 @@ class ProfileRemoteDataSource {
   Future<UserProfileModel?> getProfile() async {
     try {
       final json = await _apiClient.get('/profile');
-      // Backend returns the profile object directly (or null wrapped as {data: null} by ApiClient)
-      if (json.containsKey('data')) {
-        // ApiClient wraps non-Map responses as {data: decoded} — null profile case
-        final raw = json['data'];
-        if (raw == null) return null;
-        if (raw is Map<String, dynamic>) return UserProfileModel.fromJson(raw);
-        return null;
-      }
-      // Profile object returned directly as a Map
+      // Backend returns the profile object directly as a Map with device_id
       if (json.containsKey('device_id')) {
         return UserProfileModel.fromJson(json);
       }
       return null;
     } on ApiException catch (e) {
+      // Backend returns 404 when no profile exists
       if (e.statusCode == 404) return null;
       rethrow;
     }

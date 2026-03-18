@@ -135,8 +135,13 @@ export async function getWeeklyInsight(deviceId, context) {
   const insight = message.content[0]?.text?.trim() ?? null;
   if (!insight) return null;
 
-  // Persist for 24-hour cache (keyed by device + lang)
-  await cacheInsight(deviceId, insight, lang);
+  // Persist for 24-hour cache (keyed by device + lang) — non-blocking
+  try {
+    await cacheInsight(deviceId, insight, lang);
+  } catch (cacheErr) {
+    // Cache write may fail if Migration 014 not applied — still return the insight
+    console.warn("[insights] cacheInsight failed (migration 014 applied?):", cacheErr?.message ?? cacheErr);
+  }
 
   return insight;
 }
