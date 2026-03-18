@@ -58,7 +58,7 @@ class AmbientAudioService {
       await _player?.stop();
       _currentUrl = url;
       await _player?.setUrl(url);
-      _player?.setLoopMode(LoopMode.one);
+      await _player?.setLoopMode(LoopMode.one);
       if (autoPlay) await _player?.play();
     } catch (e) {
       debugPrint('[AmbientAudioService] setTrack error: $e');
