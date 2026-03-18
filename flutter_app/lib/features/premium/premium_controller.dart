@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/constants/monetization_constants.dart';
 import '../../core/providers/core_providers.dart';
 import '../../data/datasources/local/settings_local_ds.dart';
 import '../../data/datasources/remote/stats_remote_ds.dart';
@@ -15,6 +16,8 @@ import 'premium_purchase_service.dart';
 
 const _kTrialStartKey = 'mindscroll_trial_start';
 const _kTrialDurationDays = 7;
+// Dev-only: hidden override key (tap version 5× in Settings to set)
+const _kDevOverrideKey = 'mindscroll_dev_state_override';
 
 // ---------------------------------------------------------------------------
 // Repository provider
@@ -102,6 +105,14 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
   // ── Trial system (backend-driven) ─────────────────────────────────────
 
   Future<void> _initTrial() async {
+    // ── Dev override (hidden dev panel in Settings) ──────────────────────────
+    final prefs = await SharedPreferences.getInstance();
+    final devOverride = prefs.getString(_kDevOverrideKey);
+    if (devOverride != null) {
+      _applyDevOverride(devOverride);
+      return;
+    }
+
     try {
       final api = ref.read(apiClientProvider);
 
@@ -112,9 +123,6 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
       final trialDaysLeft = (response['trial_days_left'] as num?)?.toInt() ?? 0;
       final trialExpired = response['trial_expired'] == true;
       final isPaidPremium = response['is_paid_premium'] == true;
-
-      // Persist trial info locally for offline fallback
-      final prefs = await SharedPreferences.getInstance();
 
       if (isPaidPremium) {
         await prefs.setString(_kTrialStartKey, 'paid');
@@ -247,7 +255,7 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
     );
 
     final result = await _repo.unlock(
-      amount: 2.99,
+      amount: MonetizationConstants.basePriceUsd,
       currency: 'USD',
     );
 
@@ -261,7 +269,7 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
               purchasedAt: null,
             ),
             isPurchasing: false,
-            successMessage: 'Premium unlocked! Thank you.',
+            successMessage: 'purchaseSuccess',
           ),
         );
       },
@@ -307,6 +315,44 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
           premiumState: const PremiumStateModel(isPremium: true),
           isPurchasing: false,
           successMessage: 'restoreSuccess',
+        ));
+    }
+  }
+
+  // ── Dev tools ─────────────────────────────────────────────────────────────
+
+  /// Sets a local premium state override for testing.
+  /// [devState] is 'free' | 'trial' | 'premium' | 'reset'.
+  /// Tap the version number 5× in Settings to open the dev panel.
+  Future<void> devSetState(String devState) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (devState == 'reset') {
+      await prefs.remove(_kDevOverrideKey);
+      await prefs.remove(_kTrialStartKey);
+    } else {
+      await prefs.setString(_kDevOverrideKey, devState);
+    }
+    state = const AsyncLoading();
+    await _initTrial();
+  }
+
+  void _applyDevOverride(String devState) {
+    final current = state.valueOrNull ?? const PremiumUiState();
+    switch (devState) {
+      case 'free':
+        state = AsyncData(current.copyWith(
+          premiumState: const PremiumStateModel(isPremium: false),
+          isTrial: false, trialDaysLeft: 0, trialExpired: true,
+        ));
+      case 'trial':
+        state = AsyncData(current.copyWith(
+          premiumState: const PremiumStateModel(isPremium: false),
+          isTrial: true, trialDaysLeft: 6, trialExpired: false,
+        ));
+      case 'premium':
+        state = AsyncData(current.copyWith(
+          premiumState: const PremiumStateModel(isPremium: true),
+          isTrial: false, trialDaysLeft: 0, trialExpired: false,
         ));
     }
   }

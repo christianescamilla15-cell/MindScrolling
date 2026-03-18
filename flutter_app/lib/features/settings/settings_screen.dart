@@ -9,6 +9,7 @@ import '../../app/theme/typography.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/notification_service.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../premium/premium_controller.dart';
 import 'settings_controller.dart';
 
 // Teal accent used throughout the settings screen.
@@ -103,14 +104,7 @@ class SettingsScreen extends ConsumerWidget {
             _SectionHeader(title: context.tr.about),
             _SettingsCard(
               children: [
-                _InfoTile(
-                  icon: Icons.info_outline,
-                  label: context.tr.appVersion,
-                  trailing: Text(
-                    '1.0.0',
-                    style: AppTypography.bodySmall,
-                  ),
-                ),
+                const _DevVersionTile(version: '1.0.0'),
                 _Divider(),
                 _NavTile(
                   icon: Icons.privacy_tip_outlined,
@@ -555,6 +549,215 @@ class _Divider extends StatelessWidget {
       color: AppColors.border,
       indent: 52,
       endIndent: 0,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dev version tile — tap 5× to open dev panel
+// ---------------------------------------------------------------------------
+
+class _DevVersionTile extends StatefulWidget {
+  final String version;
+  const _DevVersionTile({required this.version});
+
+  @override
+  State<_DevVersionTile> createState() => _DevVersionTileState();
+}
+
+class _DevVersionTileState extends State<_DevVersionTile> {
+  int _tapCount = 0;
+  DateTime? _lastTap;
+
+  void _onTap() {
+    final now = DateTime.now();
+    if (_lastTap != null && now.difference(_lastTap!) > const Duration(seconds: 2)) {
+      _tapCount = 0;
+    }
+    _lastTap = now;
+    _tapCount++;
+    if (_tapCount >= 5) {
+      _tapCount = 0;
+      _showDevPanel();
+    }
+  }
+
+  void _showDevPanel() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => const _DevPremiumSheet(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+        leading: const Icon(Icons.info_outline, color: AppColors.textMuted, size: 22),
+        title: Text(context.tr.appVersion, style: AppTypography.bodyMedium),
+        trailing: Text(widget.version, style: AppTypography.bodySmall),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dev premium state panel (shown after 5 taps on version)
+// ---------------------------------------------------------------------------
+
+class _DevPremiumSheet extends ConsumerWidget {
+  const _DevPremiumSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ps = ref.watch(premiumStateProvider);
+    final controller = ref.read(premiumControllerProvider.notifier);
+
+    String currentLabel;
+    Color currentColor;
+    if (ps.premiumState.isPremium) {
+      currentLabel = 'MindScrolling Inside';
+      currentColor = const Color(0xFF8b5cf6);
+    } else if (ps.isTrial) {
+      currentLabel = 'Free Trial (${ps.trialDaysLeft}d)';
+      currentColor = const Color(0xFFf59e0b);
+    } else {
+      currentLabel = 'Free';
+      currentColor = Colors.grey;
+    }
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.borderStrong,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              const Text('🛠', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              Text('Dev Tools', style: AppTypography.displaySmall),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: currentColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: currentColor.withOpacity(0.4)),
+                ),
+                child: Text(
+                  currentLabel,
+                  style: AppTypography.labelSmall.copyWith(color: currentColor, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Override local — no modifica la DB. Tap versión 5× para abrir.',
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+          ),
+          const SizedBox(height: 20),
+          _DevStateButton(
+            icon: '🔒',
+            label: 'Free',
+            subtitle: 'Sin premium, trial expirado',
+            color: Colors.grey,
+            onTap: () { Navigator.pop(context); controller.devSetState('free'); },
+          ),
+          const SizedBox(height: 10),
+          _DevStateButton(
+            icon: '⏳',
+            label: 'Free Trial — 6 días',
+            subtitle: 'Trial activo, sin pago',
+            color: const Color(0xFFf59e0b),
+            onTap: () { Navigator.pop(context); controller.devSetState('trial'); },
+          ),
+          const SizedBox(height: 10),
+          _DevStateButton(
+            icon: '✦',
+            label: 'MindScrolling Inside',
+            subtitle: 'Premium completo activado',
+            color: const Color(0xFF8b5cf6),
+            onTap: () { Navigator.pop(context); controller.devSetState('premium'); },
+          ),
+          const SizedBox(height: 10),
+          _DevStateButton(
+            icon: '↩',
+            label: 'Reset — usar backend real',
+            subtitle: 'Elimina el override y recarga desde servidor',
+            color: Colors.redAccent,
+            onTap: () { Navigator.pop(context); controller.devSetState('reset'); },
+          ),
+          const SizedBox(height: 4),
+        ],
+      ),
+    );
+  }
+}
+
+class _DevStateButton extends StatelessWidget {
+  final String icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _DevStateButton({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.07),
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: color.withOpacity(0.25)),
+        ),
+        child: Row(
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: AppTypography.bodyMedium.copyWith(color: color, fontWeight: FontWeight.w700)),
+                  Text(subtitle, style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: color.withOpacity(0.5), size: 18),
+          ],
+        ),
+      ),
     );
   }
 }
