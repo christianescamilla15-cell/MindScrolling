@@ -17,6 +17,7 @@ abstract class AppStrings {
   String get close;
   String get error;
   String get retry;
+  String get categories;
 
   // ------------------------------------------------------------------
   // Onboarding
@@ -343,6 +344,8 @@ abstract class AppStrings {
   // ------------------------------------------------------------------
   String get exportVault;
   String get exportVaultEmpty;
+  String get myVault;
+  String get exportedFrom;
 
   // ------------------------------------------------------------------
   // Philosophy Map tabs

@@ -77,6 +77,6 @@ export default async function profileRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to fetch profile", code: "INTERNAL_ERROR" });
     }
 
-    return reply.send({ data: data ?? null });
+    return reply.send(data ?? null);
   });
 }

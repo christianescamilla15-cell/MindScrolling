@@ -38,6 +38,8 @@ class StringsEs implements AppStrings {
 
   @override
   String get retry => 'Reintentar';
+  @override
+  String get categories => 'Categorías';
 
   // ------------------------------------------------------------------
   // Onboarding
@@ -653,6 +655,8 @@ class StringsEs implements AppStrings {
   // Vault export
   @override String get exportVault      => 'Exportar b\u00f3veda';
   @override String get exportVaultEmpty => 'A\u00fan no hay frases para exportar.';
+  @override String get myVault          => 'Mi B\u00f3veda';
+  @override String get exportedFrom     => 'Exportado desde MindScrolling';
 
   // Philosophy Map tabs
   @override String get today      => 'Hoy';

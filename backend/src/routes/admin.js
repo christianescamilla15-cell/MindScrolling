@@ -236,7 +236,8 @@ export default async function adminRoutes(fastify) {
   fastify.get("/audit", async (request, reply) => {
     if (!requireAdmin(request, reply)) return;
 
-    const limit = Math.min(Number(request.query.limit) || 50, 200);
+    const rawLimit = Number(request.query.limit);
+    const limit = Math.min(Math.max(1, Number.isFinite(rawLimit) ? rawLimit : 50), 200);
 
     const { data, error } = await supabase
       .from("premium_audit_log")

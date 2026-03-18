@@ -108,9 +108,14 @@ export default async function webhooksRoutes(fastify) {
     // ── Grant premium ──────────────────────────────────────────────────────────
     if (GRANT_EVENTS.has(type)) {
       // Ensure user row exists
-      await supabase
+      const { error: upsertErr } = await supabase
         .from("users")
         .upsert({ device_id: deviceId }, { onConflict: "device_id" });
+
+      if (upsertErr) {
+        request.log.error({ err: upsertErr, deviceId, type }, "revenuecat: failed to upsert user");
+        return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
+      }
 
       const premiumSource = store === "APP_STORE" ? "app_store" : "play_billing";
       const purchasedAt   = purchasedAtMs

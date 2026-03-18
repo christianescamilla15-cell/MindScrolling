@@ -54,14 +54,14 @@ export default async function authorsRoutes(fastify) {
       .from("authors")
       .select(`slug, name, ${bioCol}, quote_count`)
       .eq("slug", slug)
-      .single();
+      .maybeSingle();
 
-    if (authorResult.error || !authorResult.data) {
-      if (authorResult.error?.code === "PGRST116") {
-        return reply.status(404).send({ error: "Author not found", code: "NOT_FOUND" });
-      }
+    if (authorResult.error) {
       fastify.log.error({ err: authorResult.error, slug }, "GET /authors/:slug — author fetch error");
       return reply.status(500).send({ error: "Failed to fetch author", code: "INTERNAL_ERROR" });
+    }
+    if (!authorResult.data) {
+      return reply.status(404).send({ error: "Author not found", code: "NOT_FOUND" });
     }
 
     const author = authorResult.data;

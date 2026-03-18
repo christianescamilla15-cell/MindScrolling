@@ -1,6 +1,19 @@
 import { supabase }              from "../db/client.js";
 import { getPreferenceVector }   from "../services/embeddings.js";
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Derive author slug from display name — NFD decomposition strips accents. */
+function authorSlug(name) {
+  if (!name) return "";
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")   // strip combining diacriticals
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORIES       = ["stoicism", "philosophy", "discipline", "reflection"];
@@ -207,7 +220,7 @@ export default async function quotesRoutes(fastify) {
     ]);
 
     const isPremium         = userRow?.is_premium === true;
-    const effectiveLang     = lang;
+    const effectiveLang     = lang === "es" ? "es" : "en";
     const challengeCategory = today?.category ?? null;
 
     // ── Build scoring inputs ───────────────────────────────────────────────────
@@ -322,7 +335,7 @@ export default async function quotesRoutes(fastify) {
 
     const last = selected[selected.length - 1];
     return reply.send({
-      data:        selected.map(({ _score, _similarity, similarity, ...q }) => q),
+      data:        selected.map(({ _score, _similarity, similarity, ...q }) => ({ ...q, author_slug: authorSlug(q.author) })),
       next_cursor: last?.id ?? null,
       has_more:    candidates.length >= poolSize,
       algorithm:   hasVector ? "hybrid" : "behavioural",   // visible in dev for debugging

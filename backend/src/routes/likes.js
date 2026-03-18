@@ -23,16 +23,18 @@ export default async function likesRoutes(fastify) {
     }
 
     if (action === "like") {
-      await supabase
-        .from("likes")
-        .upsert({ device_id: deviceId, quote_id: id }, { onConflict: "device_id,quote_id" });
-      await supabase.rpc("increment_like", { p_device_id: deviceId, p_category: quote.category });
+      await Promise.all([
+        supabase.from("likes").upsert({ device_id: deviceId, quote_id: id }, { onConflict: "device_id,quote_id" }),
+        supabase.rpc("increment_like", { p_device_id: deviceId, p_category: quote.category }),
+      ]);
 
       // Fire-and-forget: update semantic preference vector (strong signal α=0.20)
       updatePreferenceVector(deviceId, id, "like").catch(() => {});
     } else {
-      await supabase.from("likes").delete().eq("device_id", deviceId).eq("quote_id", id);
-      await supabase.rpc("decrement_like", { p_device_id: deviceId, p_category: quote.category });
+      await Promise.all([
+        supabase.from("likes").delete().eq("device_id", deviceId).eq("quote_id", id),
+        supabase.rpc("decrement_like", { p_device_id: deviceId, p_category: quote.category }),
+      ]);
       // Note: no vector decrement — EMA naturally decays old signals
     }
 

@@ -116,7 +116,7 @@ class QuoteCard extends StatelessWidget {
 
                     // Author portrait — large, centered
                     GestureDetector(
-                      onTap: () => context.push('/author/${Uri.encodeComponent(quote.author)}'),
+                      onTap: () => context.push('/author/${Uri.encodeComponent(quote.authorSlug)}'),
                       child: AuthorAvatar(
                         name: quote.author,
                         size: 72,

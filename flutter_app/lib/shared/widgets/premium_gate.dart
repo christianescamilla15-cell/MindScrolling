@@ -52,7 +52,7 @@ class _PremiumGateView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'MindScrolling Inside',
+              context.tr.premium,
               style: AppTypography.displaySmall.copyWith(
                 color: AppColors.stoicism,
               ),

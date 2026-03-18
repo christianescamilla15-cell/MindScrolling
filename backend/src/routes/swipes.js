@@ -34,6 +34,12 @@ export default async function swipesRoutes(fastify) {
 
     // ── Required field validation ──────────────────────────────────────────────
     if (!quote_id)  return reply.status(400).send({ error: "quote_id is required",  code: "MISSING_FIELD" });
+
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(quote_id)) {
+      return reply.status(400).send({ error: "quote_id must be a valid UUID", code: "INVALID_FIELD" });
+    }
+
     if (!direction) return reply.status(400).send({ error: "direction is required", code: "MISSING_FIELD" });
     if (!category)  return reply.status(400).send({ error: "category is required",  code: "MISSING_FIELD" });
 

@@ -78,6 +78,17 @@ function normalizeLang(raw) {
   return l === "es" ? "es" : "en";
 }
 
+/** Derive author slug from display name — NFD decomposition strips accents. */
+function authorSlug(name) {
+  if (!name) return "";
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 /**
  * Fire-and-forget audit log insert.
  */
@@ -468,6 +479,10 @@ export default async function packsRoutes(fastify) {
       .limit(rawLimit + 1);
 
     if (cursor) {
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!UUID_RE.test(cursor)) {
+        return reply.status(400).send({ error: "cursor must be a valid UUID", code: "INVALID_FIELD" });
+      }
       query = query.gt("id", cursor);
     }
 
@@ -515,7 +530,7 @@ export default async function packsRoutes(fastify) {
         quote_count: totalInLang,
         access_reason: accessReason,
       },
-      data: pageQuotes,
+      data: pageQuotes.map(q => ({ ...q, author_slug: authorSlug(q.author) })),
       next_cursor: nextCursor,
       has_more: hasMore,
       total_in_lang: totalInLang,

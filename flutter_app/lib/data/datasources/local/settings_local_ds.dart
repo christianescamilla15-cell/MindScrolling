@@ -8,6 +8,8 @@ class SettingsLocalDataSource {
   static const _langKey = 'mindscroll_lang';
   static const _onboardingKey = 'mindscroll_onboarding_done';
   static const _premiumKey = 'mindscroll_is_premium';
+  static const _ownedPacksKey = 'mindscroll_owned_packs';
+  static const _userStateKey = 'mindscroll_user_state';
   static const _profileKey = 'mindscroll_profile';
 
   // ── Language ──────────────────────────────────────────────────────────────
@@ -38,6 +40,32 @@ class SettingsLocalDataSource {
 
   Future<void> setPremium(bool value) async {
     await LocalStorage.setBool(_premiumKey, value);
+  }
+
+  Future<List<String>> getOwnedPacks() async {
+    final raw = await LocalStorage.getString(_ownedPacksKey);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) return decoded.whereType<String>().toList();
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> setOwnedPacks(List<String> packs) async {
+    await LocalStorage.setString(_ownedPacksKey, jsonEncode(packs));
+  }
+
+  Future<String?> getUserState() async {
+    return LocalStorage.getString(_userStateKey);
+  }
+
+  Future<void> setUserState(String? state) async {
+    if (state != null) {
+      await LocalStorage.setString(_userStateKey, state);
+    }
   }
 
   // ── Profile ───────────────────────────────────────────────────────────────

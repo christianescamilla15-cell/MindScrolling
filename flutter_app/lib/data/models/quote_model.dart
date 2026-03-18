@@ -8,6 +8,10 @@ class QuoteModel {
   final String packName;
   final bool isPremium;
 
+  /// Server-derived slug for author detail navigation.
+  /// Falls back to client-side derivation if absent (backward compat).
+  final String authorSlug;
+
   const QuoteModel({
     required this.id,
     required this.text,
@@ -17,19 +21,31 @@ class QuoteModel {
     required this.swipeDir,
     required this.packName,
     required this.isPremium,
+    required this.authorSlug,
   });
 
   factory QuoteModel.fromJson(Map<String, dynamic> json) {
+    final author = json['author'] as String? ?? '';
     return QuoteModel(
       id: json['id'] as String? ?? '',
       text: json['text'] as String? ?? '',
-      author: json['author'] as String? ?? '',
+      author: author,
       category: json['category'] as String? ?? '',
       lang: json['lang'] as String? ?? 'en',
       swipeDir: json['swipe_dir'] as String? ?? '',
       packName: json['pack_name'] as String? ?? '',
       isPremium: json['is_premium'] as bool? ?? false,
+      authorSlug: json['author_slug'] as String? ?? _deriveSlug(author),
     );
+  }
+
+  /// Client-side slug fallback — matches backend authorSlug() logic.
+  static String _deriveSlug(String name) {
+    // Simple ASCII-only fallback; backend NFD version is authoritative.
+    return name
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
   }
 
   Map<String, dynamic> toJson() {
@@ -42,6 +58,7 @@ class QuoteModel {
       'swipe_dir': swipeDir,
       'pack_name': packName,
       'is_premium': isPremium,
+      'author_slug': authorSlug,
     };
   }
 
@@ -54,6 +71,7 @@ class QuoteModel {
     String? swipeDir,
     String? packName,
     bool? isPremium,
+    String? authorSlug,
   }) {
     return QuoteModel(
       id: id ?? this.id,
@@ -64,6 +82,7 @@ class QuoteModel {
       swipeDir: swipeDir ?? this.swipeDir,
       packName: packName ?? this.packName,
       isPremium: isPremium ?? this.isPremium,
+      authorSlug: authorSlug ?? this.authorSlug,
     );
   }
 

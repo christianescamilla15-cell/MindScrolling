@@ -386,21 +386,27 @@ class _NotificationTileState extends State<_NotificationTile> {
     if (mounted) setState(() => _enabled = value);
 
     if (value) {
+      // Capture localized strings before async gap to avoid using context after dispose
+      final dailyTitle = context.tr.dailyReminder;
+      final dailyBody = context.tr.dailyReminderBody;
+      final weeklyTitle = context.tr.weeklyMapTitle;
+      final weeklyBody = context.tr.weeklyMapBody;
       try {
         await NotificationService.requestPermission();
       } catch (_) {
         // Permission dialog may fail on some devices — continue anyway
       }
+      if (!mounted) return;
       try {
         await NotificationService.scheduleDailyReminder(
           hour: _time.hour,
           minute: _time.minute,
-          title: context.tr.dailyReminder,
-          body: context.tr.dailyReminderBody,
+          title: dailyTitle,
+          body: dailyBody,
         );
         await NotificationService.scheduleWeeklyMapReminder(
-          title: context.tr.weeklyMapTitle,
-          body: context.tr.weeklyMapBody,
+          title: weeklyTitle,
+          body: weeklyBody,
         );
       } catch (_) {
         // Scheduling may fail but the preference is saved

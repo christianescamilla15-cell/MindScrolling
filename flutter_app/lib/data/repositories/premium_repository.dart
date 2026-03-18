@@ -31,10 +31,18 @@ class PremiumRepository {
       final json = await _remote.getPremiumStatus();
       final state = PremiumStateModel.fromJson(json);
       await _local.setPremium(state.isPremium);
+      await _local.setOwnedPacks(state.ownedPacks);
+      await _local.setUserState(state.userState);
       return ApiSuccess(state);
     } catch (e) {
       final cachedPremium = await _local.isPremium();
-      return ApiSuccess(PremiumStateModel(isPremium: cachedPremium));
+      final cachedPacks = await _local.getOwnedPacks();
+      final cachedUserState = await _local.getUserState();
+      return ApiSuccess(PremiumStateModel(
+        isPremium: cachedPremium,
+        ownedPacks: cachedPacks,
+        userState: cachedUserState,
+      ));
     }
   }
 

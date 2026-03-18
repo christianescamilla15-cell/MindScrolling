@@ -80,14 +80,12 @@ Rules:
 async function getCachedInsight(deviceId, lang = "en") {
   const { data } = await supabase
     .from("ai_insights")
-    .select("insight, generated_at, lang")
+    .select("insight, generated_at")
     .eq("device_id", deviceId)
+    .eq("lang", lang)
     .maybeSingle();
 
   if (!data) return null;
-
-  // If cached in a different language, treat as expired
-  if (data.lang && data.lang !== lang) return null;
 
   const age = Date.now() - new Date(data.generated_at).getTime();
   if (age > CACHE_TTL_MS) return null;   // expired
@@ -100,7 +98,7 @@ async function cacheInsight(deviceId, insight, lang = "en") {
     .from("ai_insights")
     .upsert(
       { device_id: deviceId, insight, lang, generated_at: new Date().toISOString() },
-      { onConflict: "device_id" }
+      { onConflict: "device_id,lang" }
     );
 }
 

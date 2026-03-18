@@ -173,7 +173,9 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
     if (!wasLiked) EventLogger.logLike(quote.id);
     try {
       final api = ref.read(apiClientProvider);
-      await api.post('/quotes/${quote.id}/like');
+      await api.post('/quotes/${quote.id}/like', body: {
+        'action': wasLiked ? 'unlike' : 'like',
+      });
     } catch (_) {}
   }
 
@@ -488,7 +490,7 @@ class _PackQuoteCard extends StatelessWidget {
                     // Author
                     GestureDetector(
                       onTap: () => context.push(
-                          '/author/${Uri.encodeComponent(quote.author)}'),
+                          '/author/${Uri.encodeComponent(quote.authorSlug)}'),
                       child: Text(
                         quote.author,
                         style: AppTypography.labelSmall.copyWith(

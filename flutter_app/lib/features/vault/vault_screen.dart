@@ -117,7 +117,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
 
   void _exportVault(BuildContext context, List<QuoteModel> items) {
     final buffer = StringBuffer();
-    buffer.writeln('MindScrolling — My Vault');
+    final tr = context.tr;
+    buffer.writeln('MindScrolling — ${tr.myVault}');
     buffer.writeln('=' * 40);
     buffer.writeln();
     for (final q in items) {
@@ -126,8 +127,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
       buffer.writeln();
     }
     buffer.writeln('---');
-    buffer.writeln('Exported from MindScrolling');
-    Share.share(buffer.toString(), subject: 'MindScrolling Vault');
+    buffer.writeln(tr.exportedFrom);
+    Share.share(buffer.toString(), subject: 'MindScrolling ${tr.vault}');
   }
 
   void _handleRemove(String quoteId) {

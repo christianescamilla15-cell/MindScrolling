@@ -203,6 +203,9 @@ export default async function premiumRoutes(fastify) {
     if (!VALID_STORES.includes(store)) {
       return reply.status(400).send({ error: `store must be one of: ${VALID_STORES.join(", ")}`, code: "INVALID_FIELD" });
     }
+    if ((purchase_token && purchase_token.length > 1000) || (transaction_id && transaction_id.length > 1000)) {
+      return reply.status(400).send({ error: "Token/transaction_id exceeds maximum length", code: "INVALID_FIELD" });
+    }
 
     const expectedProductId = store === "android" ? PRODUCT_ID_ANDROID : PRODUCT_ID_IOS;
     if (product_id !== expectedProductId) {
@@ -305,6 +308,9 @@ export default async function premiumRoutes(fastify) {
         error: "At least one of purchase_token or transaction_id is required",
         code: "MISSING_FIELD",
       });
+    }
+    if ((purchase_token && purchase_token.length > 1000) || (transaction_id && transaction_id.length > 1000)) {
+      return reply.status(400).send({ error: "Token/transaction_id exceeds maximum length", code: "INVALID_FIELD" });
     }
 
     // ── Look up existing Inside purchase across all devices ───────────────────
@@ -470,33 +476,20 @@ export default async function premiumRoutes(fastify) {
     }
 
     // ── Build response message ────────────────────────────────────────────────
+    const PACK_DISPLAY_NAMES = {
+      stoicism_deep: "Stoicism Deep Dive",
+      existentialism: "Existentialism",
+      zen_mindfulness: "Zen & Mindfulness",
+    };
+
     let message;
     if (hasInside && restoredPackIds.length > 0) {
-      const packNames = restoredPackIds
-        .map((pid) => {
-          const meta = {
-            stoicism_deep: "Stoicism Deep Dive",
-            existentialism: "Existentialism",
-            zen_mindfulness: "Zen & Mindfulness",
-          };
-          return meta[pid] ?? pid;
-        })
-        .join(", ");
+      const packNames = restoredPackIds.map((pid) => PACK_DISPLAY_NAMES[pid] ?? pid).join(", ");
       message = `Your purchases have been restored: ${packNames}.`;
     } else if (hasInside) {
       message = "MindScrolling Inside restored.";
     } else {
-      // Only packs restored (no Inside)
-      const packNames = restoredPackIds
-        .map((pid) => {
-          const meta = {
-            stoicism_deep: "Stoicism Deep Dive",
-            existentialism: "Existentialism",
-            zen_mindfulness: "Zen & Mindfulness",
-          };
-          return meta[pid] ?? pid;
-        })
-        .join(", ");
+      const packNames = restoredPackIds.map((pid) => PACK_DISPLAY_NAMES[pid] ?? pid).join(", ");
       message = `Your purchases have been restored: ${packNames}.`;
     }
 

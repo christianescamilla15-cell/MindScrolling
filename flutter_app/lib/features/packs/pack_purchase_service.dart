@@ -156,7 +156,7 @@ class PackPurchaseService {
       final amount = cachedProduct?.rawPrice ?? 2.99;
       final currency = cachedProduct?.currencyCode ?? 'USD';
 
-      await api.post('/packs/$packId/purchase/verify', body: {
+      final verifyResponse = await api.post('/packs/$packId/purchase/verify', body: {
         'store': store,
         'product_id': purchase.productID,
         if (purchase.verificationData.serverVerificationData.isNotEmpty)
@@ -168,6 +168,15 @@ class PackPurchaseService {
 
       if (purchase.pendingCompletePurchase) {
         await InAppPurchase.instance.completePurchase(purchase);
+      }
+
+      final accessGranted = verifyResponse['access_granted'] as bool? ?? true;
+      if (!accessGranted) {
+        _resolve(const PurchaseResult(
+          PurchaseOutcome.failed,
+          errorMessage: 'Purchase verified but access was not granted.',
+        ));
+        return;
       }
 
       _resolve(const PurchaseResult(PurchaseOutcome.success));

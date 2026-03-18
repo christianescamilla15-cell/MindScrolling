@@ -58,18 +58,21 @@ class ChallengeRepository {
     return ApiSuccess(cached);
   }
 
-  /// Posts progress to the server. Fire-and-forget — failures are silent.
+  /// Posts progress to the server and caches the server-confirmed values.
+  /// Fire-and-forget — failures are silent.
   Future<void> updateProgress(
     String challengeId,
     int progress,
     bool completed,
   ) async {
     try {
-      await _remote.updateProgress(challengeId);
-      // Persist locally so getChallengeProgress can reflect the update.
+      final response = await _remote.updateProgress(challengeId);
+      // Use server-confirmed values instead of caller-predicted values
+      final serverProgress = (response['progress'] as num?)?.toInt() ?? progress;
+      final serverCompleted = response['completed'] as bool? ?? completed;
       final model = ChallengeProgressModel(
-        progress: progress,
-        completed: completed,
+        progress: serverProgress,
+        completed: serverCompleted,
       );
       await LocalStorage.setString(
         _progressCacheKey,

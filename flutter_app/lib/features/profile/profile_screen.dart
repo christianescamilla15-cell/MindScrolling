@@ -158,7 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   color: AppColors.background,
                                 ),
                               )
-                            : const Text('Save'),
+                            : Text(context.tr.save),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -171,7 +171,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               .read(profileControllerProvider.notifier)
                               .setEditing(false);
                         },
-                        child: const Text('Cancel'),
+                        child: Text(context.tr.cancel),
                       ),
                     ),
                   ],
@@ -222,10 +222,10 @@ class _StatsSection extends StatelessWidget {
           // Streak + Reflections
           Row(
             children: [
-              _StatTile(label: 'Streak', value: '$streak days', emoji: '🔥'),
+              _StatTile(label: context.tr.streak, value: '$streak', emoji: '🔥'),
               const SizedBox(width: 20),
               _StatTile(
-                label: 'Reflections',
+                label: context.tr.reflections,
                 value: '$reflections',
                 emoji: '✦',
               ),
@@ -294,7 +294,7 @@ class _CategoryBarsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Categories', style: AppTypography.authorText),
+        Text(context.tr.categories, style: AppTypography.authorText),
         const SizedBox(height: 8),
         ...categories.entries.map((entry) {
           final color = AppColors.categoryColor(entry.key);
@@ -305,7 +305,7 @@ class _CategoryBarsSection extends StatelessWidget {
                 SizedBox(
                   width: 80,
                   child: Text(
-                    entry.key,
+                    context.tr.categoryLabels[entry.key] ?? entry.key,
                     style: AppTypography.bodySmall.copyWith(color: color),
                   ),
                 ),

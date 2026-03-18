@@ -9,13 +9,54 @@ const DEFAULT_CHALLENGE = {
   active_date: null,
 };
 
+// ── In-memory Spanish translations keyed by challenge code ───────────────────
+// Used until the DB supports a lang column on daily_challenges.
+const CHALLENGE_TRANSLATIONS_ES = {
+  daily_reflection: {
+    title:       "Reflexión diaria",
+    description: "Lee 5 frases hoy y reflexiona sobre una que resuene contigo. Escribe una sola oración sobre lo que significa en tu vida.",
+  },
+  deep_read: {
+    title:       "Lectura profunda",
+    description: "Dedica al menos 5 segundos a cada frase antes de deslizar. Observa qué ideas te detienen.",
+  },
+  stoic_focus: {
+    title:       "Enfoque estoico",
+    description: "Hoy, desliza hacia arriba las frases que hablen de resiliencia y virtud. Encuentra 8 que te inspiren.",
+  },
+  mindful_vault: {
+    title:       "Bóveda consciente",
+    description: "Guarda 3 frases en tu bóveda que quieras releer esta semana.",
+  },
+  philosophy_explorer: {
+    title:       "Explorador filosófico",
+    description: "Lee frases de al menos 3 categorías diferentes hoy. Observa cuál te atrae más.",
+  },
+};
+
+function normalizeLang(raw) {
+  if (!raw) return "en";
+  const l = String(raw).slice(0, 2).toLowerCase();
+  return l === "es" ? "es" : "en";
+}
+
+/** Translate a challenge object to the target language (in-memory). */
+function translateChallenge(challenge, lang) {
+  if (lang !== "es") return challenge;
+  const tr = CHALLENGE_TRANSLATIONS_ES[challenge.code];
+  if (!tr) return challenge;
+  return { ...challenge, title: tr.title, description: tr.description };
+}
+
 export default async function challengesRoutes(fastify) {
   /**
    * GET /challenges/today
+   * Query: ?lang=en|es
    * Returns today's challenge and the device's progress on it.
    */
   fastify.get("/today", async (request, reply) => {
     const deviceId  = request.deviceId;
+    const lang      = normalizeLang(request.query.lang);
     const todayStr  = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 
     // Fetch today's challenge
@@ -29,7 +70,10 @@ export default async function challengesRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to fetch challenge", code: "INTERNAL_ERROR" });
     }
 
-    const activeChallenge = challenge ?? { ...DEFAULT_CHALLENGE, active_date: todayStr };
+    const activeChallenge = translateChallenge(
+      challenge ?? { ...DEFAULT_CHALLENGE, active_date: todayStr },
+      lang,
+    );
 
     // Fetch progress — null if the device has never interacted with this challenge
     let progress = null;

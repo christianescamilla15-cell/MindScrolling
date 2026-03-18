@@ -38,6 +38,8 @@ class StringsEn implements AppStrings {
 
   @override
   String get retry => 'Retry';
+  @override
+  String get categories => 'Categories';
 
   // ------------------------------------------------------------------
   // Onboarding
@@ -652,6 +654,8 @@ class StringsEn implements AppStrings {
   // Vault export
   @override String get exportVault      => 'Export Vault';
   @override String get exportVaultEmpty => 'No quotes to export yet.';
+  @override String get myVault          => 'My Vault';
+  @override String get exportedFrom     => 'Exported from MindScrolling';
 
   // Philosophy Map tabs
   @override String get today      => 'Today';
