@@ -214,9 +214,9 @@ class PremiumPurchaseService {
         isRestore ? PurchaseOutcome.restored : PurchaseOutcome.success,
       ));
     } catch (e) {
-      if (purchase.pendingCompletePurchase) {
-        await InAppPurchase.instance.completePurchase(purchase);
-      }
+      // Do NOT call completePurchase on failure — let the IAP system
+      // re-deliver the unfinished transaction on next app launch so
+      // the server verify can be retried.
       _resolve(PurchaseResult(
         PurchaseOutcome.failed,
         errorMessage: e.toString(),

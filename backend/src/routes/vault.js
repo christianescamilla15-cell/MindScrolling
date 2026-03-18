@@ -48,10 +48,15 @@ export default async function vaultRoutes(fastify) {
 
     const isPremium = userRow?.is_premium === true;
     if (!isPremium) {
-      const { count } = await supabase
+      const { count, error: countErr } = await supabase
         .from("vault")
         .select("quote_id", { count: "exact", head: true })
         .eq("device_id", deviceId);
+
+      if (countErr) {
+        request.log.error({ err: countErr }, "vault: count check error");
+        return reply.status(500).send({ error: "Failed to check vault limit", code: "INTERNAL_ERROR" });
+      }
 
       if ((count ?? 0) >= FREE_VAULT_LIMIT) {
         return reply.status(403).send({

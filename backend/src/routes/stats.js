@@ -10,6 +10,11 @@ export default async function statsRoutes(fastify) {
       supabase.from("user_preferences").select("category, swipe_count").eq("device_id", deviceId),
     ]);
 
+    if (userRes.error || prefsRes.error) {
+      request.log.error({ userErr: userRes.error, prefsErr: prefsRes.error }, "stats: DB error");
+      return reply.status(500).send({ error: "Failed to fetch stats", code: "INTERNAL_ERROR" });
+    }
+
     const user  = userRes.data  ?? { streak: 0, total_reflections: 0 };
     const prefs = prefsRes.data ?? [];
 
@@ -18,15 +23,19 @@ export default async function statsRoutes(fastify) {
 
     // Count today's actual swipes from swipe_events (not seen_quotes which includes feed-loaded)
     const todayStr = new Date().toISOString().slice(0, 10);
-    const { count: todaySwipes } = await supabase
+    const { count: todaySwipes, error: swipeErr } = await supabase
       .from("swipe_events")
       .select("id", { count: "exact", head: true })
       .eq("device_id", deviceId)
       .gte("created_at", todayStr + "T00:00:00Z");
 
+    if (swipeErr) {
+      request.log.error({ err: swipeErr }, "stats: swipe_events count error");
+    }
+
     return reply.send({
-      streak:            user.streak,
-      total_reflections: user.total_reflections,
+      streak:            user.streak ?? 0,
+      total_reflections: user.total_reflections ?? 0,
       today_swipes:      todaySwipes ?? 0,
       category_counts,
     });
