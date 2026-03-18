@@ -133,6 +133,9 @@ class StringsEs implements AppStrings {
   // Actions / toasts
   // ------------------------------------------------------------------
   @override
+  String get or => 'o';
+
+  @override
   String get shareVia => 'Compartir con…';
 
   @override

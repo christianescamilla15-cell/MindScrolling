@@ -260,13 +260,13 @@ export default async function packsRoutes(fastify) {
     // Entitled user → redirect signal (no preview quotes needed)
     if (entitlement.access === "full") {
       // Fetch quote count for metadata
-      const { data: countRows } = await supabase
+      const { count: quoteCountResult } = await supabase
         .from("quotes")
-        .select("id")
+        .select("*", { count: "exact", head: true })
         .eq("pack_name", id)
         .eq("lang", lang);
 
-      const quoteCount = countRows?.length ?? 0;
+      const quoteCount = quoteCountResult ?? 0;
 
       return reply.send({
         pack: {
@@ -294,7 +294,7 @@ export default async function packsRoutes(fastify) {
     // Fetch curated preview quotes ordered by rank
     const [
       { data: previewQuotes, error: quotesErr },
-      { data: countRows },
+      { count: previewTotalCount },
     ] = await Promise.all([
       supabase
         .from("quotes")
@@ -309,7 +309,7 @@ export default async function packsRoutes(fastify) {
 
       supabase
         .from("quotes")
-        .select("id", { count: "exact", head: true })
+        .select("*", { count: "exact", head: true })
         .eq("pack_name", id)
         .eq("lang", lang),
     ]);
@@ -319,7 +319,7 @@ export default async function packsRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to load preview", code: "DB_ERROR" });
     }
 
-    const totalInLang = countRows?.count ?? 0;
+    const totalInLang = previewTotalCount ?? 0;
 
     if (!previewQuotes || previewQuotes.length === 0) {
       return reply.status(503).send({
@@ -464,12 +464,12 @@ export default async function packsRoutes(fastify) {
 
     const [
       { data: quotes, error: quotesErr },
-      { data: totalRows, error: totalErr },
+      { count: totalInLangCount, error: totalErr },
     ] = await Promise.all([
       query,
       supabase
         .from("quotes")
-        .select("id")
+        .select("*", { count: "exact", head: true })
         .eq("pack_name", id)
         .eq("lang", lang),
     ]);
@@ -479,7 +479,7 @@ export default async function packsRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to load pack feed", code: "DB_ERROR" });
     }
 
-    const totalInLang = totalRows?.length ?? 0;
+    const totalInLang = totalInLangCount ?? 0;
     const hasMore = (quotes?.length ?? 0) > rawLimit;
     const pageQuotes = hasMore ? quotes.slice(0, rawLimit) : (quotes ?? []);
     const nextCursor =
@@ -562,14 +562,19 @@ export default async function packsRoutes(fastify) {
         return reply
           .status(400)
           .send({ error: "product_id is required", code: "MISSING_FIELD" });
-      if (amount === undefined || amount === null)
+      if (amount === undefined || amount === null || !isFinite(Number(amount)))
         return reply
           .status(400)
-          .send({ error: "amount is required", code: "MISSING_FIELD" });
+          .send({ error: "amount must be a valid number", code: "INVALID_FIELD" });
       if (!currency)
         return reply
           .status(400)
           .send({ error: "currency is required", code: "MISSING_FIELD" });
+
+      const VALID_CURRENCIES = ["USD", "EUR", "GBP", "ARS", "BRL"];
+      if (!VALID_CURRENCIES.includes(String(currency).toUpperCase())) {
+        return reply.status(400).send({ error: "Invalid currency", code: "INVALID_FIELD" });
+      }
 
       if (!["ios", "android"].includes(store)) {
         return reply.status(400).send({

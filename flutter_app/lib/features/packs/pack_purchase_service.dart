@@ -83,11 +83,16 @@ class PackPurchaseService {
 
     _pendingCompleter = Completer<PurchaseResult>();
     _pendingPackId = packId;
+    final future = _pendingCompleter!.future;
 
     final purchaseParam = PurchaseParam(productDetails: product);
-    await InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
+    try {
+      await InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
+    } catch (e) {
+      _resolve(PurchaseResult(PurchaseOutcome.failed, errorMessage: e.toString()));
+    }
 
-    return _pendingCompleter!.future;
+    return future;
   }
 
   // ── Stream handler ────────────────────────────────────────────────────────

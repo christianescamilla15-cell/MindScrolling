@@ -54,11 +54,9 @@ class EventLogger {
   /// [direction] — swipe direction (`'up'`, `'down'`, `'left'`, `'right'`)
   /// [dwellMs]   — milliseconds the card was visible before the swipe
   static void logSwipe(String category, String direction, int dwellMs) {
-    _log('swipe', {
-      'category': category,
-      'direction': direction,
-      'dwell_ms': dwellMs,
-    });
+    final props = {'category': category, 'direction': direction, 'dwell_ms': dwellMs};
+    _log('swipe', props);
+    _send('swipe', props);
   }
 
   // ------------------------------------------------------------------
@@ -68,6 +66,7 @@ class EventLogger {
   /// Logs that the user liked a quote.
   static void logLike(String quoteId) {
     _log('like', {'quote_id': quoteId});
+    _send('like', {'quote_id': quoteId});
   }
 
   // ------------------------------------------------------------------
@@ -77,6 +76,7 @@ class EventLogger {
   /// Logs that the user saved a quote to their vault.
   static void logVaultSave(String quoteId) {
     _log('vault_save', {'quote_id': quoteId});
+    _send('vault_save', {'quote_id': quoteId});
   }
 
   // ------------------------------------------------------------------
@@ -86,6 +86,7 @@ class EventLogger {
   /// Logs that the user shared a quote.
   static void logShare(String quoteId) {
     _log('share', {'quote_id': quoteId});
+    _send('share', {'quote_id': quoteId});
   }
 
   // ------------------------------------------------------------------
@@ -95,6 +96,7 @@ class EventLogger {
   /// Logs that the user completed a daily challenge.
   static void logChallengeComplete(String code) {
     _log('challenge_complete', {'code': code});
+    _send('challenge_complete', {'code': code});
   }
 
   // ------------------------------------------------------------------
@@ -104,11 +106,13 @@ class EventLogger {
   /// Logs that the user viewed the premium paywall.
   static void logPremiumView() {
     _log('premium_view', {});
+    _send('premium_view');
   }
 
   /// Logs that the user initiated a premium unlock.
   static void logPremiumUnlock() {
     _log('premium_unlock', {});
+    _send('premium_unlock');
   }
 
   // ------------------------------------------------------------------

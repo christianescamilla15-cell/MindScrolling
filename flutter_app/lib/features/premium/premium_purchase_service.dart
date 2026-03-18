@@ -93,11 +93,16 @@ class PremiumPurchaseService {
     }
 
     _pendingCompleter = Completer<PurchaseResult>();
+    final future = _pendingCompleter!.future;
 
     final purchaseParam = PurchaseParam(productDetails: _productDetails!);
-    await InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
+    try {
+      await InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
+    } catch (e) {
+      _resolve(PurchaseResult(PurchaseOutcome.failed, errorMessage: e.toString()));
+    }
 
-    return _pendingCompleter!.future;
+    return future;
   }
 
   // ── Restore flow ──────────────────────────────────────────────────────────
@@ -111,11 +116,16 @@ class PremiumPurchaseService {
     }
 
     _pendingCompleter = Completer<PurchaseResult>();
+    final future = _pendingCompleter!.future;
 
-    await InAppPurchase.instance.restorePurchases();
+    try {
+      await InAppPurchase.instance.restorePurchases();
+    } catch (e) {
+      _resolve(PurchaseResult(PurchaseOutcome.failed, errorMessage: e.toString()));
+    }
 
     return Future.any([
-      _pendingCompleter!.future,
+      future,
       Future.delayed(
         const Duration(seconds: 10),
         () => const PurchaseResult(
@@ -210,8 +220,8 @@ class PremiumPurchaseService {
   void _resolve(PurchaseResult result) {
     if (_pendingCompleter != null && !_pendingCompleter!.isCompleted) {
       _pendingCompleter!.complete(result);
+      _pendingCompleter = null;
     }
-    _pendingCompleter = null;
   }
 }
 

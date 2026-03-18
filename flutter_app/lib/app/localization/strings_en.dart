@@ -133,6 +133,10 @@ class StringsEn implements AppStrings {
   // Actions / toasts
   // ------------------------------------------------------------------
   @override
+  @override
+  String get or => 'or';
+
+  @override
   String get shareVia => 'Share via…';
 
   @override

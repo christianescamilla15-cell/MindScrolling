@@ -41,8 +41,8 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
         final lang = ref.read(settingsStateProvider).lang;
         final slug = widget.authorName
             .toLowerCase()
-            .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-            .replaceAll(RegExp(r'^-+|-+$'), '');
+            .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+            .replaceAll(RegExp(r'^_+|_+$'), '');
         final result = await api.get('/authors/$slug', queryParams: {'lang': lang});
         if (mounted) setState(() { _data = result; _loading = false; });
         return;

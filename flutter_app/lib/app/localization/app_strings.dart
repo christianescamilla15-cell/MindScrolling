@@ -69,6 +69,7 @@ abstract class AppStrings {
   // ------------------------------------------------------------------
   // Actions / toasts
   // ------------------------------------------------------------------
+  String get or;
   String get shareVia;
   String get savedVault;
   String get removedLike;

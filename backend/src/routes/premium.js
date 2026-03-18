@@ -74,8 +74,8 @@ export default async function premiumRoutes(fastify) {
         supabase.from("premium_audit_log")
           .select("id").eq("device_id", deviceId).eq("event_type", "trial_expired")
           .limit(1).maybeSingle()
-          .then(({ data }) => {
-            if (!data) {
+          .then(({ data, error: selectErr }) => {
+            if (!selectErr && !data) {
               supabase.from("premium_audit_log").insert({
                 device_id: deviceId,
                 event_type: "trial_expired",

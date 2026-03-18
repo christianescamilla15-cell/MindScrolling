@@ -17,7 +17,7 @@ export default async function authorsRoutes(fastify) {
 
     if (error) {
       fastify.log.error({ err: error }, "GET /authors — DB error");
-      return reply.status(500).send({ error: "Failed to fetch authors", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch authors", code: "INTERNAL_ERROR" });
     }
 
     return reply.send(
@@ -59,7 +59,7 @@ export default async function authorsRoutes(fastify) {
         return reply.status(404).send({ error: "Author not found", code: "NOT_FOUND" });
       }
       fastify.log.error({ err: authorResult.error, slug }, "GET /authors/:slug — author fetch error");
-      return reply.status(500).send({ error: "Failed to fetch author", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch author", code: "INTERNAL_ERROR" });
     }
 
     const author = authorResult.data;
@@ -75,7 +75,7 @@ export default async function authorsRoutes(fastify) {
 
     if (quotesResult.error) {
       fastify.log.error({ err: quotesResult.error, slug }, "GET /authors/:slug — quotes fetch error");
-      return reply.status(500).send({ error: "Failed to fetch author quotes", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to fetch author quotes", code: "INTERNAL_ERROR" });
     }
 
     const authorQuotes = quotesResult.data || [];

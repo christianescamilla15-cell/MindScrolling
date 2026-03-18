@@ -53,7 +53,6 @@ class PaywallCard extends ConsumerWidget {
     // Compute owned-pack-aware Inside value prop (US-B08)
     final premiumState = ref.watch(premiumStateProvider);
     final ownedPacks = premiumState.premiumState.ownedPacks;
-    final ownedCount = ownedPacks.length;
 
     // Don't count the current pack if owned (edge case: user tapping preview
     // after owning it — shouldn't happen but defensive)
@@ -188,7 +187,7 @@ class PaywallCard extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
-                    'or',
+                    tr.or,
                     style: AppTypography.caption
                         .copyWith(color: AppColors.textMuted),
                   ),
