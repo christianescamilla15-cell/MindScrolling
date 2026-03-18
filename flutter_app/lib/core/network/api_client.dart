@@ -32,15 +32,11 @@ class ApiClient {
   ApiClient({
     required this.deviceId,
     required this.baseUrl,
-    this.lang,
     http.Client? httpClient,
   }) : _http = httpClient ?? http.Client();
 
   final String deviceId;
   final String baseUrl;
-
-  /// Optional language code forwarded as `Accept-Language`.
-  final String? lang;
 
   final http.Client _http;
 
@@ -97,8 +93,7 @@ class ApiClient {
   // Private helpers
   // ------------------------------------------------------------------
 
-  Map<String, String> _headers() =>
-      HeadersBuilder.build(deviceId, lang: lang);
+  Map<String, String> _headers() => HeadersBuilder.build(deviceId);
 
   Uri _buildUri(String path, Map<String, String>? queryParams) {
     final base = Uri.parse(baseUrl);

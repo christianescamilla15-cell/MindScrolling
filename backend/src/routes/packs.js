@@ -17,7 +17,7 @@ import {
   getPackEntitlement,
   resolveUserState,
 } from "../services/packEntitlement.js";
-import { UUID_RE, authorSlug } from "../utils/validation.js";
+import { UUID_RE, authorSlug, normalizeLang } from "../utils/validation.js";
 
 // ─── Pack catalog metadata ───────────────────────────────────────────────────
 const PACK_META = {
@@ -73,11 +73,7 @@ const PAYWALL_COPY = {
  * Build a normalized lang string from a raw query param or Accept-Language header.
  * Returns 'en' or 'es'. Defaults to 'en'.
  */
-function normalizeLang(raw) {
-  if (!raw) return "en";
-  const l = String(raw).slice(0, 2).toLowerCase();
-  return l === "es" ? "es" : "en";
-}
+
 
 
 /**
@@ -317,14 +313,13 @@ export default async function packsRoutes(fastify) {
         .eq("lang", lang),
     ]);
 
-    // Slice to user's quota — the rest are not shown yet
-    const previewQuotes = (allPreviewQuotes ?? []).slice(0, previewQuota);
-
     if (quotesErr) {
       request.log.error({ err: quotesErr }, "packs/preview: DB error");
       return reply.status(500).send({ error: "Failed to load preview", code: "INTERNAL_ERROR" });
     }
 
+    // Slice to user's quota — the rest are not shown yet
+    const previewQuotes = (allPreviewQuotes ?? []).slice(0, previewQuota);
     const totalInLang = previewTotalCount ?? 0;
 
     if (!previewQuotes || previewQuotes.length === 0) {

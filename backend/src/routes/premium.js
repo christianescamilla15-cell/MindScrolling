@@ -468,7 +468,7 @@ export default async function premiumRoutes(fastify) {
       for (const packId of restoredPackIds) {
         supabase.from("premium_audit_log").insert({
           device_id: deviceId,
-          event_type: "pack_purchased",
+          event_type: "pack_restored",
           source: "restore",
           metadata: { pack_id: packId, store },
         }).then(() => {}).catch(() => {});

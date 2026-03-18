@@ -1,4 +1,5 @@
 import { supabase } from "../db/client.js";
+import { UUID_RE, normalizeLang } from "../utils/validation.js";
 
 // Fallback challenge shown when no DB entry exists for today
 const DEFAULT_CHALLENGE = {
@@ -33,12 +34,6 @@ const CHALLENGE_TRANSLATIONS_ES = {
     description: "Lee frases de al menos 3 categorías diferentes hoy. Observa cuál te atrae más.",
   },
 };
-
-function normalizeLang(raw) {
-  if (!raw) return "en";
-  const l = String(raw).slice(0, 2).toLowerCase();
-  return l === "es" ? "es" : "en";
-}
 
 /** Translate a challenge object to the target language (in-memory). */
 function translateChallenge(challenge, lang) {
@@ -110,16 +105,15 @@ export default async function challengesRoutes(fastify) {
 
     const deviceId    = request.deviceId;
     const challengeId = request.params.id;
-    const { progress: clientProgress } = request.body ?? {};
+    const { count = 1 } = request.body ?? {};
 
-    // Validate progress if explicitly provided (must be a non-negative integer)
-    if (clientProgress !== undefined) {
-      if (typeof clientProgress !== "number" || !Number.isInteger(clientProgress) || clientProgress < 0) {
-        return reply.status(400).send({ error: "progress must be a non-negative integer", code: "INVALID_FIELD" });
-      }
-      // Note: clientProgress is informational only — server always increments by 1.
-      // No upper bound rejection: a cached clientProgress >= TARGET_QUOTES is valid
-      // because the server's idempotency check (existing?.completed) handles it.
+    if (!UUID_RE.test(challengeId)) {
+      return reply.status(400).send({ error: "Invalid challenge ID format", code: "INVALID_FIELD" });
+    }
+
+    // Validate count (how many swipes to add, defaults to 1)
+    if (typeof count !== "number" || !Number.isInteger(count) || count < 1 || count > 20) {
+      return reply.status(400).send({ error: "count must be an integer between 1 and 20", code: "INVALID_FIELD" });
     }
 
     // Ensure user row exists
@@ -158,8 +152,8 @@ export default async function challengesRoutes(fastify) {
       return reply.status(200).send({ updated: false, completed: true, progress: existing.progress, target: TARGET_QUOTES });
     }
 
-    // Increment server-side progress by 1
-    const newProgress = (existing?.progress ?? 0) + 1;
+    // Increment server-side progress by count (default 1)
+    const newProgress = (existing?.progress ?? 0) + count;
     const completed   = newProgress >= TARGET_QUOTES;
 
     const { error: upsertErr } = await supabase

@@ -1,19 +1,25 @@
 import fp from "fastify-plugin";
+import { UUID_RE } from "../utils/validation.js";
+
+const EXEMPT_PREFIXES = ["/health", "/static/", "/admin/", "/webhooks/"];
 
 /**
  * Reads X-Device-ID header and attaches it to the request.
- * Returns 400 if the header is missing.
+ * Returns 401 if the header is missing or not a valid UUID.
  */
 async function deviceIdPlugin(fastify) {
   fastify.addHook("preHandler", async (request, reply) => {
     // Public routes don't need device ID
-    if (request.url === "/health" || request.url.startsWith("/static/") || request.url.startsWith("/admin/") || request.url.startsWith("/webhooks/")) return;
+    if (EXEMPT_PREFIXES.some(p => request.url === p || request.url.startsWith(p))) return;
 
-    const deviceId = request.headers["x-device-id"];
-    if (!deviceId || deviceId.trim() === "") {
+    const deviceId = request.headers["x-device-id"]?.trim();
+    if (!deviceId) {
       return reply.status(401).send({ error: "Missing X-Device-ID header", code: "MISSING_DEVICE_ID" });
     }
-    request.deviceId = deviceId.trim();
+    if (!UUID_RE.test(deviceId)) {
+      return reply.status(400).send({ error: "X-Device-ID must be a valid UUID", code: "INVALID_DEVICE_ID" });
+    }
+    request.deviceId = deviceId;
   });
 }
 

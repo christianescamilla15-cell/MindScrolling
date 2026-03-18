@@ -9,17 +9,12 @@ class HeadersBuilder {
   /// - `Accept: application/json`
   /// - `X-Device-ID: <deviceId>`
   ///
-  /// Optionally includes:
-  /// - `Accept-Language: <lang>` when [lang] is provided and non-empty.
-  static Map<String, String> build(
-    String deviceId, {
-    String? lang,
-  }) {
+  /// Language is sent as a query parameter on each endpoint, not via header.
+  static Map<String, String> build(String deviceId) {
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'X-Device-ID': deviceId,
-      if (lang != null && lang.isNotEmpty) 'Accept-Language': lang,
     };
   }
 }

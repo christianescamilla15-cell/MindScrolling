@@ -58,15 +58,16 @@ class ChallengeRepository {
     return ApiSuccess(cached);
   }
 
-  /// Posts progress to the server and caches the server-confirmed values.
+  /// Posts progress delta to the server and caches the server-confirmed values.
+  /// [count] is the number of new swipes to add (delta, not absolute).
   /// Fire-and-forget — failures are silent.
   Future<void> updateProgress(
     String challengeId,
-    int progress,
+    int count,
     bool completed,
   ) async {
     try {
-      final response = await _remote.updateProgress(challengeId);
+      final response = await _remote.updateProgress(challengeId, count: count);
       // Use server-confirmed values instead of caller-predicted values
       final serverProgress = (response['progress'] as num?)?.toInt() ?? progress;
       final serverCompleted = response['completed'] as bool? ?? completed;

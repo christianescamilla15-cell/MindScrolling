@@ -151,6 +151,10 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
     if (current == null || current.completed) return;
 
     final clamped = swipeCount.clamp(0, current.target);
+    // Calculate delta — only send the difference to the server
+    final delta = clamped - current.progress;
+    if (delta <= 0) return; // No new progress
+
     final nowCompleted = clamped >= current.target;
 
     state = AsyncData(
@@ -168,7 +172,7 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
     if (current.challenge != null && current.challenge!.id != 'default') {
       await _repo.updateProgress(
         current.challenge!.id,
-        clamped,
+        delta,
         nowCompleted,
       );
     }

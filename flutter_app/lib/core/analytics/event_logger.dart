@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../constants/api_constants.dart';
@@ -140,7 +141,9 @@ class EventLogger {
   // ------------------------------------------------------------------
 
   static void _log(String event, Map<String, dynamic> params) {
-    // ignore: avoid_print
-    print('[Analytics] $event ${params.isNotEmpty ? params : ''}');
+    if (kDebugMode) {
+      // ignore: avoid_print
+      print('[Analytics] $event ${params.isNotEmpty ? params : ''}');
+    }
   }
 }

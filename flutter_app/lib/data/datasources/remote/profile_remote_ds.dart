@@ -7,17 +7,18 @@ class ProfileRemoteDataSource {
   const ProfileRemoteDataSource(this._apiClient);
 
   /// GET /profile
-  /// Returns null if the profile has never been saved (404 treated as empty).
+  /// Returns null if the profile has never been created.
+  /// Backend returns 200 with the profile object, or 200 with JSON null.
   Future<UserProfileModel?> getProfile() async {
     try {
       final json = await _apiClient.get('/profile');
-      // Backend returns the profile object directly as a Map with device_id
+      // ApiClient wraps JSON null as {data: null}; profile object has device_id
       if (json.containsKey('device_id')) {
         return UserProfileModel.fromJson(json);
       }
       return null;
     } on ApiException catch (e) {
-      // Backend returns 404 when no profile exists
+      // Fallback: treat 404 as no profile (backward compat)
       if (e.statusCode == 404) return null;
       rethrow;
     }

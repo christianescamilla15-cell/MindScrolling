@@ -12,9 +12,10 @@ class ChallengeRemoteDataSource {
   }
 
   /// POST /challenges/:id/progress
-  /// Returns { updated: bool, progress: int, completed: bool }
-  Future<Map<String, dynamic>> updateProgress(String challengeId) async {
-    return _apiClient.post('/challenges/$challengeId/progress');
+  /// Body: { count: int } — how many swipes to add (default 1)
+  /// Returns { updated: bool, progress: int, completed: bool, target: int }
+  Future<Map<String, dynamic>> updateProgress(String challengeId, {int count = 1}) async {
+    return _apiClient.post('/challenges/$challengeId/progress', body: {'count': count});
   }
 
   /// GET /map

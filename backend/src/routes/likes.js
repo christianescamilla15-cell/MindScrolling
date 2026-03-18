@@ -1,5 +1,6 @@
 import { supabase }                from "../db/client.js";
 import { updatePreferenceVector } from "../services/embeddings.js";
+import { UUID_RE }                from "../utils/validation.js";
 
 export default async function likesRoutes(fastify) {
   /** POST /quotes/:id/like  body: { action: "like" | "unlike" } */
@@ -7,6 +8,10 @@ export default async function likesRoutes(fastify) {
     const { id }   = request.params;
     const { action } = request.body ?? {};
     const { deviceId } = request;
+
+    if (!UUID_RE.test(id)) {
+      return reply.status(400).send({ error: "Quote ID must be a valid UUID", code: "INVALID_FIELD" });
+    }
 
     if (!["like", "unlike"].includes(action)) {
       return reply.status(400).send({ error: 'action must be "like" or "unlike"', code: "INVALID_ACTION" });
@@ -16,9 +21,13 @@ export default async function likesRoutes(fastify) {
       .from("quotes")
       .select("category")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (qErr || !quote) {
+    if (qErr) {
+      request.log.error({ err: qErr }, "like: failed to fetch quote");
+      return reply.status(500).send({ error: "Failed to fetch quote", code: "INTERNAL_ERROR" });
+    }
+    if (!quote) {
       return reply.status(404).send({ error: "Quote not found", code: "NOT_FOUND" });
     }
 
