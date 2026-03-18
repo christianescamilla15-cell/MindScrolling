@@ -40,6 +40,8 @@ This directory contains the workflow definitions for the MindScrolling multi-age
 | Product Experience Designer | Visual/sensory/emotional experience audits, pack themes |
 | Philosophical Content Curator | Quote quality, author balance, pack coherence, editorial |
 | Testing Intelligence Lead | Human tester feedback triage, pattern detection, version analysis |
+| Growth / ASO Strategist | Play Store listing, keywords, screenshots, organic growth |
+| UX Feedback Synthesizer | Qualitative feedback → UX decisions, friction points, conversion UX |
 
 ## Core Rules
 

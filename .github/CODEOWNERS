@@ -1,0 +1,27 @@
+# MindScrolling — CODEOWNERS
+# Every PR that touches these paths requires review from the owner.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback — founder reviews everything
+*                               @christianescamilla15-cell
+
+# Backend routes and services
+/backend/src/routes/            @christianescamilla15-cell
+/backend/src/services/          @christianescamilla15-cell
+
+# DB migrations — critical, always require review before merge
+/backend/src/db/migrations/     @christianescamilla15-cell
+
+# Flutter app
+/flutter_app/lib/               @christianescamilla15-cell
+
+# Agent system — only founder modifies agent definitions
+/.claude/agents/                @christianescamilla15-cell
+/.claude/agent-memory/          @christianescamilla15-cell
+
+# CI/CD workflows — security-sensitive
+/.github/workflows/             @christianescamilla15-cell
+/.github/CODEOWNERS             @christianescamilla15-cell
+
+# Environment and secrets documentation
+/backend/.env.example           @christianescamilla15-cell
