@@ -39,8 +39,11 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
       try {
         final api = ref.read(apiClientProvider);
         final lang = ref.read(settingsStateProvider).lang;
-        final encoded = Uri.encodeComponent(widget.authorName);
-        final result = await api.get('/authors/$encoded', queryParams: {'lang': lang});
+        final slug = widget.authorName
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+            .replaceAll(RegExp(r'^-+|-+$'), '');
+        final result = await api.get('/authors/$slug', queryParams: {'lang': lang});
         if (mounted) setState(() { _data = result; _loading = false; });
         return;
       } catch (e) {

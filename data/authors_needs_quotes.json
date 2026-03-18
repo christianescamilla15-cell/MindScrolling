@@ -1,0 +1,330 @@
+{
+  "_meta": {
+    "generated": "2026-03-18",
+    "description": "Authors identified as having 3 or fewer quotes in the DB, based on analysis of all_authors.json against the 13K quote corpus. These authors need a minimum of 10 quotes each to be useful in recommendations and packs.",
+    "how_to_verify": "SELECT author, COUNT(*) as quote_count FROM quotes GROUP BY author HAVING COUNT(*) <= 3 ORDER BY quote_count ASC, author ASC;",
+    "action_required": "Add 7-10 new verified quotes per author. Use prepare_quotes_dataset.py with targeted HuggingFace queries, or manually curate from primary sources."
+  },
+  "authors_needing_quotes": [
+    {
+      "name": "Reggie Jackson (basketball, born 1990)",
+      "slug": "reggie-jackson-basketball-born-1990",
+      "estimated_quotes": 1,
+      "reason": "Niche sports figure with only 1-2 attributable philosophical quotes. Name collision with baseball player creates DB confusion. Consider consolidating to 'Reggie Jackson (NBA)' or removing.",
+      "priority": "low",
+      "recommendation": "remove_or_consolidate"
+    },
+    {
+      "name": "Mike Singletary (basketball)",
+      "slug": "mike-singletary-basketball",
+      "estimated_quotes": 1,
+      "reason": "Ambiguous entry — label suggests a basketball figure distinct from the famous NFL coach Mike Singletary. Verified quotes for this specific person are not confirmed.",
+      "priority": "low",
+      "recommendation": "remove_or_consolidate"
+    },
+    {
+      "name": "Joe Adcock",
+      "slug": "joe-adcock",
+      "estimated_quotes": 1,
+      "reason": "1950s baseball player. Only documented philosophical quote is a single line on perseverance. Insufficient corpus for a meaningful author profile.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Goi Nasu",
+      "slug": "goi-nasu",
+      "estimated_quotes": 1,
+      "reason": "Contemporary Japanese writer known for a single widely-shared quote. Very little verified output beyond that one text.",
+      "priority": "medium",
+      "recommendation": "add_quotes",
+      "target_quotes": 5,
+      "note": "If additional verified quotes cannot be found, keep as single-quote author and document as such."
+    },
+    {
+      "name": "Vernon Cooper",
+      "slug": "vernon-cooper",
+      "estimated_quotes": 2,
+      "reason": "Folk preacher with oral tradition only. Fewer than 3 quotations are verifiably attributed. No published works.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "Tom Krause",
+      "slug": "tom-krause",
+      "estimated_quotes": 2,
+      "reason": "Motivational speaker with limited documented output. Most quotes are short maxims without a verifiable primary source.",
+      "priority": "medium",
+      "recommendation": "add_quotes",
+      "target_quotes": 8
+    },
+    {
+      "name": "Carrie Snow",
+      "slug": "carrie-snow",
+      "estimated_quotes": 2,
+      "reason": "Stand-up comedian — very limited documented philosophical quotes. Most attributed lines are quips rather than reflective content.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "Sam Ewing",
+      "slug": "sam-ewing",
+      "estimated_quotes": 2,
+      "reason": "Humorist with a small number of verifiable attributions. Many quotes attributed to him online are misattributed.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "John Acosta",
+      "slug": "john-acosta",
+      "estimated_quotes": 2,
+      "reason": "No verifiable publication record. Quotes attributed to him may be from multiple different people with the same name.",
+      "priority": "low",
+      "recommendation": "remove",
+      "note": "Investigate attribution. If unverifiable, remove from DB."
+    },
+    {
+      "name": "Marsha Petrie Sue",
+      "slug": "marsha-petrie-sue",
+      "estimated_quotes": 2,
+      "reason": "Niche business speaker. Limited philosophical quote corpus relevant to MindScrolling's categories.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "John Berry",
+      "slug": "john-berry",
+      "estimated_quotes": 2,
+      "reason": "Jazz journalist. Quotes are niche and may not fit philosophy/mindfulness categories. Low supply of thematic quotes.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Volker Grassmuck",
+      "slug": "volker-grassmuck",
+      "estimated_quotes": 1,
+      "reason": "Media scholar with limited popular quotes. Existing quotes are tech/policy-focused, not philosophical.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Libby Larsen",
+      "slug": "libby-larsen",
+      "estimated_quotes": 1,
+      "reason": "Composer with very few documented philosophical statements. Narrow quote corpus.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Robert Griffin III",
+      "slug": "robert-griffin-iii",
+      "estimated_quotes": 1,
+      "reason": "NFL quarterback. Only 1-2 motivational quotes in circulation. Not aligned with philosophy/mindfulness theme.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Joe Adcock",
+      "slug": "joe-adcock",
+      "estimated_quotes": 1,
+      "reason": "1950s baseball player with a single documented quote.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Paavo Nurmi",
+      "slug": "paavo-nurmi",
+      "estimated_quotes": 2,
+      "reason": "Finnish runner. Very few verified quotes. 'The mind is everything; the body is just muscles and bones' is widely shared but may be apocryphal.",
+      "priority": "low",
+      "recommendation": "verify_attribution",
+      "target_quotes": 5
+    },
+    {
+      "name": "Richard Garriott",
+      "slug": "richard-garriott",
+      "estimated_quotes": 1,
+      "reason": "Video game designer. Very few philosophical quotes. Niche audience.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Fawn M. Brodie",
+      "slug": "fawn-m-brodie",
+      "estimated_quotes": 2,
+      "reason": "Biographer with scholarly quotes. Few short, impactful philosophical quotes.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "Camillo Benso, Count of Cavour",
+      "slug": "camillo-benso-count-of-cavour",
+      "estimated_quotes": 2,
+      "reason": "Italian statesman with a narrow quote corpus in English. Historical but not well-represented in HuggingFace datasets.",
+      "priority": "medium",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "John Pierrakos",
+      "slug": "john-pierrakos",
+      "estimated_quotes": 2,
+      "reason": "Psychotherapist. Limited documented quotes; his work is primarily clinical rather than philosophical aphorism.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "Léon Blum",
+      "slug": "leon-blum",
+      "estimated_quotes": 2,
+      "reason": "French politician. Political quotes available but few align with stoicism/philosophy/mindfulness categories.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "Doris Mortman",
+      "slug": "doris-mortman",
+      "estimated_quotes": 2,
+      "reason": "Novelist known for a single famous quote about inner beauty. Very narrow documented output.",
+      "priority": "low",
+      "recommendation": "keep_as_single",
+      "note": "Her one verified quote is high quality. Keep but do not expand."
+    },
+    {
+      "name": "Vidal Sassoon",
+      "slug": "vidal-sassoon",
+      "estimated_quotes": 2,
+      "reason": "Hairdresser/businessman. Famous for one quote about work and the dictionary. Limited philosophical corpus.",
+      "priority": "low",
+      "recommendation": "keep_as_single"
+    },
+    {
+      "name": "Gordon Hinckley",
+      "slug": "gordon-hinckley",
+      "estimated_quotes": 3,
+      "reason": "Religious leader with a moderate quote corpus, but most quotes are LDS-doctrinal rather than universally philosophical.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 8
+    },
+    {
+      "name": "Bernadette Devlin",
+      "slug": "bernadette-devlin",
+      "estimated_quotes": 2,
+      "reason": "Irish civil rights politician. Few quotes in HuggingFace corpora. Niche audience.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "Cheng Yen",
+      "slug": "cheng-yen",
+      "estimated_quotes": 3,
+      "reason": "Appears twice in authors table (duplicate). Quote corpus exists but is split across two author records. Consolidation required.",
+      "priority": "high",
+      "recommendation": "consolidate_duplicates",
+      "note": "Merge all quotes from 'cheng-yen' and 'cheng-yen-2' into a single author record. Then add_quotes to reach 10."
+    },
+    {
+      "name": "Sam Keen",
+      "slug": "sam-keen",
+      "estimated_quotes": 3,
+      "reason": "Appears twice in authors table (duplicate). Same consolidation issue as Cheng Yen.",
+      "priority": "high",
+      "recommendation": "consolidate_duplicates",
+      "note": "Merge 'sam-keen' and 'sam-keen-2'. Target 10 quotes total."
+    },
+    {
+      "name": "Etty Hillesum",
+      "slug": "etty-hillesum",
+      "estimated_quotes": 3,
+      "reason": "Appears twice in authors table (duplicate). Her diaries contain many quotable passages; quote corpus should be richer.",
+      "priority": "high",
+      "recommendation": "consolidate_duplicates_then_expand",
+      "target_quotes": 15,
+      "note": "Rich primary source (diaries). After consolidation, add 10+ more quotes from 'An Interrupted Life' and 'Letters from Westerbork'."
+    },
+    {
+      "name": "Peter Abelard",
+      "slug": "peter-abelard",
+      "estimated_quotes": 2,
+      "reason": "Medieval philosopher with a small popular quote corpus. Rich primary sources exist but are not well represented in HuggingFace datasets.",
+      "priority": "medium",
+      "recommendation": "add_quotes",
+      "target_quotes": 8
+    },
+    {
+      "name": "Walter Inglis Anderson",
+      "slug": "walter-inglis-anderson",
+      "estimated_quotes": 2,
+      "reason": "American artist-hermit. His diaries contain beautiful passages but they are not widely indexed in digital quote corpora.",
+      "priority": "medium",
+      "recommendation": "add_quotes",
+      "target_quotes": 8
+    },
+    {
+      "name": "Moncure D. Conway",
+      "slug": "moncure-d-conway",
+      "estimated_quotes": 2,
+      "reason": "Abolitionist minister. Historical figure with limited popular quote circulation.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "William Ellery Channing",
+      "slug": "william-ellery-channing",
+      "estimated_quotes": 3,
+      "reason": "Unitarian minister with moderate corpus. Strong on inner life and human dignity — aligns well with philosophy/reflection categories.",
+      "priority": "medium",
+      "recommendation": "add_quotes",
+      "target_quotes": 10
+    },
+    {
+      "name": "Hugh Miller",
+      "slug": "hugh-miller",
+      "estimated_quotes": 2,
+      "reason": "Scottish geologist-writer. Very few popular quotes despite rich written output.",
+      "priority": "low",
+      "recommendation": "add_quotes",
+      "target_quotes": 5
+    },
+    {
+      "name": "Alexander Chalmers",
+      "slug": "alexander-chalmers",
+      "estimated_quotes": 1,
+      "reason": "Scottish biographer and editor. Essentially no philosophical quotes in modern circulation.",
+      "priority": "low",
+      "recommendation": "remove"
+    },
+    {
+      "name": "Doug Larson",
+      "slug": "doug-larson",
+      "estimated_quotes": 3,
+      "reason": "Newspaper columnist. Known for witty one-liners but no verified philosophical depth. Most quotes attributed to him online are misattributed.",
+      "priority": "low",
+      "recommendation": "verify_attribution"
+    }
+  ],
+  "summary": {
+    "total_authors_flagged": 35,
+    "recommend_remove": 9,
+    "recommend_consolidate": 3,
+    "recommend_add_quotes": 20,
+    "recommend_verify": 3,
+    "high_priority": ["cheng-yen", "sam-keen", "etty-hillesum"],
+    "most_impactful_to_expand": [
+      "Etty Hillesum",
+      "William Ellery Channing",
+      "Peter Abelard",
+      "Walter Inglis Anderson",
+      "Camillo Benso, Count of Cavour"
+    ]
+  }
+}
