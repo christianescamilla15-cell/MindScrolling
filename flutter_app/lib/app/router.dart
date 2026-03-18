@@ -74,9 +74,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const InsightsScreen(),
       ),
       GoRoute(
-        path: '/author/:name',
+        path: '/author/:slug',
         builder: (context, state) => AuthorDetailScreen(
-          authorName: Uri.decodeComponent(state.pathParameters['name'] ?? ''),
+          authorName: Uri.decodeComponent(state.pathParameters['slug'] ?? ''),
         ),
       ),
       GoRoute(

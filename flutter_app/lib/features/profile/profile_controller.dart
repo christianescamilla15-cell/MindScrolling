@@ -83,7 +83,7 @@ class ProfileController extends AsyncNotifier<ProfileState> {
     final result = await _repo.getProfile();
     final streak = (await LocalStorage.getInt('mindscroll_streak')) ?? 0;
     final reflections =
-        (await LocalStorage.getInt('mindscroll_reflections')) ?? 0;
+        (await LocalStorage.getInt('mindscroll_swipe_count')) ?? 0;
 
     result.when(
       success: (profile) {
