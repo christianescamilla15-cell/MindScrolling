@@ -35,6 +35,11 @@ This directory contains the workflow definitions for the MindScrolling multi-age
 | QA Reviewer | Code review, testing, regression detection |
 | Performance Engineer | Performance optimization across full stack |
 | Agent Orchestrator | Coordination, sequencing, conflict prevention |
+| Security Engineer | Security audits, hardening, RLS, secret scanning |
+| Analytics Engineer | KPIs, metrics, user behavior analysis, launch readiness |
+| Product Experience Designer | Visual/sensory/emotional experience audits, pack themes |
+| Philosophical Content Curator | Quote quality, author balance, pack coherence, editorial |
+| Testing Intelligence Lead | Human tester feedback triage, pattern detection, version analysis |
 
 ## Core Rules
 
