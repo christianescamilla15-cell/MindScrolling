@@ -145,14 +145,19 @@ class PackPurchaseService {
       final api = ref.read(apiClientProvider);
       final store = Platform.isIOS ? 'ios' : 'android';
 
+      // Use actual price from store cache; fall back to 2.99 only if unavailable.
+      final cachedProduct = _productCache[purchase.productID];
+      final amount = cachedProduct?.rawPrice ?? 2.99;
+      final currency = cachedProduct?.currencyCode ?? 'USD';
+
       await api.post('/packs/$packId/purchase/verify', body: {
         'store': store,
         'product_id': purchase.productID,
         if (purchase.verificationData.serverVerificationData.isNotEmpty)
           'purchase_token': purchase.verificationData.serverVerificationData,
         if (purchase.purchaseID != null) 'transaction_id': purchase.purchaseID,
-        'amount': 2.99,
-        'currency': 'USD',
+        'amount': amount,
+        'currency': currency,
       });
 
       if (purchase.pendingCompletePurchase) {
@@ -174,9 +179,9 @@ class PackPurchaseService {
   void _resolve(PurchaseResult result) {
     if (_pendingCompleter != null && !_pendingCompleter!.isCompleted) {
       _pendingCompleter!.complete(result);
+      _pendingCompleter = null;
+      _pendingPackId = null;
     }
-    _pendingCompleter = null;
-    _pendingPackId = null;
   }
 }
 

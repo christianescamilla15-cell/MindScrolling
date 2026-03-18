@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
+import '../../core/constants/feed_constants.dart';
 import '../../core/providers/core_providers.dart';
 import '../../core/utils/haptics_service.dart';
 import '../../data/models/quote_model.dart';
@@ -132,14 +133,8 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
 
   Future<void> _recordSwipe(
       String quoteId, String direction, int dwellTimeMs) async {
-    // Determine category from swipe direction (feed_constants mapping)
-    final categoryMap = {
-      'up': 'stoicism',
-      'right': 'discipline',
-      'left': 'reflection',
-      'down': 'philosophy',
-    };
-    final category = categoryMap[direction] ?? 'stoicism';
+    final category =
+        FeedConstants.directionToCategory[direction] ?? 'stoicism';
 
     try {
       final api = ref.read(apiClientProvider);
@@ -318,9 +313,9 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
         // Reload the feed — user is now entitled.
         _loadPage(cursor: null);
       case PurchaseOutcome.cancelled:
+      case PurchaseOutcome.pending:
         break;
       case PurchaseOutcome.failed:
-      case PurchaseOutcome.pending:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

@@ -300,32 +300,6 @@ class _NavTile extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Info tile (no tap)
-// ---------------------------------------------------------------------------
-
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Widget? trailing;
-
-  const _InfoTile({
-    required this.icon,
-    required this.label,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Icon(icon, color: AppColors.textMuted, size: 22),
-      title: Text(label, style: AppTypography.bodyMedium),
-      trailing: trailing,
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Destructive action tile
 // ---------------------------------------------------------------------------
 

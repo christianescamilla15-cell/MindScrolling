@@ -309,7 +309,7 @@ export default async function packsRoutes(fastify) {
 
       supabase
         .from("quotes")
-        .select("id")
+        .select("id", { count: "exact", head: true })
         .eq("pack_name", id)
         .eq("lang", lang),
     ]);
@@ -319,7 +319,7 @@ export default async function packsRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to load preview", code: "DB_ERROR" });
     }
 
-    const totalInLang = countRows?.length ?? 0;
+    const totalInLang = countRows?.count ?? 0;
 
     if (!previewQuotes || previewQuotes.length === 0) {
       return reply.status(503).send({
@@ -712,7 +712,7 @@ export default async function packsRoutes(fastify) {
         pack_id: id,
         pack_name: packName,
         access_granted: true,
-        message: `${packName} unlocked. ${packCounts(id)} quotes ready.`,
+        message: `${packName} unlocked. ${packCounts()} quotes ready.`,
       });
     }
   );

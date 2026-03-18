@@ -24,6 +24,8 @@ class EventLogger {
   static void setDeviceId(String id) => _deviceId = id;
 
   static void _send(String eventType, [Map<String, dynamic>? properties]) {
+    // Guard: device ID must be set before sending (setDeviceId called in main.dart).
+    if (_deviceId == null) return;
     final body = jsonEncode({
       'event_type': eventType,
       'app_version': _appVersion,
@@ -115,7 +117,7 @@ class EventLogger {
 
   /// Logs that the user completed onboarding.
   static void logOnboardingComplete() {
-    _log('onboarding_complete', {});
+    _log('onboarding_completed', {});
     _send('onboarding_completed');
   }
 

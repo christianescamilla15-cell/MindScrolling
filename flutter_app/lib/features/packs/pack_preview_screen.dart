@@ -156,9 +156,9 @@ class _PackPreviewScreenState extends ConsumerState<PackPreviewScreen> {
           extra: {'packName': widget.packName, 'packColor': widget.packColor},
         );
       case PurchaseOutcome.cancelled:
+      case PurchaseOutcome.pending:
         break;
       case PurchaseOutcome.failed:
-      case PurchaseOutcome.pending:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
