@@ -35,10 +35,18 @@ class ChallengeRepository {
       );
 
       // Cache progress from the same response to avoid a second network call.
+      // Inject top-level target into progress data so the model gets the server value.
+      final serverTarget = (json['target'] as num?)?.toInt();
       if (progressData != null) {
+        final enriched = {...progressData, if (serverTarget != null) 'target': serverTarget};
         await LocalStorage.setString(
           _progressCacheKey,
-          jsonEncode(ChallengeProgressModel.fromJson(progressData).toJson()),
+          jsonEncode(ChallengeProgressModel.fromJson(enriched).toJson()),
+        );
+      } else if (serverTarget != null) {
+        await LocalStorage.setString(
+          _progressCacheKey,
+          jsonEncode(ChallengeProgressModel(target: serverTarget).toJson()),
         );
       }
 

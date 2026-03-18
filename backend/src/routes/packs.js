@@ -271,7 +271,7 @@ export default async function packsRoutes(fastify) {
           quotes_remaining_after_preview: null,
         },
         quotes: [],
-        is_preview_complete: null,
+        is_preview_complete: false,
         redirect_to_feed: true,
         paywall: null,
       });
