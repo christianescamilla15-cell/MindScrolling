@@ -66,10 +66,7 @@ export default async function webhooksRoutes(fastify) {
    * Event payload reference:
    *   https://www.revenuecat.com/docs/webhooks#sample-events
    */
-  fastify.post("/revenuecat", {
-    // RevenueCat sends JSON — disable body parsing limit for safety
-    config: { rawBody: true },
-  }, async (request, reply) => {
+  fastify.post("/revenuecat", async (request, reply) => {
     if (!verifyRevenueCatSecret(request, reply)) return;
 
     const body = request.body;

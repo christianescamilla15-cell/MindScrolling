@@ -451,7 +451,7 @@ export default async function packsRoutes(fastify) {
     let query = supabase
       .from("quotes")
       .select(
-        "id, text, author, category, lang, swipe_dir, pack_name, is_premium"
+        "id, text, author, category, lang, swipe_dir, pack_name"
       )
       .eq("pack_name", id)
       .eq("lang", lang)
@@ -717,18 +717,9 @@ export default async function packsRoutes(fastify) {
         pack_id: id,
         pack_name: packName,
         access_granted: true,
-        message: `${packName} unlocked. ${packCounts()} quotes ready.`,
+        message: `${packName} unlocked.`,
       });
     }
   );
 
-  /**
-   * Helper: returns a static quote count string for purchase confirmation.
-   * Actual count comes from the DB; this is a fast fallback for the 201 message.
-   */
-  function packCounts() {
-    // The canonical count is 500 per pack per lang.
-    // Client already knows the real count from GET /packs.
-    return "500";
-  }
 }
