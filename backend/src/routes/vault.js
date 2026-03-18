@@ -1,6 +1,6 @@
 import { supabase }                from "../db/client.js";
 import { updatePreferenceVector } from "../services/embeddings.js";
-import { UUID_RE }                from "../utils/validation.js";
+import { UUID_RE, authorSlug }    from "../utils/validation.js";
 
 export default async function vaultRoutes(fastify) {
   /** GET /vault — list saved quotes */
@@ -13,7 +13,7 @@ export default async function vaultRoutes(fastify) {
 
     if (error) return reply.status(500).send({ error: "Failed to load vault", code: "INTERNAL_ERROR" });
 
-    return reply.send({ data: (data || []).map(r => ({ ...r.quotes, saved_at: r.saved_at })) });
+    return reply.send({ data: (data || []).map(r => ({ ...r.quotes, saved_at: r.saved_at, author_slug: authorSlug(r.quotes?.author) })) });
   });
 
   /** POST /vault — save a quote */

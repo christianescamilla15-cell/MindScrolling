@@ -39,10 +39,25 @@ class QuoteModel {
     );
   }
 
-  /// Client-side slug fallback — matches backend authorSlug() logic.
+  /// Client-side slug fallback — mirrors backend authorSlug() in validation.js.
+  /// Pre-maps non-decomposable Latin chars before stripping non-ASCII.
+  /// The server-provided author_slug is always preferred over this fallback.
   static String _deriveSlug(String name) {
-    // Simple ASCII-only fallback; backend NFD version is authoritative.
     return name
+        .replaceAll(RegExp(r'[øØ]'), 'o')
+        .replaceAll(RegExp(r'[ðÐ]'), 'd')
+        .replaceAll(RegExp(r'[þÞ]'), 'th')
+        .replaceAll(RegExp(r'[łŁ]'), 'l')
+        .replaceAll('ß', 'ss')
+        .replaceAll(RegExp(r'[æÆ]'), 'ae')
+        .replaceAll(RegExp(r'[éèêë]'), 'e')
+        .replaceAll(RegExp(r'[àáâãä]'), 'a')
+        .replaceAll(RegExp(r'[ìíîï]'), 'i')
+        .replaceAll(RegExp(r'[òóôõö]'), 'o')
+        .replaceAll(RegExp(r'[ùúûü]'), 'u')
+        .replaceAll(RegExp(r'[ýÿ]'), 'y')
+        .replaceAll(RegExp(r'[ñ]'), 'n')
+        .replaceAll(RegExp(r'[ç]'), 'c')
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
         .replaceAll(RegExp(r'^_+|_+$'), '');

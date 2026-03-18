@@ -8,10 +8,17 @@ export function normalizeLang(raw) {
   return l === "es" ? "es" : "en";
 }
 
-/** Derive author slug from display name — NFD decomposition strips accents. */
+/** Derive author slug from display name — NFD decomposition strips accents.
+ *  Pre-maps non-decomposable Latin letters (ø, ð, þ, ł, ß, æ) before NFD. */
 export function authorSlug(name) {
   if (!name) return "";
   return name
+    .replace(/ø/gi, "o")
+    .replace(/ð/gi, "d")
+    .replace(/þ/gi, "th")
+    .replace(/ł/gi, "l")
+    .replace(/ß/g,  "ss")
+    .replace(/æ/gi, "ae")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
