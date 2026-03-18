@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/philosophy_map_model.dart';
+import '../../data/repositories/challenge_repository.dart';
 import '../challenges/challenges_controller.dart'
     show challengeRepositoryProvider;
 
