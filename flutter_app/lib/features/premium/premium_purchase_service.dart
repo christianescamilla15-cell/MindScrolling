@@ -130,6 +130,9 @@ class PremiumPurchaseService {
 
   Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
+      // Ignore individual pack purchases — handled by PackPurchaseService.
+      if (purchase.productID.startsWith('com.mindscrolling.pack.')) continue;
+
       switch (purchase.status) {
         case PurchaseStatus.pending:
           break;

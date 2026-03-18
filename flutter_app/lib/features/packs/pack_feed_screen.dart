@@ -6,9 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/providers/core_providers.dart';
+import '../../core/utils/haptics_service.dart';
 import '../../data/models/quote_model.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../premium/premium_controller.dart';
+import '../premium/premium_purchase_service.dart';
 import '../settings/settings_controller.dart';
+import 'pack_purchase_service.dart';
 import 'widgets/paywall_card.dart';
 
 // ---------------------------------------------------------------------------
@@ -48,6 +52,7 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
   bool _hasMore = true;
   String? _nextCursor;
   int _quoteCount = 0;
+  bool _buying = false;
 
   // MED-05: track when the current card became visible so we can compute dwell_time_ms.
   DateTime _cardShownAt = DateTime.now();
@@ -187,6 +192,8 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(packPurchaseServiceProvider);
+
     final tr = context.tr;
     final packAccent = _parseColor(widget.packColor);
 
@@ -292,20 +299,43 @@ class _PackFeedScreenState extends ConsumerState<PackFeedScreen> {
     );
   }
 
-  void _onBuyPack() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          context.tr.packComingSoon,
-          style: AppTypography.caption.copyWith(color: Colors.white),
-        ),
-        backgroundColor: AppColors.stoicism.withOpacity(0.9),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-      ),
-    );
+  Future<void> _onBuyPack() async {
+    if (_buying) return;
+    setState(() => _buying = true);
+
+    final service = ref.read(packPurchaseServiceProvider);
+    final result = await service.purchase(packId: widget.packId);
+
+    if (!mounted) return;
+    setState(() => _buying = false);
+
+    switch (result.outcome) {
+      case PurchaseOutcome.success:
+      case PurchaseOutcome.restored:
+        HapticsService.heavyImpact();
+        await ref.read(premiumControllerProvider.notifier).checkStatus();
+        if (!mounted) return;
+        // Reload the feed — user is now entitled.
+        _loadPage(cursor: null);
+      case PurchaseOutcome.cancelled:
+        break;
+      case PurchaseOutcome.failed:
+      case PurchaseOutcome.pending:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result.errorMessage ?? context.tr.purchaseFailed,
+              style: AppTypography.caption.copyWith(color: Colors.white),
+            ),
+            backgroundColor: const Color(0xFFE05C5C).withOpacity(0.9),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+          ),
+        );
+    }
   }
 
   Color _parseColor(String hex) {

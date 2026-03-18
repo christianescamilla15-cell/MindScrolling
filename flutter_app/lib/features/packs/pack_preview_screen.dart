@@ -5,10 +5,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
+import 'dart:io';
+
+import '../../app/theme/colors.dart' show AppColors;
 import '../../core/providers/core_providers.dart';
+import '../../core/utils/haptics_service.dart';
 import '../../data/models/quote_model.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../premium/premium_controller.dart';
+import '../premium/premium_purchase_service.dart';
 import '../settings/settings_controller.dart';
+import 'pack_purchase_service.dart';
 import 'widgets/paywall_card.dart';
 
 // ---------------------------------------------------------------------------
@@ -41,6 +48,7 @@ class _PackPreviewScreenState extends ConsumerState<PackPreviewScreen> {
   final CardSwiperController _swiperController = CardSwiperController();
 
   bool _loading = true;
+  bool _buying = false;
   String? _error;
   bool _previewUnavailable = false;
 
@@ -118,24 +126,61 @@ class _PackPreviewScreenState extends ConsumerState<PackPreviewScreen> {
     }
   }
 
-  void _onBuyPack() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          context.tr.packComingSoon,
-          style: AppTypography.caption.copyWith(color: Colors.white),
-        ),
-        backgroundColor: AppColors.stoicism.withOpacity(0.9),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-      ),
+  Future<void> _onBuyPack() async {
+    if (_buying) return;
+    setState(() => _buying = true);
+
+    // Resolve product ID from paywall data (iOS vs Android) or derive from packId.
+    final productId = Platform.isIOS
+        ? (_paywallData?['product_id_ios'] as String?)
+        : (_paywallData?['product_id_android'] as String?);
+
+    final service = ref.read(packPurchaseServiceProvider);
+    final result = await service.purchase(
+      packId: widget.packId,
+      productIdOverride: productId,
     );
+
+    if (!mounted) return;
+    setState(() => _buying = false);
+
+    switch (result.outcome) {
+      case PurchaseOutcome.success:
+      case PurchaseOutcome.restored:
+        HapticsService.heavyImpact();
+        // Refresh owned_packs in premium state.
+        await ref.read(premiumControllerProvider.notifier).checkStatus();
+        if (!mounted) return;
+        context.pushReplacement(
+          '/packs/${Uri.encodeComponent(widget.packId)}/feed',
+          extra: {'packName': widget.packName, 'packColor': widget.packColor},
+        );
+      case PurchaseOutcome.cancelled:
+        break;
+      case PurchaseOutcome.failed:
+      case PurchaseOutcome.pending:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result.errorMessage ?? context.tr.purchaseFailed,
+              style: AppTypography.caption.copyWith(color: Colors.white),
+            ),
+            backgroundColor: const Color(0xFFE05C5C).withOpacity(0.9),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+          ),
+        );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Keep the purchase service alive for the duration of the purchase flow.
+    ref.watch(packPurchaseServiceProvider);
+
     final tr = context.tr;
     final packColor = _parseColor(widget.packColor);
 

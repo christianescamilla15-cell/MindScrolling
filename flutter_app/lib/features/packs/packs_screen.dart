@@ -90,7 +90,6 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
                           style: AppTypography.bodyMedium
                               .copyWith(color: AppColors.textMuted)))
                   : _PackList(packs: _packs!, userState: _userState),
-    ),
     );
   }
 }
