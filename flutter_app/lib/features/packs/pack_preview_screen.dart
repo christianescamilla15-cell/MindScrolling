@@ -226,7 +226,7 @@ class _PackPreviewScreenState extends ConsumerState<PackPreviewScreen> {
     return CardSwiper(
       controller: _swiperController,
       cardsCount: totalCards,
-      allowedSwipeDirection: const AllowedSwipeDirection.only(top: true),
+      allowedSwipeDirection: const AllowedSwipeDirection.only(up: true),
       numberOfCardsDisplayed: 1,
       backCardOffset: const Offset(0, 0),
       scale: 1.0,
