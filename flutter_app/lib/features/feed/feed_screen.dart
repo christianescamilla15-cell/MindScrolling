@@ -24,6 +24,7 @@ import 'feed_state.dart';
 import 'widgets/challenge_card.dart';
 import 'widgets/quote_card.dart';
 import 'widgets/reflection_card.dart';
+import 'widgets/soft_paywall_card.dart';
 import 'widgets/swipe_direction_overlay.dart';
 import 'widgets/swipe_hint.dart';
 
@@ -161,8 +162,20 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       CardSwiperDirection.bottom => 'down',
       _ => 'left',
     };
-    ref.read(feedControllerProvider.notifier).onSwipe(dirStr);
-    // Reset overlay after swipe completes
+
+    // Soft paywall card — dismiss without counting as a quote swipe (US-B07).
+    final state = ref.read(feedControllerProvider);
+    final swipedItem = (previousIndex < state.items.length)
+        ? state.items[previousIndex]
+        : null;
+    if (swipedItem != null && swipedItem.isSoftPaywallCard) {
+      // Advance index without incrementing reflections count.
+      ref.read(feedControllerProvider.notifier).advanceIndex();
+    } else {
+      ref.read(feedControllerProvider.notifier).onSwipe(dirStr);
+    }
+
+    // Reset overlay after swipe completes.
     setState(() {
       _swipeDirection = null;
       _swipeIntensity = 0.0;
@@ -208,6 +221,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             .read(challengesControllerProvider.notifier)
             .updateFromSwipes(next.reflections);
         HapticsService.heavyImpact();
+      }
+      // Soft paywall injection at swipe 100 for Trial users (US-B07).
+      if (prev != null &&
+          next.reflections >= 100 &&
+          prev.reflections < 100 &&
+          mounted) {
+        final isTrial = ref.read(premiumStateProvider).isTrial;
+        if (isTrial) {
+          ref
+              .read(feedControllerProvider.notifier)
+              .maybeinjectSoftPaywall()
+              .ignore();
+        }
       }
     });
 
@@ -331,6 +357,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     FeedController controller,
     bool isPremium,
   ) {
+    if (item.isSoftPaywallCard) {
+      return const SoftPaywallCard();
+    }
     if (item.isChallengeCard) {
       final extra = item.extra ?? {};
       return ChallengeCard(
@@ -398,7 +427,7 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            'MindScroll',
+            context.tr.appName,
             style: AppTypography.displaySmall.copyWith(fontSize: 20),
           ),
           const SizedBox(width: 8),

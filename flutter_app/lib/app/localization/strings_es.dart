@@ -590,7 +590,7 @@ class StringsEs implements AppStrings {
   @override String get ambientAudio    => 'Audio ambiental';
   @override String get soundscapes     => 'Paisajes sonoros';
   @override String get nowPlaying      => 'Reproduciendo';
-  @override String get audioComingSoon => 'Pistas de audio proximamente';
+  @override String get audioComingSoon => 'Pistas de audio próximamente';
   @override String get play            => 'Reproducir';
   @override String get pause           => 'Pausar';
   @override String get volume          => 'Volumen';
@@ -606,6 +606,7 @@ class StringsEs implements AppStrings {
   // Author detail
   @override String get authorLoadError => 'No se pudo cargar el autor';
   @override String get topQuotes       => 'Frases destacadas';
+  @override String nQuotes(int n)      => '$n frases';
 
   // Notifications
   @override String get notifications        => 'Notificaciones';
@@ -650,4 +651,31 @@ class StringsEs implements AppStrings {
   @override String get takeABreath    => 'Toma un respiro.';
   @override String get doingWell      => 'Lo estás haciendo bien.';
   @override String get swipeContinue  => 'Desliza para continuar tu camino.';
+
+  // Soft paywall dismiss hint
+  @override String get swipeToContinue => 'Desliza para continuar';
+
+  // Pack monetization (Block B)
+  @override String get packIncluded            => 'Incluido';
+  @override String get packUnlocked            => 'Desbloqueado';
+  @override String get packPreview             => 'Vista previa';
+  @override String get packLocked              => 'Bloqueado';
+  @override String packUnlockCta(int quotesCount) => 'Desbloquea $quotesCount quotes — \$2.99';
+  @override String get packInsideCta           => 'O llévate los 3 packs con Inside (\$4.99)';
+  @override String get packPreviewUnavailable  => 'Preview no disponible en este idioma';
+  @override String get packComingSoon          => 'Compra próximamente';
+  @override String get trialSoftPaywall        => '¿Disfrutas MindScrolling? Pásate a Inside por \$4.99';
+
+  // API Contract keys
+  @override String get packIncludedInInside    => 'Incluido en Inside';
+  @override String get packGetFor              => 'Obtener por \$2.99';
+  @override String packPaywallPrimary(String packName) => 'Obtener $packName — \$2.99';
+  @override String get packPaywallSecondaryInside => 'O desbloquea todo con Inside — \$4.99';
+  @override String packTrialPaywallPrimary(int count) => '$count frases más — \$2.99';
+  @override String get packTrialPaywallSecondary => 'O consigue los 3 packs con Inside — \$4.99';
+  @override String packConfirmationUnlocked(String packName, int count) => '$packName desbloqueado. $count frases listas.';
+  @override String get packNewNotIncluded      => 'Nuevo — no incluido en Inside existente';
+  @override String get insideValueProp         => '3 packs (valor \$8.97) + funciones premium — \$4.99';
+  @override String get insideValuePropOwn1     => 'Ya tienes 1 pack. Obtén los otros 2 + funciones premium por \$4.99.';
+  @override String get insideValuePropOwn2     => 'Tienes 2 packs. Completa tu biblioteca + funciones premium por \$4.99.';
 }

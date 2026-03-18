@@ -298,6 +298,47 @@ class FeedController extends StateNotifier<FeedState> {
   }
 
   // -------------------------------------------------------------------------
+  // Soft paywall injection (Block B — US-B07)
+  // -------------------------------------------------------------------------
+
+  static const _kSoftPaywallShownKey = 'mindscroll_soft_paywall_shown';
+  static const _kSoftPaywallInjectionSwipe = 100;
+
+  /// Injects the soft paywall card into the feed at position ~100 for Trial
+  /// users. Safe to call multiple times — idempotent after first injection.
+  Future<void> maybeinjectSoftPaywall() async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyShown = prefs.getBool(_kSoftPaywallShownKey) ?? false;
+    if (alreadyShown) return;
+
+    // Only inject if total reflections are at or past the threshold.
+    if (state.reflections < _kSoftPaywallInjectionSwipe) return;
+
+    // Check if card is already in items list.
+    final alreadyInjected = state.items.any((i) => i.isSoftPaywallCard);
+    if (alreadyInjected) return;
+
+    // Insert after the current index so the user sees it on the next swipe.
+    final insertAt = (state.currentIndex + 1).clamp(0, state.items.length);
+    final updated = List<FeedItemModel>.from(state.items)
+      ..insert(insertAt, const FeedItemModel.softPaywall());
+    state = state.copyWith(items: updated);
+
+    await prefs.setBool(_kSoftPaywallShownKey, true);
+  }
+
+  // -------------------------------------------------------------------------
+  // advanceIndex — used when swiping a non-quote card (soft paywall card).
+  // Advances currentIndex without incrementing reflections count (US-B07).
+  // -------------------------------------------------------------------------
+
+  void advanceIndex() {
+    final newIndex = state.currentIndex + 1;
+    state = state.copyWith(currentIndex: newIndex);
+    _swipeStartTime = DateTime.now();
+  }
+
+  // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
 

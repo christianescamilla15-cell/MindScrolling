@@ -307,6 +307,7 @@ abstract class AppStrings {
   // ------------------------------------------------------------------
   String get authorLoadError;
   String get topQuotes;
+  String nQuotes(int n);
 
   // ------------------------------------------------------------------
   // Notifications
@@ -363,6 +364,37 @@ abstract class AppStrings {
   String get takeABreath;
   String get doingWell;
   String get swipeContinue;
+
+  // ------------------------------------------------------------------
+  // Soft paywall dismiss hint
+  // ------------------------------------------------------------------
+  String get swipeToContinue;
+
+  // ------------------------------------------------------------------
+  // Pack monetization (Block B)
+  // ------------------------------------------------------------------
+  String get packIncluded;
+  String get packUnlocked;
+  String get packPreview;
+  String get packLocked;
+  String packUnlockCta(int quotesCount);
+  String get packInsideCta;
+  String get packPreviewUnavailable;
+  String get packComingSoon;
+  String get trialSoftPaywall;
+
+  // API Contract keys (from contract section 7)
+  String get packIncludedInInside;
+  String get packGetFor;
+  String packPaywallPrimary(String packName);
+  String get packPaywallSecondaryInside;
+  String packTrialPaywallPrimary(int count);
+  String get packTrialPaywallSecondary;
+  String packConfirmationUnlocked(String packName, int count);
+  String get packNewNotIncluded;
+  String get insideValueProp;
+  String get insideValuePropOwn1;
+  String get insideValuePropOwn2;
 
 }
 

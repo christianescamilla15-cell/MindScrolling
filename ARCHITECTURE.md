@@ -1,7 +1,7 @@
 # MindScrolling — Architecture
 
-**Version:** Sprint 5 (Flutter migration)
-**Last updated:** 2026-03-15
+**Version:** Sprint 8 — Block B Pack Monetization
+**Last updated:** 2026-03-18
 
 ---
 
@@ -82,9 +82,17 @@ MindScrolling/
 │       ├── plugins/       Shared middleware
 │       └── db/
 │           ├── migrations/ SQL schema
-│           └── seed.js    Quote seeder (5,500 quotes)
+│           └── seed.js    Quote seeder (~13,000 quotes EN+ES)
 │
 ├── frontend_legacy/       Original React/Vite app (reference only)
+│
+├── cloud/                 QA workflow system (non-deployed)
+│   ├── control_tower/     Build dashboard · QA/blind-test status ·
+│   │                      blockers · release gate · build/score/qa history
+│   ├── testing/           Blind test targets, checklist, results, evidence
+│   ├── debugging/         Active issues, fix history, debug log
+│   └── workflows/         QA, blind test, self-debugging, product brain,
+│                          sprint planner, roadmap, release workflow protocols
 │
 ├── ARCHITECTURE.md        This document
 ├── CONTRIBUTING.md
@@ -112,7 +120,10 @@ app.js
      ├── swipes.js          → POST /swipes
      ├── challenges.js      → GET /challenges/today · POST progress
      ├── map.js             → GET /map · POST /map/snapshot
-     └── premium.js         → GET /premium/status · POST /unlock
+     ├── packs.js           → GET /packs · GET /packs/:id/preview · GET /packs/:id/feed
+     │                          POST /packs/:id/purchase/verify
+     └── premium.js         → GET /premium/status · POST /purchase/verify
+     │                          POST /restore · POST /start-trial · POST /redeem
 ```
 
 ### Request Flow
@@ -194,18 +205,27 @@ Repository (e.g. FeedRepository)
 ## 6. Database Schema Summary
 
 ```
-quotes              ← 5,500+ philosophical quotes (EN + ES)
-users               ← Device-based user records + streak
+quotes              ← ~13,000 philosophical quotes (EN + ES, bilingual DB)
+                      Block B adds: is_pack_preview, pack_preview_rank (1-15), released_at
+users               ← Device-based user records + streak + premium status
 likes               ← Quote likes per device
 vault               ← Saved quotes per device
 user_preferences    ← Category weights (like + swipe counts + scores)
-seen_quotes         ← Feed exclusion list per device
+seen_quotes         ← Feed exclusion list per device (main feed only, not pack feeds)
 user_profiles       ← Onboarding data (age, interest, goal, lang)
 swipe_events        ← Raw swipe log with dwell time
+                      Block B adds: source ('feed'|'pack'|'preview'), source_pack_id
 user_preference_snapshots ← Weekly evolution snapshots
 daily_challenges    ← One challenge per calendar date
 challenge_progress  ← Per-device progress per challenge
-purchases           ← Premium unlock records
+purchases           ← Inside (MindScrolling Inside) unlock records
+pack_purchases      ← Individual pack entitlements ($2.99 each)
+                      UNIQUE (device_id, pack_id) — EC-09 duplicate prevention
+pack_prices         ← Canonical pack prices per (pack_id, currency) — BR-01
+premium_activation_codes ← Activation code redemption
+premium_audit_log   ← All purchase/trial/pack events
+user_preference_vectors ← 512-dim semantic preference vector (Voyage AI)
+weekly_insights     ← AI insight cache (Claude, 24h TTL)
 ```
 
 ### Key Indexes
@@ -226,14 +246,17 @@ idx_challenges_date          ON daily_challenges(active_date)
 
 ```
 QuoteModel
-  id          UUID
-  text        String
-  author      String
-  category    stoicism | philosophy | discipline | reflection
-  lang        en | es
-  swipe_dir   left | right | up | down
-  pack_name   free | stoicism_pack | zen_pack | ...
-  is_premium  Boolean
+  id                UUID
+  text              String
+  author            String
+  category          stoicism | philosophy | discipline | reflection
+  lang              en | es
+  swipe_dir         left | right | up | down
+  pack_name         free | stoicism_deep | existentialism | zen_mindfulness
+  is_premium        Boolean
+  is_pack_preview   Boolean   (Block B — editorial curation flag)
+  pack_preview_rank Int?      (1-15, null if not a preview quote)
+  released_at       Timestamptz (Block B — grandfathering boundary)
 
 UserProfileModel
   device_id         String (UUID v4)
@@ -463,35 +486,108 @@ GET /challenges/today
 
 POST /challenges/:id/progress
   │
+  ├── SERVER increments progress by 1 (client cannot set progress directly)
+  ├── TARGET = 8 quotes seen → server sets completed = true automatically
+  ├── Returns { updated, progress, completed }
   └── UPSERT challenge_progress
       { device_id, challenge_id, progress, completed }
+
+Completion rule: challenge completes after 8 swipe events whose category
+matches today's challenge category. The server enforces this threshold;
+the client only calls POST .../progress once per qualifying swipe.
 ```
 
 ---
 
-## 12. Premium and Donation Architecture
+## 12. Premium and Monetization Architecture
 
-### Premium Model
+### Entitlement Tiers (Block B, Sprint 8)
 
 ```
-One-time unlock: $2.99 USD (no recurring charges)
+Free:
+  └── 20 swipes/day from general pool (pack_name = 'free' or is_premium = false)
+  └── 5 curated preview quotes per pack (pack_preview_rank 1-5)
+  └── 20-quote vault cap
 
-Free tier:
-  └── 200 free quotes (pack_name = 'free')
+Trial (7 days OR 1,000 feed quotes, whichever comes first):
+  └── Up to 1,000 feed quotes
+  └── 15 curated preview quotes per pack (pack_preview_rank 1-15)
+  └── Pack preview swipes do NOT count against the 1,000-quote trial quota (BR-08)
 
-Premium tier:
-  └── 5,000+ quotes (all pack_names)
-  └── Export quote as image (canvas 1080×1080)
-  └── Philosophy map with evolution history
+Pack Owner ($2.99 one-time per pack):
+  └── Full 500 quotes from purchased pack in user's configured language
+  └── Pack feed does NOT affect main feed swipe limit
+  └── Main feed behavior unchanged (Free limits still apply)
+  └── Pack access is permanent
 
-POST /premium/unlock
+MindScrolling Inside ($4.99 one-time):
+  └── Unlimited main feed quotes
+  └── Full access to all grandfathered packs (released_at < 2026-06-01)
+  └── Future packs (released_at >= 2026-06-01) sold separately at $2.99
+  └── Supersedes trial immediately on purchase
+
+Grandfathering rule (BR-04, permanent):
+  └── Inside users with is_premium = true before 2026-06-01 ship date
+      receive automatic access to the 3 current packs. This is irrevocable.
+  └── Determination: server checks is_premium = true AND pack.released_at < '2026-06-01'
+  └── No date comparison on users.premium_since — the pack's released_at is the gate
+```
+
+### Pack Monetization Flow (Block B)
+
+```
+Individual Pack Purchase ($2.99):
+
+POST /packs/:id/purchase/verify
   │
-  ├── INSERT into purchases
-  └── UPDATE users SET is_premium = true
+  ├── Validate product_id against pack_prices table
+  ├── Upsert users row (create if first request)
+  ├── UPSERT pack_purchases ON CONFLICT (device_id, pack_id)
+  │     status = 'verified', purchased_at = now()
+  ├── Emit pack_purchased → premium_audit_log (fire-and-forget)
+  └── Return { status: "verified", access_granted: true }
+
+GET /packs/:id/feed (entitled users only)
+  │
+  ├── Entitlement check: is_premium = true OR pack_purchases row exists
+  ├── If not entitled: 403 PACK_NOT_ENTITLED
+  ├── Adaptive feed query scoped to pack_name = :id AND lang = :lang
+  └── Cursor-based pagination, 20 per page default
+
+GET /packs/:id/preview
+  │
+  ├── Entitlement check:
+  │     unlocked (Inside/pack owner) → redirect_to_feed = true
+  │     trial_active                 → quota = 15, ranks 1-15
+  │     free / trial_expired         → quota = 5, ranks 1-5
+  └── Paywall block included when is_preview_complete = true
 
 GET /premium/status
   │
-  └── CHECK users.is_premium AND purchases record
+  ├── Existing fields preserved (is_premium, trial_active, etc.)
+  ├── owned_packs: string[]  ← all pack IDs device can access in full
+  └── user_state: "free" | "trial" | "inside" | "pack_owner"
+```
+
+### Swipe Source Tracking (Block B, BR-07)
+
+```
+swipe_events.source values:
+  "feed"    → main feed swipe  (counts against daily/trial limits, updates preferences)
+  "pack"    → pack feed swipe  (does NOT count against limits, updates preferences)
+  "preview" → pack preview     (does NOT count against limits, does NOT update preferences)
+```
+
+### Donation Flow
+
+```
+User taps "Support MindScrolling"
+      │
+      ▼
+url_launcher opens DONATION_LINK
+(external: Buy Me a Coffee / Ko-fi)
+      │
+No backend involvement — fully external
 ```
 
 ### Donation Flow
@@ -527,7 +623,7 @@ UI strings:
     app_strings.dart   ← Abstract base
 
 Price localization (display only):
-  USD: $2.99
+  USD: $4.99
   MXN: $59
   BRL: R$14.90
   ARS: $2,800
@@ -563,6 +659,7 @@ Price localization (display only):
 ## 15. API Error Contract
 
 > Full endpoint specification: [API_CONTRACT.md](API_CONTRACT.md)
+> Block B pack monetization endpoints: [API_CONTRACT_BLOCK_B.md](API_CONTRACT_BLOCK_B.md)
 
 All backend endpoints return errors in a consistent JSON envelope:
 
@@ -583,8 +680,11 @@ All backend endpoints return errors in a consistent JSON envelope:
 | 401 | `MISSING_DEVICE_ID` | `X-Device-ID` header absent |
 | 404 | `NOT_FOUND` | Resource does not exist |
 | 409 | `ALREADY_EXISTS` | Duplicate resource (e.g. vault duplicate) |
-| 429 | `RATE_LIMITED` | Exceeded 60 requests per minute |
+| 403 | `PACK_NOT_ENTITLED` | Device does not have entitlement for this pack (Block B) |
+| 404 | `PACK_NOT_FOUND` | Pack ID does not exist (Block B) |
+| 429 | `RATE_LIMITED` | Exceeded 60 requests per minute (10/min for purchase endpoints) |
 | 500 | `INTERNAL_ERROR` | Unexpected server error |
+| 503 | `PREVIEW_UNAVAILABLE` | No curated preview quotes exist in the requested language (Block B) |
 
 ### Special cases
 
@@ -620,7 +720,7 @@ This table is the **single source of truth** for direction → category mapping 
 | Area | Planned direction |
 |---|---|
 | Auth | Optional Google/Apple sign-in for cross-device sync |
-| Content | Curated packs: Stoicism Deep Dive, Zen Buddhism, Existentialism |
+| Content | Additional packs beyond Block B's 3 (Phase 8+). Future packs are sold separately at $2.99 even to Inside users (released_at >= 2026-06-01). |
 | Social | Optional sharing of Philosophy Map to social media |
 | AI | Claude-powered daily quote generation tailored to user profile |
 | Notifications | Daily reminder push notification at user-set time |

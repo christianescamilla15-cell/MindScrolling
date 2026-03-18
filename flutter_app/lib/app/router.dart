@@ -13,6 +13,8 @@ import '../features/premium/premium_screen.dart';
 import '../features/premium/redeem_code_screen.dart';
 import '../features/authors/author_detail_screen.dart';
 import '../features/packs/packs_screen.dart';
+import '../features/packs/pack_preview_screen.dart';
+import '../features/packs/pack_feed_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/insights/insights_screen.dart';
@@ -84,6 +86,34 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/packs',
         builder: (context, state) => const PacksScreen(),
+      ),
+      GoRoute(
+        path: '/packs/:packId/preview',
+        builder: (context, state) {
+          final packId =
+              Uri.decodeComponent(state.pathParameters['packId'] ?? '');
+          final extra =
+              state.extra as Map<String, dynamic>? ?? const {};
+          return PackPreviewScreen(
+            packId: packId,
+            packName: extra['packName'] as String? ?? packId,
+            packColor: extra['packColor'] as String? ?? '#14B8A6',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/packs/:packId/feed',
+        builder: (context, state) {
+          final packId =
+              Uri.decodeComponent(state.pathParameters['packId'] ?? '');
+          final extra =
+              state.extra as Map<String, dynamic>? ?? const {};
+          return PackFeedScreen(
+            packId: packId,
+            packName: extra['packName'] as String? ?? packId,
+            packColor: extra['packColor'] as String? ?? '#14B8A6',
+          );
+        },
       ),
       GoRoute(
         path: '/donations',

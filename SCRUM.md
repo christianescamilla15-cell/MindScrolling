@@ -3,7 +3,7 @@
 **Producto:** App anti doom-scrolling filosófico
 **Stack:** Flutter (mobile) · Node.js + Fastify + Supabase (backend) · React legacy (web)
 **Metodología:** Scrum ligero — sprints de ~2 semanas, sin reuniones formales
-**Última actualización:** 2026-03-15
+**Última actualización:** 2026-03-18
 
 ---
 
@@ -23,7 +23,7 @@ MindScrolling reemplaza el doom-scrolling con frases filosóficas curadas presen
 | Hosting backend | Railway o Render | Vercel Edge Functions | Servidor persistente, más predecible |
 | Multilenguaje | Columna `lang` en DB + dataset ES estático + i18n propio | i18n framework externo | Mínimo, 2 idiomas, sin dependencias pesadas |
 | Recomendación | Adaptive feed con scoring ponderado (affinity + onboarding + novelty) | ML / collaborative filtering | Explicable, escalable, suficiente |
-| Monetización | One-time premium unlock ($2.99) + donación voluntaria | Suscripción mensual | Sin fricción, sin recurrencia |
+| Monetización | One-time premium unlock ($4.99) + donación voluntaria | Suscripción mensual | Sin fricción, sin recurrencia |
 | Costo estimado | $0–5/mes hasta ~500 DAU | — | Supabase free + Railway starter |
 | **Cliente móvil** | **Flutter (Sprint 5)** | React Native / Capacitor | Cross-platform nativo, mejor gestos, Riverpod state |
 
@@ -191,7 +191,7 @@ Distribución por batch:
 
 ### Modelo freemium
 
-| Característica | Free | Premium ($2.99) |
+| Característica | Free | Premium ($4.99) |
 |----------------|------|-----------------|
 | Acceso a frases | 200 frases free | 5,000+ frases |
 | Vault | ✅ básico | ✅ ilimitado |
@@ -527,10 +527,10 @@ flutter_app/
 
 | Categoría | Color | Dirección swipe |
 |-----------|-------|-----------------|
-| stoicism | `#6B8F71` | ← izquierda |
-| philosophy | `#7B9BB8` | ↑ arriba |
+| stoicism | `#6B8F71` | ↑ arriba |
 | discipline | `#C17F24` | → derecha |
-| reflection | `#9B6B8F` | ↓ abajo |
+| reflection | `#9B6B8F` | ← izquierda |
+| philosophy | `#7B9BB8` | ↓ abajo |
 
 ### Cómo ejecutar la app Flutter
 
@@ -541,6 +541,137 @@ flutter run                    # emulador o dispositivo conectado
 flutter build apk --release    # Android APK
 flutter build ios --release    # iOS (requiere Xcode en macOS)
 ```
+
+---
+
+## Sprint 6 — QA Gate & Correcciones (completado)
+
+**Período:** 2026-03-17 al 2026-03-18
+**Objetivo:** Auditoría completa del repositorio (backend + Flutter + docs + dataset). Detectar y corregir todos los bugs críticos, errores de lógica, regresiones de precio, strings no localizados y código muerto antes del lanzamiento en Google Play.
+
+### Expansión de bios de autores
+
+| ID | Tarea | Archivo | Estado |
+|----|-------|---------|--------|
+| S6-A01 | Crear `author_bios.js` como fuente única para 433 bios EN + ES | `backend/src/data/author_bios.js` | ✅ |
+| S6-A02 | Simplificar `getAuthorBio()` a 4 líneas (fallback EN → ES → default) | `backend/src/routes/authors.js` | ✅ |
+| S6-A03 | Eliminar bloque `_LEGACY_BIOS` (~165 líneas de código muerto) | `backend/src/routes/authors.js` | ✅ |
+| S6-A04 | Verificar cobertura 433/433 autores EN y ES programáticamente | Script Node.js + all_authors.json | ✅ |
+| S6-A05 | Eliminar 8 claves duplicadas en el objeto `AUTHOR_BIOS` | `backend/src/data/author_bios.js` | ✅ |
+
+### Correcciones backend (QA gate)
+
+| ID | Severidad | Descripción | Archivo | Estado |
+|----|-----------|-------------|---------|--------|
+| S6-B01 | CRIT | Challenge: servidor ahora incrementa progreso en 1/llamada; `completed` derivado server-side al alcanzar 8 swipes | `routes/challenges.js` | ✅ |
+| S6-B02 | CRIT | Vault: límite de 20 saves para usuarios free (403 `VAULT_LIMIT_REACHED`) | `routes/vault.js` | ✅ |
+| S6-B03 | CRIT | Premium insights: gate invertido corregido — nuevos dispositivos ya no pasan como premium | `routes/insights.js` | ✅ |
+| S6-B04 | CRIT | Premium iOS source: `premium_source` ahora detecta iOS vs Android correctamente | `routes/premium.js` | ✅ |
+| S6-B05 | HIGH | Map: `computeScores()` retorna campos con sufijo `_score` (alineado al contrato de API) | `routes/map.js` | ✅ |
+| S6-B06 | HIGH | Profile: `GET /profile` ahora selecciona `device_id` en la query | `routes/profile.js` | ✅ |
+| S6-B07 | HIGH | Premium legacy `/unlock`: captura error de update y retorna 500 si falla | `routes/premium.js` | ✅ |
+| S6-B08 | HIGH | Mind profile: `CATEGORIES.sort()` → `[...CATEGORIES].sort()` para evitar mutación concurrente | `routes/mind-profile.js` | ✅ |
+| S6-B09 | MED | Swipes: validación de categoría permitida (stoicism/philosophy/discipline/reflection) | `routes/swipes.js` | ✅ |
+| S6-B10 | MED | Challenge: `GET /challenges/today` retorna `progress: null` para dispositivos sin interacción previa | `routes/challenges.js` | ✅ |
+| S6-B11 | MED | Profile: respuesta `POST /profile` cambiada de `{ saved: true }` a `{ ok: true }` | `routes/profile.js` | ✅ |
+| S6-B12 | MED | Map snapshot: respuesta cambiada de `{ saved: true }` a `{ ok: true }` | `routes/map.js` | ✅ |
+| S6-B13 | MED | Premium status: variable `userErr` no usada eliminada | `routes/premium.js` | ✅ |
+
+### Correcciones Flutter (QA gate)
+
+| ID | Severidad | Descripción | Archivo | Estado |
+|----|-----------|-------------|---------|--------|
+| S6-F01 | CRIT | `unlock()` usaba `amount: 2.99` → `MonetizationConstants.basePriceUsd` (4.99) | `premium_controller.dart` | ✅ |
+| S6-F02 | CRIT | `successMessage` hardcodeado en inglés → key `'purchaseSuccess'` (i18n) | `premium_controller.dart` | ✅ |
+| S6-F03 | CRIT | Offline fallback en challenges usaba `ChallengeModel` hardcodeado en inglés → `challenge: null` (UI fallback localizado) | `challenges_controller.dart` | ✅ |
+| S6-F04 | HIGH | Eliminado widget `_ActionButton` dead code (282–314) | `challenges_screen.dart` | ✅ |
+| S6-F05 | HIGH | `'$quoteCount quotes'` → `context.tr.nQuotes(quoteCount)` (nuevo método i18n) | `packs_screen.dart` | ✅ |
+| S6-F06 | HIGH | `'${_data!['total_quotes']} quotes'` → `context.tr.nQuotes(...)` | `author_detail_screen.dart` | ✅ |
+| S6-F07 | HIGH | Categorías como slug raw → `context.tr.categoryLabels[cat]` | `author_detail_screen.dart` | ✅ |
+| S6-F08 | HIGH | `'MindScrolling Inside'` hardcodeado → `context.tr.premium` | `packs_screen.dart` | ✅ |
+| S6-F09 | HIGH | `'MindScroll'` hardcodeado → `context.tr.appName` | `feed_screen.dart` | ✅ |
+| S6-F10 | MED | Fallback de precio `r'$2.99'` → `r'$4.99'` | `premium_screen.dart` | ✅ |
+| S6-F11 | LOW | Typo `'proximamente'` → `'próximamente'` | `strings_es.dart` | ✅ |
+| S6-I01 | i18n | Método `nQuotes(int n)` añadido a `AppStrings`, `StringsEn` y `StringsEs` | `app_strings.dart` + impls | ✅ |
+
+### Correcciones de documentación
+
+| ID | Descripción | Archivo | Estado |
+|----|-------------|---------|--------|
+| S6-D01 | Precio actualizado `$2.99` → `$4.99` | `ARCHITECTURE.md`, `SCRUM.md`, `ROADMAP.md` | ✅ |
+| S6-D02 | Conteo de quotes actualizado `5,500` → `~13,000` | `ARCHITECTURE.md` | ✅ |
+| S6-D03 | Arquitectura del challenge documentada (8 swipes server-side) | `ARCHITECTURE.md` | ✅ |
+| S6-D04 | Versión actualizada Sprint 5 → Sprint 6 + fecha | `ARCHITECTURE.md` | ✅ |
+| S6-D05 | Header `author_bios.js` actualizado 432 → 433 autores | `author_bios.js` | ✅ |
+| S6-D06 | Dirección de swipes corregida en tabla de categorías | `SCRUM.md` | ✅ |
+
+### Sistema de workflow QA implementado (Control Tower)
+
+| ID | Descripción | Archivo | Estado |
+|----|-------------|---------|--------|
+| S6-W01 | Blind test targets, checklist y resultados (Sprint 6 baseline) | `cloud/testing/` | ✅ |
+| S6-W02 | Control Tower: dashboard, build/qa/blind_test status, blockers, release status | `cloud/control_tower/` | ✅ |
+| S6-W03 | Historial automático: build_history, score_history, qa_history, regression_log | `cloud/control_tower/` | ✅ |
+| S6-W04 | Protocolo self-debugging con loop detect→classify→assign→fix→verify | `cloud/workflows/` | ✅ |
+| S6-W05 | Workflows: QA, Blind Test, Product Brain, Sprint Planner, Roadmap, Release | `cloud/workflows/` | ✅ |
+| S6-W06 | Debugging log: B-01..B-04 como blockers activos | `cloud/debugging/` | ✅ |
+
+### Blockers arquitecturales (requieren DevOps — no bloquearon QA gate)
+
+| ID | Descripción | Severidad | Owner |
+|----|-------------|-----------|-------|
+| B-01 | Receipt validation real (RevenueCat webhook) en `/purchase/verify` | Critical | DevOps + Backend |
+| B-02 | Rate-limit admin persistente + `crypto.timingSafeEqual` | Major | Backend Implementer |
+| B-03 | TOCTOU race en `POST /premium/start-trial` | Major | Backend Implementer |
+| B-04 | Campos `swipe_dir` + `is_premium` faltantes en preview de packs | Minor | Backend Implementer |
+
+### Estado del Build al cerrar Sprint 6
+
+| Métrica | Valor |
+|---------|-------|
+| Build Quality Score | **82/100** |
+| Estado | 🟡 Stable — Needs Stabilization before release |
+| Micro QA | ✅ PASS |
+| Feature QA | ✅ PASS |
+| Integration QA | ✅ PASS |
+| Release QA | ⏳ Pendiente (bloqueado por B-01) |
+| Regressions | 0 |
+
+---
+
+## Sprint 7 — Google Play Launch + Retention (en progreso)
+
+**Período:** 2026-03-18 → 2026-04-04
+**Objetivo:** Lanzar en Google Play, desplegar backend en producción, activar pgvector para el feed AI, instrumentar el funnel trial→paid y añadir notificaciones push.
+
+### Tareas
+
+| ID | Tarea | Owner | Estado |
+|----|-------|-------|--------|
+| S7-01 | Resolver B-01: Receipt validation real con RevenueCat webhook | Backend Implementer + DevOps | 🔴 Pendiente |
+| S7-02 | Resolver B-02: Rate-limit admin persistente + timing-safe comparison | Backend Implementer | 🟠 Pendiente |
+| S7-03 | Resolver B-03: TOCTOU race en trial start (constraint DB o advisory lock) | Backend Implementer | 🟠 Pendiente |
+| S7-04 | Resolver B-04: Añadir `swipe_dir` + `is_premium` al select de packs preview | Backend Implementer | 🟡 Pendiente |
+| S7-05 | Desplegar backend en Railway producción (health check + no cold starts) | DevOps | 🔴 Pendiente |
+| S7-06 | Habilitar pgvector en Supabase + activar feed AI | Recommendation Engineer | 🔴 Pendiente |
+| S7-07 | Instrumentar funnel: `trial_started` / `trial_expired` / `premium_purchased` (server-side) | Backend Implementer | 🟠 Pendiente |
+| S7-08 | Notificaciones push: recordatorio diario a hora configurable por el usuario | Flutter Mobile Engineer | 🟠 Pendiente |
+| S7-09 | Notificación semanal: "Tu mapa filosófico está listo" | Flutter Mobile Engineer | 🟠 Pendiente |
+| S7-10 | Export del Vault como texto plano (free — growth loop) | Flutter Mobile Engineer | 🟡 Pendiente |
+| S7-11 | Auditoría de precios localizados: MXN / BRL / ARS / COP | Product Owner | 🟡 Pendiente |
+| S7-12 | Sentry en backend (error tracking producción) | DevOps | 🟠 Pendiente |
+| S7-13 | Optimización de queries: partial indexes en feed | Backend Implementer | 🟡 Pendiente |
+| S7-14 | Submisión a Google Play Store | DevOps + Product Owner | 🔴 Pendiente |
+| S7-15 | Smoke test en build de producción (APK release) | QA Reviewer | 🔴 Pendiente |
+
+### Criterio de "Done" para Sprint 7
+
+- Build Quality Score ≥ 90
+- Release QA completado
+- B-01 resuelto (no hay release sin receipt validation real)
+- Backend en Railway producción respondiendo `/health`
+- APK release firmado y subido a Google Play
+- Blind test completo en build de producción: 0 FAIL, 0 REGRESSION
 
 ---
 
@@ -567,8 +698,28 @@ Una tarea se considera terminada cuando:
 1. El código está escrito y no rompe funcionalidades existentes
 2. Los edge cases obvios están manejados (errores de red, datos vacíos, backend caído)
 3. No hay bugs nuevos introducidos
-4. Si tiene UI: funciona en mobile (iOS Safari) y desktop Chrome
+4. Si tiene UI: funciona en el dispositivo móvil target (Android + iOS)
 5. Las variables de entorno necesarias están documentadas en `.env.example`
+6. Pasa el QA level correspondiente al tamaño del cambio (Micro / Feature / Integration)
+7. Si es feature visible: pasa el blind test (no se confía en el código, se verifica como usuario)
+8. `cloud/control_tower/dashboard.md` actualizado con el nuevo estado
+
+## Sistema de calidad (QA Workflow)
+
+El proyecto opera bajo un sistema de QA por niveles. Ver `cloud/workflows/qa_workflow.md` para el protocolo completo.
+
+| Nivel | Cuándo aplicar | Checks clave |
+|-------|---------------|--------------|
+| Micro QA | Después de cualquier cambio | App corre, `/health` ok, feed carga, sin crash |
+| Feature QA | Después de cada feature | Feature funciona end-to-end, sin regresión en flows principales |
+| Integration QA | Cambios multi-sistema | Frontend + backend alineados, todos los sistemas core intactos |
+| Release QA | Antes de deploy/APK | Validación completa, localization, premium/free, performance |
+
+**Regla crítica:** Si el QA falla → el workflow se detiene inmediatamente.
+
+**Release gate:** Build Quality Score ≥ 90 + 0 Critical issues + 0 Regressions + Release QA completo.
+
+Ver estado actual en `cloud/control_tower/dashboard.md`.
 
 ---
 

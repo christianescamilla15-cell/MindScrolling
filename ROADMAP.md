@@ -1,6 +1,6 @@
 # MindScrolling — Product Roadmap
 
-**Last updated:** 2026-03-17
+**Last updated:** 2026-03-18
 **Methodology:** Continuous delivery with sprint-based milestones
 
 ---
@@ -63,7 +63,7 @@ Every phase must leave the product meaningfully more valuable to the user — no
 - [x] Daily challenge with progress tracking
 - [x] Philosophy Map (category score bars)
 - [x] Evolution snapshots (week-over-week delta)
-- [x] Premium unlock (one-time $2.99)
+- [x] Premium unlock (one-time $2.99 → updated to $4.99 in Sprint 6, see Pricing Decision Record)
 - [x] Donation panel (Buy Me a Coffee)
 - [x] Export quote as image (canvas 1080×1080, premium)
 - [x] Full EN/ES localization (i18n system)
@@ -143,7 +143,14 @@ Every phase must leave the product meaningfully more valuable to the user — no
 
 **Goal:** Establish a sustainable revenue model and significantly expand the content library.
 
-**Status: v1 complete as of Sprint 6. Content packs deferred to Sprint 8.**
+**Status: v1 complete as of Sprint 6. Content packs and pack browser deferred to Sprint 8.**
+
+### Pricing Model (v2 — 2026-03-18, supersedes 2026-03-17 decision)
+Two-tier monetization: individual packs at $2.99 USD each, and MindScrolling Inside at $4.99 USD as the value anchor (all packs + premium features). No subscriptions, no tiered gating.
+Inside regional prices: MXN $79 / BRL $19.90 / ARS automatic / COP $19,900 / EUR $4.49 / CAD $6.99.
+Individual pack regional prices: MXN $49 / BRL $14.90 / EUR $2.69 / CAD $3.99 / COP $12,900 / ARS automatic.
+Grandfathering: existing Inside users get the 3 current packs at no extra cost. Future packs are always $2.99 for everyone.
+See BACKLOG.md Pricing Decision Record v2 and SCOPE_BLOCK_B_PACK_MONETIZATION.md for full rationale.
 
 ### Product Milestones (v1 — Complete)
 - [x] MindScrolling Inside premium ($4.99 one-time unlock)
@@ -151,8 +158,14 @@ Every phase must leave the product meaningfully more valuable to the user — no
 - [x] Activation code system for donors
 - [x] Restore purchases flow (RevenueCat)
 - [x] AI Weekly Insight gated behind premium
-- [ ] Content packs (Stoicism / Existentialism / Zen / Spanish) — Sprint 8
-- [ ] Pack preview screen (locked quotes visible, upgrade blur) — Sprint 8
+- [ ] Pack catalog UI with per-entitlement state badges (Bloque B, Sprint 8) — supersedes "single Unlock All CTA" from v1
+- [ ] Pack preview flow: 5 quotes (Free) / 15 quotes (Trial) / full 500 (entitled) with appropriate paywalls (Bloque B, Sprint 8)
+- [ ] Individual pack purchase at $2.99 via RevenueCat (Bloque B, Sprint 8)
+- [ ] Inside as value anchor: paywall always shows both $2.99 and $4.99 options (Bloque B, Sprint 8)
+- [ ] Grandfathering: existing Inside users get current 3 packs automatically (Bloque B, Sprint 8)
+- [ ] Content packs: Stoicism Deep Dive, Existentialism, Zen & Mindfulness — verify 500 EN + 500 ES each in DB (Sprint 8)
+- [ ] New content pack: Spanish Philosophy (Sprint 8-9)
+- [ ] Trial quota enforcement: 1,000 quotes or 7 days (Bloque C, Sprint 8)
 
 ### Key Deliverables
 - `premium_controller.dart` — trial + purchase + restore state machine
@@ -193,8 +206,8 @@ Every phase must leave the product meaningfully more valuable to the user — no
 **Goal:** Give users a reason to stay beyond the first 30 days through deeper content and richer personal context.
 
 ### Product Milestones
-- [ ] Content packs: Stoicism Deep Dive, Existentialism, Zen & Buddhism, Spanish Philosophy
-- [ ] Pack preview screen (locked quotes visible with upgrade blur)
+- [ ] Pack monetization new architecture — Bloque B (scope: SCOPE_BLOCK_B_PACK_MONETIZATION.md)
+- [ ] Content packs: Stoicism Deep Dive, Existentialism, Zen & Mindfulness, Spanish Philosophy
 - [ ] Author deep-dive cards (bio + top 5 quotes, premium)
 - [ ] "Today's reflection" daily question card injected into feed
 - [ ] Evolution card in feed every 10 quotes ("Your philosophy shifted this week")

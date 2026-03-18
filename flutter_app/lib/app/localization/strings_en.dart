@@ -605,6 +605,7 @@ class StringsEn implements AppStrings {
   // Author detail
   @override String get authorLoadError => 'Could not load author';
   @override String get topQuotes       => 'Top Quotes';
+  @override String nQuotes(int n)      => '$n quotes';
 
   // Notifications
   @override String get notifications        => 'Notifications';
@@ -649,4 +650,31 @@ class StringsEn implements AppStrings {
   @override String get takeABreath    => 'Take a breath.';
   @override String get doingWell      => "You're doing well.";
   @override String get swipeContinue  => 'Swipe to continue your journey.';
+
+  // Soft paywall dismiss hint
+  @override String get swipeToContinue => 'Swipe to continue';
+
+  // Pack monetization (Block B)
+  @override String get packIncluded            => 'Included';
+  @override String get packUnlocked            => 'Unlocked';
+  @override String get packPreview             => 'Preview';
+  @override String get packLocked              => 'Locked';
+  @override String packUnlockCta(int quotesCount) => 'Unlock $quotesCount quotes — \$2.99';
+  @override String get packInsideCta           => 'Or get all 3 packs with Inside (\$4.99)';
+  @override String get packPreviewUnavailable  => 'Preview not available in this language';
+  @override String get packComingSoon          => 'Purchase coming soon';
+  @override String get trialSoftPaywall        => 'Enjoying MindScrolling? Go Inside for \$4.99';
+
+  // API Contract keys
+  @override String get packIncludedInInside    => 'Included in Inside';
+  @override String get packGetFor              => 'Get for \$2.99';
+  @override String packPaywallPrimary(String packName) => 'Get $packName — \$2.99';
+  @override String get packPaywallSecondaryInside => 'Or unlock everything with Inside — \$4.99';
+  @override String packTrialPaywallPrimary(int count) => '$count more quotes — \$2.99';
+  @override String get packTrialPaywallSecondary => 'Or get all 3 packs with Inside — \$4.99';
+  @override String packConfirmationUnlocked(String packName, int count) => '$packName unlocked. $count quotes ready.';
+  @override String get packNewNotIncluded      => 'New — not included in existing Inside';
+  @override String get insideValueProp         => '3 packs (\$8.97 value) + premium features — \$4.99';
+  @override String get insideValuePropOwn1     => 'You already own 1 pack. Get the other 2 + premium features for \$4.99.';
+  @override String get insideValuePropOwn2     => 'You own 2 packs. Complete your library + premium features for \$4.99.';
 }

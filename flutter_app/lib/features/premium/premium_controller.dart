@@ -124,11 +124,22 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
       final trialExpired = response['trial_expired'] == true;
       final isPaidPremium = response['is_paid_premium'] == true;
 
+      // Parse Block B fields: owned_packs, user_state
+      final rawPacks = response['owned_packs'];
+      final ownedPacks = rawPacks is List
+          ? rawPacks.whereType<String>().toList()
+          : <String>[];
+      final userState = response['user_state'] as String?;
+
       if (isPaidPremium) {
         await prefs.setString(_kTrialStartKey, 'paid');
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
-            premiumState: const PremiumStateModel(isPremium: true),
+            premiumState: PremiumStateModel(
+              isPremium: true,
+              ownedPacks: ownedPacks,
+              userState: userState,
+            ),
             isTrial: false,
             trialExpired: false,
           ),
@@ -143,6 +154,11 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
             trialEnd.subtract(const Duration(days: _kTrialDurationDays)).toIso8601String());
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            premiumState: PremiumStateModel(
+              isPremium: false,
+              ownedPacks: ownedPacks,
+              userState: userState,
+            ),
             isTrial: true,
             trialDaysLeft: trialDaysLeft,
             trialExpired: false,
@@ -154,6 +170,11 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
       if (trialExpired) {
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
+            premiumState: PremiumStateModel(
+              isPremium: false,
+              ownedPacks: ownedPacks,
+              userState: userState,
+            ),
             isTrial: false,
             trialDaysLeft: 0,
             trialExpired: true,
@@ -373,11 +394,14 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
     switch (result.outcome) {
       case PurchaseOutcome.restored:
         HapticsService.mediumImpact();
+        // HIGH-04: Re-fetch /premium/status so owned_packs is populated from
+        // the server. We set isRestoring: false + successMessage first so the
+        // UI can react immediately, then let _initTrial refresh the full state.
         state = AsyncData(updated.copyWith(
-          premiumState: const PremiumStateModel(isPremium: true),
           isRestoring: false,
           successMessage: 'restoreSuccess',
         ));
+        await _initTrial();
       case PurchaseOutcome.failed:
         state = AsyncData(updated.copyWith(
           isRestoring: false,
