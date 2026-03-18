@@ -39,14 +39,15 @@ export default async function vaultRoutes(fastify) {
     }
     if (existing) return reply.send({ ok: true, status: "already_saved" });
 
-    // Enforce free-user vault limit
+    // Enforce free-user vault limit (trial users bypass like premium)
     const { data: userRow } = await supabase
       .from("users")
-      .select("is_premium")
+      .select("is_premium, trial_end_date")
       .eq("device_id", deviceId)
       .maybeSingle();
 
-    const isPremium = userRow?.is_premium === true;
+    const isTrialActive = userRow?.trial_end_date && Date.now() < new Date(userRow.trial_end_date).getTime();
+    const isPremium = userRow?.is_premium === true || isTrialActive;
     if (!isPremium) {
       const { count, error: countErr } = await supabase
         .from("vault")

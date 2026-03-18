@@ -32,19 +32,16 @@ export default async function insightsRoutes(fastify) {
       const premiumResult = await safeQuery(() =>
         supabase
           .from("users")
-          .select("is_premium, trial_start_date")
+          .select("is_premium, trial_end_date")
           .eq("device_id", deviceId)
           .maybeSingle()
       );
       const userRow = premiumResult.data;
       const isPaid = userRow?.is_premium === true;
 
-      // Also allow active trial users (trial started within the last 7 days)
-      let isTrialActive = false;
-      if (!isPaid && userRow?.trial_start_date) {
-        const trialEnd = new Date(userRow.trial_start_date).getTime() + 7 * 86400000;
-        isTrialActive = Date.now() < trialEnd;
-      }
+      // Allow active trial users — use trial_end_date directly (matches quotes.js pattern)
+      const isTrialActive = !isPaid && userRow?.trial_end_date &&
+        Date.now() < new Date(userRow.trial_end_date).getTime();
 
       if (!isPaid && !isTrialActive) {
         return reply.send({ insight: null, premium_required: true });

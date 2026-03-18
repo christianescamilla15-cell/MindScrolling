@@ -77,9 +77,7 @@ class _BootstrapScreenState extends State<BootstrapScreen>
                   errorBuilder: (_, __, ___) => _MindScrollLogo(),
                 ),
               ),
-              const SizedBox(height: 20),
-              _MindScrollLogo(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               Text(
                 context.tr.loadingReflections,
                 style: AppTypography.bodySmall.copyWith(

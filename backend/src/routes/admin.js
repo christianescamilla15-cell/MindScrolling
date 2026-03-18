@@ -42,9 +42,8 @@ function generateCode() {
 export default async function adminRoutes(fastify) {
   // Stricter rate limit for admin routes (10 req/min vs 60 global)
   fastify.addHook("preHandler", async (request, reply) => {
-    // Defence-in-depth: enforce admin secret on every admin route via shared hook.
-    // Individual handlers also call requireAdmin(), but this ensures protection even
-    // if a future handler forgets to do so.
+    // Sole enforcement point: admin secret is validated here for ALL admin routes.
+    // Individual handlers do NOT call requireAdmin() — this hook is the only gate.
     if (!requireAdmin(request, reply)) return;
 
     // Simple in-memory rate limit for admin

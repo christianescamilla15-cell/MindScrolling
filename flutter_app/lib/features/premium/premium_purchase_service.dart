@@ -181,7 +181,7 @@ class PremiumPurchaseService {
 
     try {
       final api = ref.read(apiClientProvider);
-      final store = Platform.isIOS ? 'ios' : 'android';
+      final store = (!kIsWeb && Platform.isIOS) ? 'ios' : 'android';
 
       if (isRestore) {
         await api.post('/premium/restore', body: {
