@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MindScrolling · Test Pre-Release</title>
+<style>
+:root {
+  --bg: #07070f;
+  --card: #0e0e1c;
+  --border: rgba(255,255,255,.07);
+  --text: #e2e2f0;
+  --muted: #52526a;
+  --radius: 16px;
+  --module-color: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% -10%, rgba(139,92,246,.12), transparent);
+  pointer-events: none;
+  transition: background 0.6s ease;
+  z-index: 0;
+}
+#app {
+  width: 100%;
+  max-width: 520px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── SCREENS ───────────────────────────────────────────────── */
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 22px 48px;
+  animation: fadeUp .35s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─── WELCOME ─────────────────────────────────────────────── */
+.logo-area {
+  text-align: center;
+  padding: 44px 0 36px;
+}
+.logo-mark {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 20px var(--module-color));
+  transition: filter .4s;
+}
+.logo-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  color: #fff;
+}
+.logo-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.field-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.input-field {
+  width: 100%;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 16px;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  font-family: inherit;
+}
+.input-field:focus {
+  border-color: var(--module-color);
+  box-shadow: 0 0 0 3px rgba(139,92,246,.15);
+}
+.input-field::placeholder { color: var(--muted); }
+.module-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  margin: 24px 0;
+}
+.module-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 14px 16px;
+  cursor: pointer;
+  transition: border-color .2s, transform .15s, box-shadow .2s;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.module-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--c, #8b5cf6);
+  opacity: 0;
+  transition: opacity .2s;
+  border-radius: 14px;
+}
+.module-card.selected {
+  border-color: var(--c, #8b5cf6);
+  box-shadow: 0 0 0 1px var(--c, #8b5cf6), 0 8px 24px rgba(0,0,0,.4);
+  transform: translateY(-1px);
+}
+.module-card.selected::after { opacity: .07; }
+.module-card:active { transform: scale(.97); }
+.module-num {
+  position: absolute;
+  top: 10px; right: 10px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--c, #8b5cf6);
+  background: rgba(255,255,255,.05);
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: .3px;
+}
+.module-icon { font-size: 22px; margin-bottom: 9px; display: block; }
+.module-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+.module-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.module-testers {
+  font-size: 10px;
+  color: var(--c, #8b5cf6);
+  margin-top: 8px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+.welcome-note {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────── */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: -.2px;
+  font-family: inherit;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { cursor: not-allowed; }
+.btn-primary {
+  background: var(--module-color);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-ghost {
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  margin-top: 10px;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.08); }
+
+/* ─── PROGRESS HEADER ─────────────────────────────────────── */
+.q-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.back-btn {
+  background: rgba(255,255,255,.06);
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 17px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.back-btn:hover { background: rgba(255,255,255,.1); }
+.module-badge {
+  background: var(--module-color);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 20px;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.q-counter {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 600;
+}
+.progress-wrap {
+  height: 4px;
+  background: rgba(255,255,255,.06);
+  border-radius: 4px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--module-color);
+  border-radius: 4px;
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── QUESTION ────────────────────────────────────────────── */
+.q-num {
+  font-size: 11px;
+  color: var(--module-color);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.q-text {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+  margin-bottom: 26px;
+  letter-spacing: -.3px;
+}
+
+/* Stars */
+.stars-wrap { display: flex; gap: 10px; justify-content: center; padding: 4px 0 28px; }
+.star {
+  font-size: 38px;
+  cursor: pointer;
+  transition: transform .15s, opacity .15s, filter .15s;
+  opacity: .2;
+  user-select: none;
+  filter: grayscale(1);
+}
+.star.active { opacity: 1; filter: none; color: var(--module-color); }
+.star:hover { transform: scale(1.15); }
+.star:active { transform: scale(1.25); }
+.stars-label {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: -16px;
+  margin-bottom: 20px;
+  min-height: 20px;
+}
+
+/* Choice pills */
+.choices { display: flex; flex-direction: column; gap: 10px; }
+.choice-btn {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 13px;
+  color: var(--text);
+  font-size: 15px;
+  padding: 15px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: inherit;
+  line-height: 1.4;
+}
+.choice-btn:active { transform: scale(.98); }
+.choice-btn.selected {
+  border-color: var(--module-color);
+  background: rgba(139,92,246,.07);
+  color: #fff;
+}
+.choice-check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px; font-weight: 700;
+  transition: all .15s;
+}
+.choice-btn.selected .choice-check {
+  background: var(--module-color);
+  border-color: var(--module-color);
+  color: #fff;
+}
+
+/* Textarea */
+.text-input {
+  width: 100%;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 13px;
+  color: var(--text);
+  font-size: 15px;
+  padding: 14px 16px;
+  outline: none;
+  resize: none;
+  min-height: 110px;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: border-color .2s, box-shadow .2s;
+}
+.text-input:focus {
+  border-color: var(--module-color);
+  box-shadow: 0 0 0 3px rgba(139,92,246,.12);
+}
+.text-input::placeholder { color: var(--muted); }
+.skip-link {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.skip-link:hover { color: var(--text); }
+
+/* ─── DONE SCREEN ─────────────────────────────────────────── */
+.done-hero {
+  text-align: center;
+  padding: 44px 0 28px;
+}
+.done-icon {
+  font-size: 56px;
+  display: block;
+  margin-bottom: 16px;
+  animation: popIn .4s ease;
+}
+@keyframes popIn {
+  from { transform: scale(.5); opacity: 0; }
+  60%  { transform: scale(1.2); }
+  to   { transform: scale(1); opacity: 1; }
+}
+.done-title {
+  font-size: 26px; font-weight: 800;
+  color: #fff; margin-bottom: 8px; letter-spacing: -.5px;
+}
+.done-sub {
+  font-size: 15px; color: var(--muted);
+  max-width: 300px; margin: 0 auto 32px; line-height: 1.6;
+}
+.wa-status {
+  background: rgba(37,211,102,.08);
+  border: 1px solid rgba(37,211,102,.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #25d366;
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.report-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+  text-align: left;
+  margin-bottom: 18px;
+  line-height: 1.7;
+  font-family: 'Menlo', 'Monaco', monospace;
+}
+.action-hint {
+  font-size: 12px; color: var(--muted);
+  text-align: center; margin-top: 6px;
+  min-height: 18px; transition: color .2s;
+}
+
+/* ─── UTILS ───────────────────────────────────────────────── */
+.spacer { flex: 1; }
+.mt8  { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.mt16 { margin-top: 16px; }
+.mt24 { margin-top: 24px; }
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// Pon el número de WhatsApp del coordinador (código de país sin +)
+// Ejemplo: "5215512345678" para México, "573001234567" para Colombia
+const COORDINATOR_WA = "";
+
+// ─── MODULE DATA ─────────────────────────────────────────────────────────────
+const MODULES = {
+  1: {
+    name: "Feed & UX",
+    color: "#8b5cf6",
+    icon: "⚡",
+    desc: "Swipes · Likes · Vault · Animaciones",
+    testers: "Testers 1, 2 y 3",
+    questions: [
+      {
+        id: "q1",
+        text: "¿El feed carga bien al abrir la app?",
+        type: "choice",
+        options: ["Sí, sin problemas", "Tarda pero carga", "A veces falla", "No cargó"]
+      },
+      {
+        id: "q2",
+        text: "¿Los swipes (derecha/izquierda) se sienten fluidos y responden bien?",
+        type: "stars",
+        labels: ["Muy torpe", "Torpe", "Aceptable", "Fluido", "Perfecto"]
+      },
+      {
+        id: "q3",
+        text: "¿Los haptics (vibración al swipear) se sienten presentes y bien calibrados?",
+        type: "choice",
+        options: ["Sí, se sienten bien", "Están pero se sienten raros", "No los noté", "Mi dispositivo no los soporta"]
+      },
+      {
+        id: "q4",
+        text: "¿Pudiste guardar quotes en el vault?",
+        type: "choice",
+        options: ["Sí, funcionó perfecto", "Sí, pero algo estuvo raro", "No lo intenté", "No funcionó"]
+      },
+      {
+        id: "q5",
+        text: "¿El contenido del feed se repite mucho?",
+        type: "choice",
+        options: ["Nunca lo noté", "A veces repite", "Se repite bastante"]
+      },
+      {
+        id: "q6",
+        text: "¿El like (♥) en quotes funciona correctamente?",
+        type: "choice",
+        options: ["Sí, perfecto", "A veces falla", "No funcionó", "No lo intenté"]
+      },
+      {
+        id: "q7",
+        text: "¿Encontraste textos cortados, mal traducidos o mezclados de idioma?",
+        type: "choice",
+        options: ["No, todo OK", "Sí, encontré algo", "No presté atención"]
+      },
+      {
+        id: "q8",
+        text: "Si encontraste problemas de texto o idioma, descríbelos aquí:",
+        type: "text",
+        optional: true,
+        placeholder: "Ej: 'En la pantalla X aparece texto en inglés' o 'Un quote está cortado'"
+      },
+      {
+        id: "q9",
+        text: "¿Qué tan intuitiva es la navegación general?",
+        type: "stars",
+        labels: ["Muy confusa", "Confusa", "Normal", "Clara", "Muy intuitiva"]
+      },
+      {
+        id: "q10",
+        text: "¿Algo te confundió o te trabó? Cuéntanos:",
+        type: "text",
+        optional: true,
+        placeholder: "Cualquier cosa que no fue clara o que te molestó"
+      },
+      {
+        id: "q11",
+        text: "Calificación general — Feed & UX",
+        type: "stars",
+        final: true,
+        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
+      }
+    ]
+  },
+  2: {
+    name: "Premium & Packs",
+    color: "#f59e0b",
+    icon: "✦",
+    desc: "Trial · Límites · Packs · Upgrade",
+    testers: "Testers 4, 5 y 6",
+    questions: [
+      {
+        id: "q1",
+        text: "¿Pudiste iniciar el trial de 7 días sin problemas?",
+        type: "choice",
+        options: ["Sí, inició bien", "Ya lo tenía activo", "No lo intenté", "Falló"]
+      },
+      {
+        id: "q2",
+        text: "¿Los contenidos premium están correctamente bloqueados en modo free?",
+        type: "choice",
+        options: ["Sí, todo bloqueado", "Algunos no estaban bloqueados", "No estaba en modo free", "No lo verifiqué"]
+      },
+      {
+        id: "q3",
+        text: "¿Llegaste al límite de 20 quotes en el vault (modo free)?",
+        type: "choice",
+        options: ["Sí, vi el mensaje de límite", "No llegué al límite", "No estaba en modo free"]
+      },
+      {
+        id: "q4",
+        text: "¿La sección de Packs carga y muestra contenido?",
+        type: "choice",
+        options: ["Sí, perfecta", "Carga pero con errores", "No cargó", "No la encontré"]
+      },
+      {
+        id: "q5",
+        text: "¿Pudiste ver el detalle de al menos un pack (preview, quotes, autores)?",
+        type: "choice",
+        options: ["Sí, funcionó bien", "Entré pero algo estuvo raro", "No lo intenté", "No funcionó"]
+      },
+      {
+        id: "q6",
+        text: "¿Qué tan clara y confiable se ve la pantalla de premium/upgrade?",
+        type: "stars",
+        labels: ["Muy confusa", "Confusa", "Aceptable", "Clara", "Muy clara"]
+      },
+      {
+        id: "q7",
+        text: "¿Encontraste algún contenido premium accesible sin pagar ni tener trial?",
+        type: "choice",
+        options: ["No, todo bien bloqueado", "Sí, encontré algo", "No lo verifiqué"]
+      },
+      {
+        id: "q8",
+        text: "Si encontraste contenido premium accesible sin pagar, descríbelo:",
+        type: "text",
+        optional: true,
+        placeholder: "Ej: 'En packs pude acceder al pack X sin trial activo'"
+      },
+      {
+        id: "q9",
+        text: "¿Qué cambiarías del flujo de trial/premium para que sea más claro?",
+        type: "text",
+        optional: true,
+        placeholder: "Cualquier sugerencia de mejora"
+      },
+      {
+        id: "q10",
+        text: "Calificación general — Premium & Packs",
+        type: "stars",
+        final: true,
+        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
+      }
+    ]
+  },
+  3: {
+    name: "Mapa · Autores · Retos",
+    color: "#10b981",
+    icon: "◈",
+    desc: "Mapa filosófico · Perfiles · Daily challenge",
+    testers: "Testers 7, 8 y 9",
+    questions: [
+      {
+        id: "q1",
+        text: "¿El mapa filosófico cargó correctamente?",
+        type: "choice",
+        options: ["Sí, sin problemas", "Cargó con errores visuales", "Tardó mucho", "No cargó"]
+      },
+      {
+        id: "q2",
+        text: "¿Puedes hacer tap en los nodos del mapa y ver información?",
+        type: "choice",
+        options: ["Sí, funcionan bien", "Algunos sí, otros no", "No funcionaron", "No lo intenté"]
+      },
+      {
+        id: "q3",
+        text: "¿La sección de Autores carga y muestra los perfiles?",
+        type: "choice",
+        options: ["Sí, perfecto", "Carga pero incompleto", "No cargó", "No la encontré"]
+      },
+      {
+        id: "q4",
+        text: "¿Los perfiles de autor tienen foto, bio y quotes visibles?",
+        type: "choice",
+        options: ["Todos completos", "La mayoría completos", "Varios incompletos", "Casi todos vacíos"]
+      },
+      {
+        id: "q5",
+        text: "¿El reto diario estaba disponible al abrir la app?",
+        type: "choice",
+        options: ["Sí, estaba disponible", "No apareció", "Apareció después de un rato"]
+      },
+      {
+        id: "q6",
+        text: "¿Pudiste completar el reto diario?",
+        type: "choice",
+        options: ["Sí, funcionó bien", "Lo intenté pero falló", "No lo intenté"]
+      },
+      {
+        id: "q7",
+        text: "¿El idioma del mapa, autores y retos es consistente?",
+        type: "choice",
+        options: ["Sí, todo en el mismo idioma", "Mezclado (español/inglés)", "No presté atención"]
+      },
+      {
+        id: "q8",
+        text: "¿Encontraste autores sin foto, con bio vacía o info incorrecta?",
+        type: "text",
+        optional: true,
+        placeholder: "Ej: 'El autor X no tiene foto' o 'El autor Y tiene la bio en inglés'"
+      },
+      {
+        id: "q9",
+        text: "¿Qué te pareció el mapa filosófico como feature?",
+        type: "text",
+        optional: true,
+        placeholder: "Primera impresión, qué cambiarías, qué está bien"
+      },
+      {
+        id: "q10",
+        text: "Calificación general — Mapa / Autores / Retos",
+        type: "stars",
+        final: true,
+        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
+      }
+    ]
+  },
+  4: {
+    name: "Rendimiento & Percepción",
+    color: "#3b82f6",
+    icon: "◎",
+    desc: "Performance · Batería · Primera impresión",
+    testers: "Testers 10, 11 y 12",
+    questions: [
+      {
+        id: "q1",
+        text: "¿En qué dispositivo y versión de Android probaste la app?",
+        type: "text",
+        placeholder: "Ej: 'Samsung Galaxy S21, Android 13' o 'Xiaomi Redmi 10, Android 12'"
+      },
+      {
+        id: "q2",
+        text: "¿Cuánto tardó la app en cargar al abrirla por primera vez?",
+        type: "choice",
+        options: ["Menos de 2 segundos", "Entre 2 y 5 segundos", "Más de 5 segundos", "No lo medí"]
+      },
+      {
+        id: "q3",
+        text: "¿Notaste lag, freezes o animaciones lentas durante el uso?",
+        type: "choice",
+        options: ["Nunca", "En momentos puntuales", "Seguido", "La app se sentía lenta en general"]
+      },
+      {
+        id: "q4",
+        text: "¿La app se cerró sola en algún momento (crash)?",
+        type: "choice",
+        options: ["No, nunca", "Sí, una vez", "Sí, varias veces"]
+      },
+      {
+        id: "q5",
+        text: "¿Alguna pantalla tardó más de 5 segundos en cargar?",
+        type: "choice",
+        options: ["No, todo rápido", "Sí, lo anoto abajo", "No lo noté"]
+      },
+      {
+        id: "q6",
+        text: "Si hubo pantallas lentas, ¿cuáles fueron?",
+        type: "text",
+        optional: true,
+        placeholder: "Ej: 'El mapa tarda bastante' o 'Los packs tardaron en cargar'"
+      },
+      {
+        id: "q7",
+        text: "¿La app consumió batería de forma notoria?",
+        type: "choice",
+        options: ["No, normal", "Sí, algo", "Sí, bastante", "No lo medí"]
+      },
+      {
+        id: "q8",
+        text: "¿El audio (si lo usaste) funcionó correctamente?",
+        type: "choice",
+        options: ["Sí, funcionó bien", "Tuve problemas con el audio", "No usé el audio"]
+      },
+      {
+        id: "q9",
+        text: "¿Cuál fue tu primera sensación al abrir la app?",
+        type: "text",
+        placeholder: "Honesto y libre — qué pensaste la primera vez que la viste"
+      },
+      {
+        id: "q10",
+        text: "¿La recomendarías tal como está a alguien?",
+        type: "stars",
+        labels: ["Jamás", "Dudoso", "Tal vez", "Probablemente", "Sin dudar"]
+      },
+      {
+        id: "q11",
+        text: "Comentario final — lo que quieras agregar:",
+        type: "text",
+        optional: true,
+        placeholder: "Bugs, ideas, sensaciones generales, lo que sea"
+      },
+      {
+        id: "q12",
+        text: "Calificación general — Rendimiento & Percepción",
+        type: "stars",
+        final: true,
+        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
+      }
+    ]
+  }
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  screen: "welcome",
+  testerName: "",
+  moduleId: null,
+  currentQ: 0,
+  answers: {}
+};
+
+const app = document.getElementById("app");
+
+function setColor(color) {
+  document.documentElement.style.setProperty("--module-color", color);
+}
+
+function render() {
+  if (state.screen === "welcome")   renderWelcome();
+  else if (state.screen === "questions") renderQuestion();
+  else if (state.screen === "done") renderDone();
+}
+
+// ─── WELCOME ─────────────────────────────────────────────────────────────────
+function renderWelcome() {
+  const color = state.moduleId ? MODULES[state.moduleId].color : "#8b5cf6";
+  setColor(color);
+
+  app.innerHTML = `
+    <div class="screen">
+      <div class="logo-area">
+        <span class="logo-mark">◈</span>
+        <div class="logo-title">MindScrolling</div>
+        <div class="logo-sub">Pre-Release · Test Form</div>
+      </div>
+
+      <div class="field-label">Tu nombre o alias</div>
+      <input class="input-field" id="tester-name" type="text"
+        placeholder="Ej: Carlos, @usuario, Laura..."
+        value="${esc(state.testerName)}" maxlength="40" autocomplete="off">
+
+      <div class="field-label mt24">Selecciona tu módulo</div>
+      <div class="module-grid">
+        ${Object.entries(MODULES).map(([id, m]) => `
+          <div class="module-card ${state.moduleId == id ? 'selected' : ''}"
+            style="--c:${m.color}" data-id="${id}">
+            <span class="module-num">M${id}</span>
+            <span class="module-icon">${m.icon}</span>
+            <div class="module-name">${m.name}</div>
+            <div class="module-desc">${m.desc}</div>
+            <div class="module-testers">${m.testers}</div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="welcome-note">
+        Responde con honestidad — cada bug que encuentres hace la app mejor 🙌
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn btn-primary" id="start-btn"
+        ${!state.moduleId || !state.testerName.trim() ? 'disabled style="opacity:.4"' : ''}>
+        Empezar test →
+      </button>
+    </div>`;
+
+  document.getElementById("tester-name").addEventListener("input", e => {
+    state.testerName = e.target.value;
+    updateStartBtn();
+  });
+
+  document.querySelectorAll(".module-card").forEach(card => {
+    card.addEventListener("click", () => {
+      state.moduleId = parseInt(card.dataset.id);
+      setColor(MODULES[state.moduleId].color);
+      document.querySelectorAll(".module-card").forEach(c => {
+        c.classList.toggle("selected", c.dataset.id == state.moduleId);
+      });
+      updateStartBtn();
+    });
+  });
+
+  document.getElementById("start-btn").addEventListener("click", () => {
+    if (!state.testerName.trim() || !state.moduleId) return;
+    state.screen = "questions";
+    state.currentQ = 0;
+    state.answers = {};
+    render();
+  });
+
+  setTimeout(() => {
+    const f = document.getElementById("tester-name");
+    if (f && !state.testerName) f.focus();
+  }, 100);
+}
+
+function updateStartBtn() {
+  const btn = document.getElementById("start-btn");
+  if (!btn) return;
+  const ok = state.moduleId && state.testerName.trim();
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? "1" : ".4";
+}
+
+// ─── QUESTION ────────────────────────────────────────────────────────────────
+function renderQuestion() {
+  const mod = MODULES[state.moduleId];
+  const questions = mod.questions;
+  const qi = state.currentQ;
+  const q = questions[qi];
+  const pct = Math.round((qi / questions.length) * 100);
+  const ans = state.answers[q.id];
+  const canNext = q.optional || (ans !== undefined && ans !== "" && ans !== null);
+
+  setColor(mod.color);
+
+  app.innerHTML = `
+    <div class="screen">
+      <div class="q-header">
+        <button class="back-btn" id="back-btn">←</button>
+        <span class="module-badge">${mod.icon} ${mod.name}</span>
+        <span class="q-counter">${qi + 1} / ${questions.length}</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-fill" style="width:${pct}%"></div>
+      </div>
+
+      <div class="q-num">Pregunta ${qi + 1}</div>
+      <div class="q-text">${esc(q.text)}</div>
+
+      <div id="answer-area">${buildAnswerHTML(q, ans)}</div>
+
+      <div class="spacer"></div>
+      ${q.optional ? `<div class="skip-link" id="skip-btn">Saltar esta pregunta</div>` : ""}
+      <button class="btn btn-primary mt16" id="next-btn"
+        ${canNext ? "" : 'disabled style="opacity:.4"'}>
+        ${qi === questions.length - 1 ? "Enviar respuestas ✓" : "Siguiente →"}
+      </button>
+    </div>`;
+
+  wireAnswerEvents(q);
+
+  document.getElementById("back-btn").addEventListener("click", () => {
+    if (state.currentQ === 0) { state.screen = "welcome"; render(); }
+    else { state.currentQ--; render(); }
+  });
+
+  document.getElementById("next-btn").addEventListener("click", () => {
+    if (document.getElementById("next-btn").disabled) return;
+    const isLast = qi === questions.length - 1;
+    if (isLast) {
+      // Send via WhatsApp immediately (triggered by user click — no popup block)
+      sendToWhatsApp();
+    }
+    advanceQuestion(questions);
+  });
+
+  const skipBtn = document.getElementById("skip-btn");
+  if (skipBtn) {
+    skipBtn.addEventListener("click", () => {
+      state.answers[q.id] = "";
+      advanceQuestion(questions);
+    });
+  }
+}
+
+function buildAnswerHTML(q, ans) {
+  if (q.type === "stars") {
+    const val = ans || 0;
+    const label = val > 0 && q.labels ? q.labels[val - 1] : "";
+    return `
+      <div class="stars-wrap">
+        ${[1,2,3,4,5].map(n =>
+          `<span class="star ${n <= val ? 'active' : ''}" data-val="${n}">★</span>`
+        ).join("")}
+      </div>
+      <div class="stars-label" id="stars-label">${esc(label)}</div>`;
+  }
+  if (q.type === "choice") {
+    return `<div class="choices">
+      ${q.options.map(opt => `
+        <button class="choice-btn ${ans === opt ? 'selected' : ''}" data-val="${esc(opt)}">
+          <span class="choice-check">${ans === opt ? '✓' : ''}</span>
+          ${esc(opt)}
+        </button>
+      `).join("")}
+    </div>`;
+  }
+  if (q.type === "text") {
+    return `<textarea class="text-input" id="text-ans"
+      placeholder="${esc(q.placeholder || '')}" rows="4">${esc(ans || "")}</textarea>`;
+  }
+  return "";
+}
+
+function wireAnswerEvents(q) {
+  if (q.type === "stars") {
+    document.querySelectorAll(".star").forEach(star => {
+      star.addEventListener("click", () => {
+        const val = parseInt(star.dataset.val);
+        state.answers[q.id] = val;
+        document.querySelectorAll(".star").forEach((s, i) => s.classList.toggle("active", i < val));
+        const lbl = document.getElementById("stars-label");
+        if (lbl && q.labels) lbl.textContent = q.labels[val - 1] || "";
+        enableNext();
+      });
+    });
+  }
+  if (q.type === "choice") {
+    document.querySelectorAll(".choice-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.answers[q.id] = btn.dataset.val;
+        document.querySelectorAll(".choice-btn").forEach(b => {
+          b.classList.toggle("selected", b === btn);
+          b.querySelector(".choice-check").textContent = b === btn ? "✓" : "";
+        });
+        enableNext();
+      });
+    });
+  }
+  if (q.type === "text") {
+    const ta = document.getElementById("text-ans");
+    if (ta) {
+      ta.addEventListener("input", () => {
+        state.answers[q.id] = ta.value;
+        if (!q.optional) enableNext();
+      });
+    }
+  }
+}
+
+function enableNext() {
+  const btn = document.getElementById("next-btn");
+  if (btn) { btn.disabled = false; btn.style.opacity = "1"; }
+}
+
+function advanceQuestion(questions) {
+  if (state.currentQ < questions.length - 1) {
+    state.currentQ++;
+    render();
+  } else {
+    state.screen = "done";
+    render();
+  }
+}
+
+// ─── WHATSAPP ────────────────────────────────────────────────────────────────
+function sendToWhatsApp() {
+  if (!COORDINATOR_WA) return;
+  const report = buildReport();
+  const url = `https://wa.me/${COORDINATOR_WA}?text=${encodeURIComponent(report)}`;
+  window.open(url, "_blank");
+}
+
+// ─── DONE ────────────────────────────────────────────────────────────────────
+function renderDone() {
+  const mod = MODULES[state.moduleId];
+  setColor(mod.color);
+  const report = buildReport();
+  const waSent = !!COORDINATOR_WA;
+
+  app.innerHTML = `
+    <div class="screen">
+      <div class="done-hero">
+        <span class="done-icon">✓</span>
+        <div class="done-title">¡Gracias, ${esc(state.testerName)}!</div>
+        <div class="done-sub">
+          ${waSent
+            ? "Tu reporte se envió por WhatsApp al coordinador. Si no se abrió, usa el botón de abajo."
+            : "Tu feedback fue registrado. Compártelo al coordinador usando uno de los botones de abajo."}
+        </div>
+      </div>
+
+      ${waSent ? `<div class="wa-status">✓ WhatsApp abierto con tu reporte</div>` : ""}
+
+      <div class="report-box">${esc(report)}</div>
+
+      <button class="btn btn-primary" id="wa-btn">💬 ${waSent ? "Reenviar por WhatsApp" : "Enviar por WhatsApp"}</button>
+      <button class="btn btn-ghost" id="copy-btn">📋 Copiar reporte</button>
+      <div class="action-hint" id="action-hint"></div>
+
+      <div class="divider"></div>
+      <button class="btn btn-ghost" id="restart-btn">← Hacer otro test</button>
+    </div>`;
+
+  document.getElementById("wa-btn").addEventListener("click", () => {
+    if (COORDINATOR_WA) {
+      window.open(`https://wa.me/${COORDINATOR_WA}?text=${encodeURIComponent(report)}`, "_blank");
+    } else if (navigator.share) {
+      navigator.share({ text: report }).catch(() => {});
+    } else {
+      copyText(report);
+      document.getElementById("action-hint").textContent = "✓ Copiado — pégalo en WhatsApp";
+    }
+  });
+
+  document.getElementById("copy-btn").addEventListener("click", () => {
+    copyText(report);
+    const btn = document.getElementById("copy-btn");
+    const hint = document.getElementById("action-hint");
+    if (btn) btn.textContent = "✓ Copiado";
+    if (hint) hint.textContent = "✓ Copiado al portapapeles";
+    setTimeout(() => {
+      if (document.getElementById("copy-btn")) {
+        document.getElementById("copy-btn").textContent = "📋 Copiar reporte";
+        document.getElementById("action-hint").textContent = "";
+      }
+    }, 2500);
+  });
+
+  document.getElementById("restart-btn").addEventListener("click", () => {
+    state = { screen: "welcome", testerName: "", moduleId: null, currentQ: 0, answers: {} };
+    render();
+  });
+}
+
+// ─── BUILD REPORT ────────────────────────────────────────────────────────────
+function buildReport() {
+  const mod = MODULES[state.moduleId];
+  const date = new Date().toLocaleDateString("es", {
+    day: "2-digit", month: "2-digit", year: "numeric"
+  });
+  const lines = [
+    `🧪 MindScrolling · Test Pre-Release`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━`,
+    `Tester : ${state.testerName}`,
+    `Módulo : M${state.moduleId} — ${mod.name}`,
+    `Fecha  : ${date}`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━`,
+    ""
+  ];
+  mod.questions.forEach((q, i) => {
+    const ans = state.answers[q.id];
+    if (ans === undefined || ans === null || ans === "") return;
+    const display = typeof ans === "number"
+      ? "★".repeat(ans) + "☆".repeat(5 - ans) + ` (${ans}/5)`
+      : ans;
+    lines.push(`${i + 1}. ${q.text}`);
+    lines.push(`   → ${display}`);
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function copyText(text) {
+  if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  else fallbackCopy(text);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand("copy");
+  document.body.removeChild(ta);
+}
+
+render();
+</script>
+</body>
+</html>
