@@ -208,12 +208,12 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
       final prefs = await SharedPreferences.getInstance();
       var trialStartStr = prefs.getString(_kTrialStartKey);
 
-      // First time + backend failed → start trial locally
-      if (trialStartStr == null || trialStartStr == 'paid') {
-        if (trialStartStr != 'paid') {
-          trialStartStr = DateTime.now().toIso8601String();
-          await prefs.setString(_kTrialStartKey, trialStartStr);
-        }
+      // Offline fallback — never overwrite an existing start date.
+      // Bug fix: previously wrote DateTime.now() on every failed backend call,
+      // resetting the trial counter to 7 each time Render had a cold start.
+      if (trialStartStr == null) {
+        trialStartStr = DateTime.now().toIso8601String();
+        await prefs.setString(_kTrialStartKey, trialStartStr);
       }
 
       if (trialStartStr == 'paid') {
@@ -226,7 +226,9 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
         );
       } else {
         final start = DateTime.parse(trialStartStr!);
-        final daysLeft = _kTrialDurationDays - DateTime.now().difference(start).inDays;
+        // Use hours for precision — inDays truncates, causing day-0 to show 7
+        final hoursElapsed = DateTime.now().difference(start).inHours;
+        final daysLeft = _kTrialDurationDays - (hoursElapsed / 24).floor();
         state = AsyncData(
           (state.valueOrNull ?? const PremiumUiState()).copyWith(
             isTrial: daysLeft > 0,
