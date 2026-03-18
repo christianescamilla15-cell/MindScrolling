@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/analytics/event_logger.dart';
 import '../../core/providers/core_providers.dart';
 import '../../data/datasources/remote/challenge_remote_ds.dart';
 import '../../data/models/challenge_model.dart';
@@ -157,6 +158,11 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
       ),
     );
 
+    if (nowCompleted && !current.completed) {
+      EventLogger.logChallengeComplete(
+          current.challenge?.code ?? 'daily_reflection');
+    }
+
     if (current.challenge != null && current.challenge!.id != 'default') {
       await _repo.updateProgress(
         current.challenge!.id,
@@ -172,6 +178,8 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
     if (current == null || current.completed || current.challenge == null) {
       return;
     }
+
+    EventLogger.logChallengeComplete(current.challenge!.code);
 
     state = AsyncData(
       current.copyWith(

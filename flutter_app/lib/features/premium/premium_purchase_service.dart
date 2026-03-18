@@ -128,10 +128,16 @@ class PremiumPurchaseService {
       future,
       Future.delayed(
         const Duration(seconds: 10),
-        () => const PurchaseResult(
-          PurchaseOutcome.failed,
-          errorMessage: 'Restore timed out.',
-        ),
+        () {
+          _resolve(const PurchaseResult(
+            PurchaseOutcome.failed,
+            errorMessage: 'Restore timed out.',
+          ));
+          return const PurchaseResult(
+            PurchaseOutcome.failed,
+            errorMessage: 'Restore timed out.',
+          );
+        },
       ),
     ]);
   }

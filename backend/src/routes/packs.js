@@ -150,7 +150,7 @@ export default async function packsRoutes(fastify) {
 
     if (userErr || countErr) {
       request.log.error({ userErr, countErr }, "packs/catalog: DB error");
-      return reply.status(500).send({ error: "Failed to load packs", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to load packs", code: "INTERNAL_ERROR" });
     }
 
     // Build helpers
@@ -254,7 +254,7 @@ export default async function packsRoutes(fastify) {
     try {
       entitlement = await getPackEntitlement(deviceId, id);
     } catch {
-      return reply.status(500).send({ error: "Failed to check entitlement", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to check entitlement", code: "INTERNAL_ERROR" });
     }
 
     // Entitled user → redirect signal (no preview quotes needed)
@@ -316,7 +316,7 @@ export default async function packsRoutes(fastify) {
 
     if (quotesErr) {
       request.log.error({ err: quotesErr }, "packs/preview: DB error");
-      return reply.status(500).send({ error: "Failed to load preview", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to load preview", code: "INTERNAL_ERROR" });
     }
 
     const totalInLang = previewTotalCount ?? 0;
@@ -427,7 +427,7 @@ export default async function packsRoutes(fastify) {
     try {
       entitlement = await getPackEntitlement(deviceId, id);
     } catch {
-      return reply.status(500).send({ error: "Failed to check entitlement", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to check entitlement", code: "INTERNAL_ERROR" });
     }
 
     if (entitlement.access !== "full") {
@@ -476,7 +476,7 @@ export default async function packsRoutes(fastify) {
 
     if (quotesErr || totalErr) {
       request.log.error({ quotesErr, totalErr }, "packs/feed: DB error");
-      return reply.status(500).send({ error: "Failed to load pack feed", code: "DB_ERROR" });
+      return reply.status(500).send({ error: "Failed to load pack feed", code: "INTERNAL_ERROR" });
     }
 
     const totalInLang = totalInLangCount ?? 0;
@@ -607,7 +607,7 @@ export default async function packsRoutes(fastify) {
 
       if (priceErr) {
         request.log.error({ err: priceErr }, "packs/purchase/verify: price lookup failed");
-        return reply.status(500).send({ error: "Failed to validate product", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to validate product", code: "INTERNAL_ERROR" });
       }
 
       const expectedProductId =
@@ -640,7 +640,7 @@ export default async function packsRoutes(fastify) {
         request.log.error({ err: userUpsertErr }, "packs/purchase/verify: user upsert failed");
         return reply
           .status(500)
-          .send({ error: "Failed to initialise user", code: "DB_ERROR" });
+          .send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
       }
 
       // ── Idempotency check: already verified? ──────────────────────────────────
@@ -654,7 +654,7 @@ export default async function packsRoutes(fastify) {
 
       if (existingErr) {
         request.log.error({ err: existingErr }, "packs/purchase/verify: existing check failed");
-        return reply.status(500).send({ error: "Failed to check existing purchase", code: "DB_ERROR" });
+        return reply.status(500).send({ error: "Failed to check existing purchase", code: "INTERNAL_ERROR" });
       }
 
       const meta = PACK_META[id];
@@ -695,7 +695,7 @@ export default async function packsRoutes(fastify) {
         request.log.error({ err: insertErr }, "packs/purchase/verify: insert failed");
         return reply
           .status(500)
-          .send({ error: "Failed to record purchase", code: "DB_ERROR" });
+          .send({ error: "Failed to record purchase", code: "INTERNAL_ERROR" });
       }
 
       // Fire-and-forget audit log

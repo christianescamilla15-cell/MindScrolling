@@ -132,7 +132,7 @@ class EventLogger {
   /// Fires once per cold launch. Call after device ID is available.
   static void logAppOpen() {
     _log('app_opened', {'app_version': _appVersion});
-    _send('app_opened');
+    _send('app_opened', {'app_version': _appVersion});
   }
 
   // ------------------------------------------------------------------

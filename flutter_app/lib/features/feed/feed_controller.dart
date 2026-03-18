@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/analytics/event_logger.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/haptics_service.dart';
 import '../../core/providers/core_providers.dart';
@@ -160,6 +161,7 @@ class FeedController extends StateNotifier<FeedState> {
         dwellTimeMs: dwellMs,
       );
       _repository.recordSwipe(event).ignore();
+      EventLogger.logSwipe(current.quote!.category, direction, dwellMs);
     }
 
     // Update swipeCounts.
@@ -247,6 +249,7 @@ class FeedController extends StateNotifier<FeedState> {
       updated.remove(quoteId);
     } else {
       updated.add(quoteId);
+      EventLogger.logLike(quoteId);
     }
     state = state.copyWith(
       likedIds: updated,
@@ -278,6 +281,7 @@ class FeedController extends StateNotifier<FeedState> {
       return;
     }
     HapticsService.mediumImpact();
+    EventLogger.logVaultSave(quote.id);
     final updated = List<QuoteModel>.from(state.vault)..add(quote);
     state = state.copyWith(
       vault: updated,
