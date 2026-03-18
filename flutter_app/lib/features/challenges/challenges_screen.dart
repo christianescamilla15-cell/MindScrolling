@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
-import '../../shared/widgets/premium_gate.dart';
 import '../../shared/extensions/context_extensions.dart';
 import 'challenges_controller.dart';
 
@@ -40,16 +39,14 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
           style: AppTypography.displaySmall,
         ),
       ),
-      body: PremiumGate(
-        child: cs.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.stoicism,
-                  strokeWidth: 2,
-                ),
-              )
-            : _ChallengeBody(cs: cs),
-      ),
+      body: cs.isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.stoicism,
+                strokeWidth: 2,
+              ),
+            )
+          : _ChallengeBody(cs: cs),
     );
   }
 }

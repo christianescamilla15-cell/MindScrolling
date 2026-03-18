@@ -105,8 +105,19 @@ export default async function webhooksRoutes(fastify) {
       return reply.status(200).send({ ok: true, ignored: true, reason: "sandbox" });
     }
 
+    // ── Validate product ID — only grant for known Inside products ─────────────
+    const VALID_PRODUCT_IDS = new Set([
+      "com.mindscrolling.inside",
+      process.env.PREMIUM_PRODUCT_ID_ANDROID ?? "com.mindscrolling.inside",
+      process.env.PREMIUM_PRODUCT_ID_IOS ?? "com.mindscrolling.inside",
+    ]);
+
     // ── Grant premium ──────────────────────────────────────────────────────────
     if (GRANT_EVENTS.has(type)) {
+      if (productId && !VALID_PRODUCT_IDS.has(productId)) {
+        request.log.warn({ productId, deviceId, type }, "revenuecat: grant event for unknown product — ignored");
+        return reply.status(200).send({ ok: true, ignored: true, reason: "unknown_product" });
+      }
       // Ensure user row exists
       const { error: upsertErr } = await supabase
         .from("users")

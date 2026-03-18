@@ -194,7 +194,7 @@ export default async function quotesRoutes(fastify) {
 
       supabase
         .from("users")
-        .select("is_premium")
+        .select("is_premium, trial_start_date, trial_end_date")
         .eq("device_id", deviceId)
         .maybeSingle(),
 
@@ -207,7 +207,8 @@ export default async function quotesRoutes(fastify) {
       getPreferenceVector(deviceId),   // null for new users
     ]);
 
-    const isPremium         = userRow?.is_premium === true;
+    const isTrialActive     = userRow?.trial_end_date && Date.now() < new Date(userRow.trial_end_date).getTime();
+    const isPremium         = userRow?.is_premium === true || isTrialActive;
     const effectiveLang     = lang === "es" ? "es" : "en";
     const challengeCategory = today?.category ?? null;
 

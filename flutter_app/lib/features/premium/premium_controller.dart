@@ -339,6 +339,8 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
           isPurchasing: false,
           successMessage: 'purchaseSuccess',
         ));
+        // Refresh full server state (owned_packs, userState) after successful purchase
+        await _initTrial();
       case PurchaseOutcome.cancelled:
         state = AsyncData(updated.copyWith(isPurchasing: false));
       case PurchaseOutcome.failed:

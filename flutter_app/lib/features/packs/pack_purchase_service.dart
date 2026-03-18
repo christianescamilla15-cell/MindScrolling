@@ -166,17 +166,19 @@ class PackPurchaseService {
         'currency': currency,
       });
 
-      if (purchase.pendingCompletePurchase) {
-        await InAppPurchase.instance.completePurchase(purchase);
-      }
-
       final accessGranted = verifyResponse['access_granted'] as bool? ?? true;
       if (!accessGranted) {
+        // Do NOT complete purchase — let IAP re-deliver on next launch for retry
         _resolve(const PurchaseResult(
           PurchaseOutcome.failed,
           errorMessage: 'Purchase verified but access was not granted.',
         ));
         return;
+      }
+
+      // Only acknowledge receipt AFTER server confirmed access
+      if (purchase.pendingCompletePurchase) {
+        await InAppPurchase.instance.completePurchase(purchase);
       }
 
       _resolve(const PurchaseResult(PurchaseOutcome.success));

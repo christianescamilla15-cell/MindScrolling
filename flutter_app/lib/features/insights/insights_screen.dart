@@ -7,7 +7,6 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/app_bottom_nav.dart';
-import '../../shared/widgets/premium_gate.dart';
 import 'insights_controller.dart';
 
 class InsightsScreen extends ConsumerStatefulWidget {
@@ -32,8 +31,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: PremiumGate(
-        child: SafeArea(
+      body: SafeArea(
           child: Column(
             children: [
               _Header(
@@ -55,7 +53,6 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 
