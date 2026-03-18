@@ -75,8 +75,6 @@ export default async function adminRoutes(fastify) {
    * Returns: array of generated codes
    */
   fastify.post("/codes/create", async (request, reply) => {
-    if (!requireAdmin(request, reply)) return;
-
     const {
       count = 1,
       assigned_email = null,
@@ -137,8 +135,6 @@ export default async function adminRoutes(fastify) {
    * Body: { code }
    */
   fastify.post("/codes/revoke", async (request, reply) => {
-    if (!requireAdmin(request, reply)) return;
-
     const { code } = request.body ?? {};
     if (!code) {
       return reply.status(400).send({ error: "code is required", code: "MISSING_FIELD" });
@@ -152,7 +148,11 @@ export default async function adminRoutes(fastify) {
       .eq("code", cleanCode)
       .maybeSingle();
 
-    if (lookupErr || !codeRow) {
+    if (lookupErr) {
+      request.log.error({ err: lookupErr }, "admin/codes/revoke: lookup error");
+      return reply.status(500).send({ error: "Failed to look up code", code: "INTERNAL_ERROR" });
+    }
+    if (!codeRow) {
       return reply.status(404).send({ error: "Code not found", code: "CODE_NOT_FOUND" });
     }
 
@@ -190,8 +190,6 @@ export default async function adminRoutes(fastify) {
    * Query: ?status=all|active|redeemed|revoked
    */
   fastify.get("/codes/list", async (request, reply) => {
-    if (!requireAdmin(request, reply)) return;
-
     const status = request.query.status || "all";
     const VALID_STATUSES = ["all", "active", "redeemed", "revoked"];
     if (!VALID_STATUSES.includes(status)) {
@@ -234,8 +232,6 @@ export default async function adminRoutes(fastify) {
    * Query: ?limit=50
    */
   fastify.get("/audit", async (request, reply) => {
-    if (!requireAdmin(request, reply)) return;
-
     const rawLimit = Number(request.query.limit);
     const limit = Math.min(Math.max(1, Number.isFinite(rawLimit) ? rawLimit : 50), 200);
 

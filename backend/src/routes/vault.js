@@ -26,13 +26,17 @@ export default async function vaultRoutes(fastify) {
     if (!UUID_RE.test(quote_id)) return reply.status(400).send({ error: "quote_id must be a valid UUID", code: "INVALID_FIELD" });
 
     // Check for duplicate first (avoids unnecessary limit check for re-saves)
-    const { data: existing } = await supabase
+    const { data: existing, error: dupErr } = await supabase
       .from("vault")
       .select("quote_id")
       .eq("device_id", deviceId)
       .eq("quote_id", quote_id)
       .maybeSingle();
 
+    if (dupErr) {
+      request.log.error({ err: dupErr }, "vault: duplicate check error");
+      return reply.status(500).send({ error: "Failed to check vault", code: "INTERNAL_ERROR" });
+    }
     if (existing) return reply.send({ ok: true, status: "already_saved" });
 
     // Enforce free-user vault limit
