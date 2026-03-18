@@ -66,29 +66,36 @@ export default async function authorsRoutes(fastify) {
 
     const author = authorResult.data;
 
-    // Filter by author name in SQL — previously fetched last 20 of all authors
-    // and filtered in memory, causing empty results for most authors.
-    const quotesResult = await supabase
-      .from("quotes")
-      .select("id, text, category, lang, author")
-      .eq("lang", lang)
-      .eq("author", author.name)
-      .limit(5);
+    // Parallel: top 5 quotes for display + full category distribution for dominant_category
+    const [quotesResult, catResult] = await Promise.all([
+      supabase
+        .from("quotes")
+        .select("id, text, category, lang, author")
+        .eq("lang", lang)
+        .eq("author", author.name)
+        .limit(5),
+      supabase
+        .from("quotes")
+        .select("category")
+        .eq("lang", lang)
+        .eq("author", author.name),
+    ]);
 
-    if (quotesResult.error) {
-      fastify.log.error({ err: quotesResult.error, slug }, "GET /authors/:slug — quotes fetch error");
+    if (quotesResult.error || catResult.error) {
+      fastify.log.error({ quotesErr: quotesResult.error, catErr: catResult.error, slug }, "GET /authors/:slug — quotes fetch error");
       return reply.status(500).send({ error: "Failed to fetch author quotes", code: "INTERNAL_ERROR" });
     }
 
     const authorQuotes = quotesResult.data || [];
+    const allCategoryRows = catResult.data || [];
 
-    // Category distribution
+    // Category distribution from ALL quotes (not just 5)
     const categories = {};
-    authorQuotes.forEach((q) => {
+    allCategoryRows.forEach((q) => {
       categories[q.category] = (categories[q.category] || 0) + 1;
     });
 
-    // Dominant category
+    // Dominant category from full set
     const dominant =
       Object.entries(categories).sort(([, a], [, b]) => b - a)[0]?.[0] ??
       "philosophy";

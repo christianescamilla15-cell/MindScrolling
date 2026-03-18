@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 /// Manages daily and weekly local notifications for MindScrolling.
 class NotificationService {
@@ -15,6 +17,7 @@ class NotificationService {
   static const _weeklyId = 200;
 
   static Future<void> init() async {
+    tz.initializeTimeZones();
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
@@ -51,6 +54,16 @@ class NotificationService {
     return true;
   }
 
+  /// Computes the next occurrence of [hour]:[minute] in local timezone.
+  static tz.TZDateTime _nextInstance(int hour, int minute) {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    if (scheduled.isBefore(now)) {
+      scheduled = scheduled.add(const Duration(days: 1));
+    }
+    return scheduled;
+  }
+
   static Future<void> scheduleDailyReminder({
     required int hour,
     required int minute,
@@ -64,11 +77,11 @@ class NotificationService {
 
     await _plugin.cancel(_dailyId);
 
-    await _plugin.periodicallyShow(
+    await _plugin.zonedSchedule(
       _dailyId,
       title,
       body,
-      RepeatInterval.daily,
+      _nextInstance(hour, minute),
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'daily_reflection',
@@ -80,6 +93,7 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
@@ -89,11 +103,18 @@ class NotificationService {
   }) async {
     await _plugin.cancel(_weeklyId);
 
-    await _plugin.periodicallyShow(
+    // Schedule for next Sunday at 10:00 local time
+    final now = tz.TZDateTime.now(tz.local);
+    var nextSunday = tz.TZDateTime(tz.local, now.year, now.month, now.day, 10, 0);
+    while (nextSunday.weekday != DateTime.sunday || nextSunday.isBefore(now)) {
+      nextSunday = nextSunday.add(const Duration(days: 1));
+    }
+
+    await _plugin.zonedSchedule(
       _weeklyId,
       title,
       body,
-      RepeatInterval.weekly,
+      nextSunday,
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'weekly_map',
@@ -105,6 +126,7 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
 

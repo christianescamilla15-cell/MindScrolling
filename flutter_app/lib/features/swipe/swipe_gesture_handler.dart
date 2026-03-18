@@ -74,14 +74,17 @@ class SwipeGestureHandler extends StatefulWidget {
 
 class _SwipeGestureHandlerState extends State<SwipeGestureHandler> {
   Offset _start = Offset.zero;
+  Offset _lastPosition = Offset.zero;
   bool _committed = false;
 
   void _onPanStart(DragStartDetails details) {
     _start = details.localPosition;
+    _lastPosition = details.localPosition;
     _committed = false;
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
+    _lastPosition = details.localPosition;
     final delta = details.localPosition - _start;
     final dx = delta.dx;
     final dy = delta.dy;
@@ -113,17 +116,24 @@ class _SwipeGestureHandlerState extends State<SwipeGestureHandler> {
 
   void _onPanEnd(DragEndDetails details) {
     if (!_committed) {
-      // Check final position via velocity fallback when position delta is not
-      // tracked across the full gesture (e.g. fast flick).
+      // 1. Try positional commit — drag crossed the threshold slowly.
+      final delta = _lastPosition - _start;
+      _committed = resolveAndCommitSwipe(
+        delta: delta,
+        horizontalThreshold: widget.horizontalThreshold,
+        verticalThreshold: widget.verticalThreshold,
+        onSwipe: widget.onSwipe,
+      );
+    }
+
+    if (!_committed) {
+      // 2. Velocity fallback — fast flick that may not cross positional threshold.
       final velocity = details.velocity.pixelsPerSecond;
       final vx = velocity.dx;
       final vy = velocity.dy;
       final avx = vx.abs();
       final avy = vy.abs();
 
-      // Re-read the delta if we stored start — _start was set in onPanStart.
-      // For a committed swipe we need a threshold crossing; velocity flicks
-      // bypass the positional threshold.
       if (avx >= 400 || avy >= 400) {
         final dir = avx >= avy
             ? (vx > 0 ? SwipeDirection.right : SwipeDirection.left)
@@ -137,6 +147,7 @@ class _SwipeGestureHandlerState extends State<SwipeGestureHandler> {
   }
 
   void _onPanCancel() {
+    _committed = false;
     widget.onDragEnd?.call();
   }
 
