@@ -7,15 +7,19 @@ if (!ADMIN_SECRET && process.env.NODE_ENV === "production") {
 }
 
 /**
- * Validates the X-Admin-Secret header.
+ * Validates the X-Admin-Secret header using a timing-safe comparison
+ * to prevent timing-attack-based secret enumeration.
  */
 function requireAdmin(request, reply) {
   if (!ADMIN_SECRET) {
     reply.status(503).send({ error: "Admin not configured", code: "ADMIN_NOT_CONFIGURED" });
     return false;
   }
-  const secret = request.headers["x-admin-secret"];
-  if (!secret || secret !== ADMIN_SECRET) {
+  const secret = request.headers["x-admin-secret"] ?? "";
+  const providedBuf = Buffer.from(secret);
+  const expectedBuf = Buffer.from(ADMIN_SECRET);
+  // Lengths must match before timingSafeEqual (different lengths = wrong, not a timing oracle)
+  if (providedBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(providedBuf, expectedBuf)) {
     reply.status(403).send({ error: "Forbidden", code: "INVALID_ADMIN_SECRET" });
     return false;
   }

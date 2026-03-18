@@ -30,10 +30,10 @@ function computeScores(prefs) {
   };
 
   return {
-    wisdom:      normalise(raw("stoicism")),
-    discipline:  normalise(raw("discipline")),
-    reflection:  normalise(raw("reflection")),
-    philosophy:  normalise(raw("philosophy")),
+    wisdom_score:      normalise(raw("stoicism")),
+    discipline_score:  normalise(raw("discipline")),
+    reflection_score:  normalise(raw("reflection")),
+    philosophy_score:  normalise(raw("philosophy")),
   };
 }
 
@@ -74,10 +74,10 @@ export default async function mapRoutes(fastify) {
 
     const snapshot = snapRow
       ? {
-          wisdom:      Number(snapRow.wisdom_score),
-          discipline:  Number(snapRow.discipline_score),
-          reflection:  Number(snapRow.reflection_score),
-          philosophy:  Number(snapRow.philosophy_score),
+          wisdom_score:      Number(snapRow.wisdom_score),
+          discipline_score:  Number(snapRow.discipline_score),
+          reflection_score:  Number(snapRow.reflection_score),
+          philosophy_score:  Number(snapRow.philosophy_score),
         }
       : null;
 
@@ -120,16 +120,16 @@ export default async function mapRoutes(fastify) {
       .from("user_preference_snapshots")
       .insert({
         device_id:         deviceId,
-        wisdom_score:      scores.wisdom,
-        discipline_score:  scores.discipline,
-        reflection_score:  scores.reflection,
-        philosophy_score:  scores.philosophy,
+        wisdom_score:      scores.wisdom_score,
+        discipline_score:  scores.discipline_score,
+        reflection_score:  scores.reflection_score,
+        philosophy_score:  scores.philosophy_score,
       });
 
     if (insertErr) {
       return reply.status(500).send({ error: "Failed to save snapshot", code: "DB_ERROR" });
     }
 
-    return reply.status(200).send({ saved: true });
+    return reply.status(200).send({ ok: true });
   });
 }

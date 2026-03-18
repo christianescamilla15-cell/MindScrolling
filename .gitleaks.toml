@@ -1,0 +1,59 @@
+# Gitleaks configuration for MindScrolling
+# https://github.com/gitleaks/gitleaks
+
+title = "MindScrolling Secret Detection"
+
+[extend]
+useDefault = true  # Use gitleaks built-in rules as base
+
+# ─── Custom rules for MindScrolling-specific secrets ──────────────────────────
+[[rules]]
+id = "supabase-jwt"
+description = "Supabase JWT (anon or service_role key)"
+regex = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]{50,}\.[A-Za-z0-9_-]{40,}'''
+tags = ["supabase", "jwt", "key"]
+
+[[rules]]
+id = "supabase-url-hardcoded"
+description = "Hardcoded Supabase project URL"
+regex = '''["']https://[a-z]{20}\.supabase\.co["']'''
+tags = ["supabase", "url"]
+
+[[rules]]
+id = "voyage-ai-key"
+description = "Voyage AI API key"
+regex = '''["']pa-[A-Za-z0-9]{40,}["']'''
+tags = ["voyage", "api-key"]
+
+[[rules]]
+id = "revenuecat-secret"
+description = "RevenueCat webhook or API secret"
+regex = '''(?i)(revenuecat[_-]?(secret|key|token))\s*[:=]\s*["'][A-Za-z0-9_-]{20,}["']'''
+tags = ["revenuecat", "webhook"]
+
+# ─── Allowlists (false positives to ignore) ───────────────────────────────────
+[allowlist]
+description = "Known safe patterns"
+paths = [
+  # Example files are intentionally blank
+  '''.env.example''',
+  '''backend/.env.example''',
+  '''flutter_app/.env.example''',
+  # Node modules never scanned
+  '''node_modules''',
+  # Flutter build output
+  '''flutter_app/build''',
+  '''flutter_app/.dart_tool''',
+  # Cloud workflow docs (no real secrets)
+  '''cloud/''',
+]
+regexes = [
+  # Placeholder values in example files
+  '''your-.*-here''',
+  '''your-project\.supabase\.co''',
+  '''placeholder''',
+  # Process.env references are safe
+  '''process\.env\.[A-Z_]+''',
+  # Dart const from environment
+  '''String\.fromEnvironment''',
+]

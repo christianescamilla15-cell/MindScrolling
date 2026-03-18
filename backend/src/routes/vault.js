@@ -17,11 +17,13 @@ export default async function vaultRoutes(fastify) {
 
   /** POST /vault — save a quote */
   fastify.post("/", async (request, reply) => {
+    const FREE_VAULT_LIMIT = 20;
+
     const { deviceId } = request;
     const { quote_id } = request.body ?? {};
     if (!quote_id) return reply.status(400).send({ error: "quote_id is required", code: "MISSING_FIELD" });
 
-    // Check for duplicate
+    // Check for duplicate first (avoids unnecessary limit check for re-saves)
     const { data: existing } = await supabase
       .from("vault")
       .select("quote_id")
@@ -30,6 +32,29 @@ export default async function vaultRoutes(fastify) {
       .maybeSingle();
 
     if (existing) return reply.send({ ok: true, status: "already_saved" });
+
+    // Enforce free-user vault limit
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("is_premium")
+      .eq("device_id", deviceId)
+      .maybeSingle();
+
+    const isPremium = userRow?.is_premium === true;
+    if (!isPremium) {
+      const { count } = await supabase
+        .from("vault")
+        .select("quote_id", { count: "exact", head: true })
+        .eq("device_id", deviceId);
+
+      if ((count ?? 0) >= FREE_VAULT_LIMIT) {
+        return reply.status(403).send({
+          error: `Free vault is limited to ${FREE_VAULT_LIMIT} quotes. Upgrade to MindScrolling Inside to save unlimited quotes.`,
+          code: "VAULT_LIMIT_REACHED",
+          limit: FREE_VAULT_LIMIT,
+        });
+      }
+    }
 
     // Fetch category (needed for vault preference signal)
     const { data: quote } = await supabase
@@ -76,7 +101,7 @@ export default async function vaultRoutes(fastify) {
 
     // Fire-and-forget decrement
     if (quote?.category) {
-      supabase.rpc("decrement_vault", { p_device_id: deviceId, p_category: quote.category }).catch(() => {});
+      supabase.rpc("decrement_vault", { p_device_id: deviceId, p_category: quote.category }).then(() => {}).catch(() => {});
     }
 
     return reply.send({ ok: true });

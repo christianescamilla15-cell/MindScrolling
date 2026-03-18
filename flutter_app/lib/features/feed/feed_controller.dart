@@ -283,8 +283,13 @@ class FeedController extends StateNotifier<FeedState> {
       vault: updated,
       toastMessage: 'savedVault',
       toastColor: '#14B8A6',
+      requestRating: updated.length == 3,
     );
     _repository.saveToVault(quote.id).ignore();
+  }
+
+  void clearRatingRequest() {
+    state = state.copyWith(requestRating: false);
   }
 
   void onVaultRemove(String quoteId) {

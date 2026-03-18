@@ -10,7 +10,7 @@ VALUES
   ('discipline_daily',     'Daily Discipline',          'Swipe 8 quotes on self-discipline. Choose one principle to apply in the next 24 hours.',                     'discipline',   '2026-03-20'),
   ('philosophy_of_time',   'Philosophy of Time',        'Read 8 quotes about time and mortality. How are you spending yours?',                                        'philosophy',   '2026-03-21'),
   ('stoic_evening',        'Stoic Evening Review',      'Swipe 8 quotes and reflect: What went well today? What would you do differently?',                           'stoicism',     '2026-03-22'),
-  ('question_everything',  'Question Everything',       'Read 8 philosophical quotes that challenge assumptions. Which belief do you hold that you've never examined?','philosophy',   '2026-03-23'),
+  ('question_everything',  'Question Everything',       'Read 8 philosophical quotes that challenge assumptions. Which belief do you hold that you''ve never examined?','philosophy',   '2026-03-23'),
   ('mindful_swipe',        'Mindful Swipe',             'Swipe 8 quotes slowly. For each one, pause 5 seconds before continuing.',                                    'reflection',   '2026-03-24'),
   ('virtue_in_action',     'Virtue in Action',          'Read 8 quotes about virtue and character. What does your best self look like?',                              'stoicism',     '2026-03-25'),
   ('meaning_seeker',       'Seek Meaning',              'Explore 8 existentialist quotes. Write one sentence about what makes your life meaningful.',                  'philosophy',   '2026-03-26'),

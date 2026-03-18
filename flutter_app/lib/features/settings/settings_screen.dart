@@ -104,7 +104,7 @@ class SettingsScreen extends ConsumerWidget {
             _SectionHeader(title: context.tr.about),
             _SettingsCard(
               children: [
-                const _DevVersionTile(version: '1.0.0'),
+                const _DevVersionTile(version: '1.1.0'),
                 _Divider(),
                 _NavTile(
                   icon: Icons.privacy_tip_outlined,

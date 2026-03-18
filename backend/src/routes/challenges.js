@@ -31,8 +31,8 @@ export default async function challengesRoutes(fastify) {
 
     const activeChallenge = challenge ?? { ...DEFAULT_CHALLENGE, active_date: todayStr };
 
-    // Fetch progress (only if a real DB challenge exists)
-    let progress = { progress: 0, completed: false };
+    // Fetch progress — null if the device has never interacted with this challenge
+    let progress = null;
 
     if (challenge) {
       const { data: prog, error: progErr } = await supabase
@@ -56,16 +56,27 @@ export default async function challengesRoutes(fastify) {
 
   /**
    * POST /challenges/:id/progress
-   * Body: { progress, completed }
-   * Upserts challenge_progress for this device.
+   * Body: { progress }
+   * Increments challenge progress by 1. Server enforces the completion rule:
+   * a challenge completes automatically when progress reaches TARGET_QUOTES.
+   * Clients must NOT send completed=true — the server derives it.
    */
   fastify.post("/:id/progress", async (request, reply) => {
+    const TARGET_QUOTES = 8; // quotes required to complete a challenge
+
     const deviceId    = request.deviceId;
     const challengeId = request.params.id;
-    const { progress = 0, completed = false } = request.body ?? {};
+    const { progress: clientProgress } = request.body ?? {};
 
-    if (typeof progress !== "number") {
-      return reply.status(400).send({ error: "progress must be a number", code: "INVALID_FIELD" });
+    // Validate progress if explicitly provided (must be a non-negative integer)
+    if (clientProgress !== undefined) {
+      if (typeof clientProgress !== "number" || !Number.isInteger(clientProgress) || clientProgress < 0) {
+        return reply.status(400).send({ error: "progress must be a non-negative integer", code: "INVALID_FIELD" });
+      }
+      // Reject client-side completion claims
+      if (clientProgress >= TARGET_QUOTES) {
+        return reply.status(400).send({ error: "Progress can only be incremented by 1 per call", code: "INVALID_FIELD" });
+      }
     }
 
     // Ensure user row exists
@@ -91,15 +102,31 @@ export default async function challengesRoutes(fastify) {
       return reply.status(404).send({ error: "Challenge not found", code: "NOT_FOUND" });
     }
 
-    // Upsert progress
+    // Fetch current server-side progress
+    const { data: existing } = await supabase
+      .from("challenge_progress")
+      .select("progress, completed")
+      .eq("device_id", deviceId)
+      .eq("challenge_id", challengeId)
+      .maybeSingle();
+
+    // If already completed, return immediately
+    if (existing?.completed) {
+      return reply.status(200).send({ updated: false, completed: true, progress: existing.progress });
+    }
+
+    // Increment server-side progress by 1
+    const newProgress = (existing?.progress ?? 0) + 1;
+    const completed   = newProgress >= TARGET_QUOTES;
+
     const { error: upsertErr } = await supabase
       .from("challenge_progress")
       .upsert(
         {
           device_id:    deviceId,
           challenge_id: challengeId,
-          progress:     Number(progress),
-          completed:    Boolean(completed),
+          progress:     newProgress,
+          completed,
           updated_at:   new Date().toISOString(),
         },
         { onConflict: "device_id,challenge_id" }
@@ -109,6 +136,6 @@ export default async function challengesRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to update progress", code: "DB_ERROR" });
     }
 
-    return reply.status(200).send({ updated: true });
+    return reply.status(200).send({ updated: true, progress: newProgress, completed });
   });
 }

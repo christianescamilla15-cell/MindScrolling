@@ -17,6 +17,7 @@ class FeedState {
   final bool showVault;
   final String? toastMessage;
   final String? toastColor;
+  final bool requestRating;
 
   const FeedState({
     required this.items,
@@ -33,6 +34,7 @@ class FeedState {
     required this.showVault,
     this.toastMessage,
     this.toastColor,
+    this.requestRating = false,
   });
 
   static FeedState initial() => const FeedState(
@@ -50,6 +52,7 @@ class FeedState {
         showVault: false,
         toastMessage: null,
         toastColor: null,
+        requestRating: false,
       );
 
   FeedState copyWith({
@@ -67,6 +70,7 @@ class FeedState {
     bool? showVault,
     Object? toastMessage = _sentinel,
     Object? toastColor = _sentinel,
+    bool? requestRating,
   }) {
     return FeedState(
       items: items ?? this.items,
@@ -85,6 +89,7 @@ class FeedState {
           toastMessage == _sentinel ? this.toastMessage : toastMessage as String?,
       toastColor:
           toastColor == _sentinel ? this.toastColor : toastColor as String?,
+      requestRating: requestRating ?? this.requestRating,
     );
   }
 

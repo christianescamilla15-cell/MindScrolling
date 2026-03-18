@@ -5,6 +5,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
+import 'core/analytics/event_logger.dart';
 import 'core/providers/core_providers.dart';
 import 'core/services/notification_service.dart';
 import 'core/utils/device_id.dart';
@@ -34,6 +35,10 @@ Future<void> main() async {
 
   // Resolve device ID once before the widget tree builds
   final deviceId = await DeviceIdService.getOrCreate();
+
+  // Register device ID with EventLogger so analytics events include it
+  EventLogger.setDeviceId(deviceId);
+  EventLogger.logAppOpen();
 
   // Sentry DSN — set via --dart-define=SENTRY_DSN=https://...
   // If not set, Sentry is disabled (no-op)

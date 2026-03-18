@@ -471,7 +471,7 @@ class _PriceLabel extends StatelessWidget {
       textBaseline: TextBaseline.alphabetic,
       children: [
         Text(
-          MonetizationConstants.priceDisplay['USD'] ?? r'$2.99',
+          MonetizationConstants.priceDisplay['USD'] ?? r'$4.99',
           style: AppTypography.displayLarge.copyWith(
             color: AppColors.stoicism,
             fontStyle: FontStyle.normal,

@@ -1,0 +1,100 @@
+#!/bin/sh
+# MindScrolling — commit-msg hook
+# Validates commit message format and blocks messages that reference secrets.
+#
+# Expected format:  type(scope): description
+# Examples:
+#   feat(feed): add partial indexes for free-user quotes
+#   fix(premium): correct amount in unlock() to $4.99
+#   sec(admin): replace string equality with timingSafeEqual
+#   docs: update ARCHITECTURE.md with cloud/ directory
+#   chore(deps): upgrade @sentry/node to 10.x
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# ─── Skip merge commits and fixup commits ─────────────────────────────────────
+case "$COMMIT_MSG" in
+  Merge*|Revert*|fixup!*|squash!*) exit 0 ;;
+esac
+
+# ─── 1. Format validation ──────────────────────────────────────────────────────
+# Valid types
+VALID_TYPES="feat|fix|sec|docs|chore|refactor|perf|test|ci|build|style|revert"
+
+# Pattern: type(optional-scope): description
+PATTERN="^($VALID_TYPES)(\([a-z0-9/_-]+\))?: .{5,}"
+
+if ! echo "$COMMIT_MSG" | grep -qE "$PATTERN"; then
+  echo ""
+  echo "${RED}BLOCKED: Invalid commit message format.${NC}"
+  echo ""
+  echo "Expected:  type(scope): short description"
+  echo "Examples:"
+  echo "  ${CYAN}feat(feed): add diversity cap to prevent category overload${NC}"
+  echo "  ${CYAN}fix(premium): correct amount in unlock() from \$2.99 to \$4.99${NC}"
+  echo "  ${CYAN}sec(admin): replace string equality with crypto.timingSafeEqual${NC}"
+  echo "  ${CYAN}docs: update ARCHITECTURE.md with cloud/ directory${NC}"
+  echo "  ${CYAN}chore(deps): upgrade @sentry/node to 10.x${NC}"
+  echo ""
+  echo "Valid types: feat | fix | sec | docs | chore | refactor | perf | test | ci | build | style | revert"
+  echo ""
+  echo "Your message was: ${YELLOW}$COMMIT_MSG${NC}"
+  echo ""
+  exit 1
+fi
+
+# ─── 2. Description length ─────────────────────────────────────────────────────
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
+LINE_LEN=${#FIRST_LINE}
+
+if [ "$LINE_LEN" -gt 100 ]; then
+  echo "${RED}BLOCKED: First line too long ($LINE_LEN chars). Max: 100.${NC}"
+  echo "Shorten the description or move details to the body."
+  exit 1
+fi
+
+# ─── 3. No trailing period ─────────────────────────────────────────────────────
+if echo "$FIRST_LINE" | grep -qE "\.$"; then
+  echo "${YELLOW}WARNING: Commit message ends with a period. Remove it.${NC}"
+  echo "  Bad:  fix(vault): correct free user limit."
+  echo "  Good: fix(vault): correct free user limit"
+  exit 1
+fi
+
+# ─── 4. No secrets in commit message ──────────────────────────────────────────
+# People sometimes accidentally paste tokens into commit messages
+if echo "$COMMIT_MSG" | grep -qE "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"; then
+  echo "${RED}BLOCKED: JWT token detected in commit message.${NC}"
+  exit 1
+fi
+
+if echo "$COMMIT_MSG" | grep -qE "sk-ant-[A-Za-z0-9_-]{10,}"; then
+  echo "${RED}BLOCKED: Anthropic API key detected in commit message.${NC}"
+  exit 1
+fi
+
+if echo "$COMMIT_MSG" | grep -qE "[A-Za-z0-9_-]{40,}"; then
+  # Heuristic: long random-looking strings in commit messages
+  # Only warn, don't block (could be a hash reference)
+  echo "${YELLOW}NOTE: Commit message contains a long string (40+ chars).${NC}"
+  echo "If this is a secret or token, abort with Ctrl+C and remove it."
+  echo "Continuing in 3 seconds..."
+  sleep 3
+fi
+
+# ─── 5. Security type reminder ────────────────────────────────────────────────
+TYPE=$(echo "$FIRST_LINE" | grep -oE "^($VALID_TYPES)" | head -1)
+if [ "$TYPE" = "sec" ]; then
+  echo "${CYAN}Security commit detected.${NC}"
+  echo "Reminder: verify the security workflow checklist in cloud/workflows/security_workflow.md"
+fi
+
+echo "${GREEN}Commit message OK.${NC}"
+exit 0

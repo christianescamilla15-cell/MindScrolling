@@ -17,6 +17,7 @@ import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/app_bottom_nav.dart';
 import '../../core/utils/haptics_service.dart';
 import '../challenges/challenges_controller.dart';
+import 'package:in_app_review/in_app_review.dart';
 import '../../shared/widgets/streak_milestone_dialog.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
@@ -293,6 +294,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               .ignore();
         }
       }
+      // Rating prompt after 3rd vault save.
+      if (next.requestRating && !(prev?.requestRating ?? false) && mounted) {
+        ref.read(feedControllerProvider.notifier).clearRatingRequest();
+        final review = InAppReview.instance;
+        review.isAvailable().then((available) {
+          if (available) review.requestReview();
+        });
+      }
     });
 
     return Scaffold(
@@ -478,7 +487,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-class _Header extends StatelessWidget {
+const _kFreeSwipeLimit = 20;
+
+class _Header extends ConsumerWidget {
   const _Header({
     required this.streak,
     required this.reflections,
@@ -490,7 +501,10 @@ class _Header extends StatelessWidget {
   final bool streakPulse;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPremium = ref.watch(premiumStateProvider).isPremium;
+    final remaining = (_kFreeSwipeLimit - reflections).clamp(0, _kFreeSwipeLimit);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Row(
@@ -502,6 +516,11 @@ class _Header extends StatelessWidget {
           const SizedBox(width: 8),
           const AmbientAudioButton(),
           const Spacer(),
+          // Free swipe counter — only shown for non-premium users
+          if (!isPremium) ...[
+            _FreeSwipeChip(remaining: remaining),
+            const SizedBox(width: 8),
+          ],
           // Reflection count
           _StatChip(
             icon: Icons.auto_stories_outlined,
@@ -520,6 +539,56 @@ class _Header extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FreeSwipeChip extends StatelessWidget {
+  const _FreeSwipeChip({required this.remaining});
+  final int remaining;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color;
+    if (remaining > 10) {
+      color = AppColors.textMuted;
+    } else if (remaining > 4) {
+      color = AppColors.discipline; // orange
+    } else {
+      color = const Color(0xFFE05C5C); // red
+    }
+
+    return GestureDetector(
+      onTap: () => context.push('/premium'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.10),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.30), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              remaining > 0
+                  ? Icons.lock_open_outlined
+                  : Icons.lock_outline_rounded,
+              size: 11,
+              color: color,
+            ),
+            const SizedBox(width: 3),
+            Text(
+              '$remaining/$_kFreeSwipeLimit',
+              style: AppTypography.caption.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -565,23 +634,140 @@ class _StatChip extends StatelessWidget {
 
 // Bottom nav extracted to shared/widgets/app_bottom_nav.dart
 
-// ─── Loading shimmer ─────────────────────────────────────────────────────────
+// ─── Loading shimmer (interactive) ───────────────────────────────────────────
 
-class _LoadingShimmer extends StatelessWidget {
+// Bundled quotes shown during cold start (~30s on Render free tier).
+// These are hardcoded so no network call is needed.
+const _kLoadingQuotes = [
+  ('"The unexamined life is not worth living."', 'Socrates'),
+  ('"He who has a why to live can bear almost any how."', 'Nietzsche'),
+  ('"You have power over your mind, not outside events. Realise this, and you will find strength."', 'Marcus Aurelius'),
+  ('"The only way to do great work is to love what you do."', 'Seneca'),
+  ('"Man is condemned to be free."', 'Sartre'),
+  ('"Waste no more time arguing about what a good man should be. Be one."', 'Marcus Aurelius'),
+];
+
+class _LoadingShimmer extends StatefulWidget {
   const _LoadingShimmer();
 
   @override
+  State<_LoadingShimmer> createState() => _LoadingShimmerState();
+}
+
+class _LoadingShimmerState extends State<_LoadingShimmer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _fade;
+  int _quoteIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _quoteIndex = DateTime.now().millisecondsSinceEpoch % _kLoadingQuotes.length;
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+    _ctrl.forward();
+    _cycle();
+  }
+
+  void _cycle() async {
+    while (mounted) {
+      await Future.delayed(const Duration(seconds: 6));
+      if (!mounted) return;
+      await _ctrl.reverse();
+      if (!mounted) return;
+      setState(() {
+        _quoteIndex = (_quoteIndex + 1) % _kLoadingQuotes.length;
+      });
+      _ctrl.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceVariant,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(28),
+    final (quote, author) = _kLoadingQuotes[_quoteIndex];
+    return Stack(
+      children: [
+        // Shimmer card placeholder
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Shimmer.fromColors(
+            baseColor: AppColors.surface,
+            highlightColor: AppColors.surfaceVariant,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(28),
+              ),
+            ),
+          ),
         ),
-      ),
+        // Overlaid animated quote
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FadeTransition(
+                opacity: _fade,
+                child: Column(
+                  children: [
+                    Text(
+                      quote,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.quoteText.copyWith(
+                        fontSize: 20,
+                        height: 1.6,
+                        color: AppColors.textPrimary.withOpacity(0.88),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '— $author',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.stoicism,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: AppColors.stoicism.withOpacity(0.4),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    context.tr.loadingReflections,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textMuted,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

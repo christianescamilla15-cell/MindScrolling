@@ -1,10 +1,46 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import '../constants/api_constants.dart';
+
 /// Centralised event logger for user interactions.
 ///
-/// All methods currently print to the debug console. Replace the
-/// `debugPrint` calls with a real analytics SDK (e.g., Firebase Analytics,
-/// Mixpanel, PostHog) without changing any call sites.
+/// Fires key funnel events to POST /analytics/event (fire-and-forget,
+/// no throw on failure). All events also print to the debug console.
+/// Replace the backend call with any SDK (Firebase, Mixpanel, PostHog)
+/// without changing call sites.
 class EventLogger {
   EventLogger._();
+
+  static const String _appVersion = '1.1.0';
+
+  // ------------------------------------------------------------------
+  // Internal HTTP sender — fire-and-forget, never throws
+  // ------------------------------------------------------------------
+
+  static String? _deviceId;
+
+  /// Set once from [DeviceIdService] at app startup so events include device_id.
+  static void setDeviceId(String id) => _deviceId = id;
+
+  static void _send(String eventType, [Map<String, dynamic>? properties]) {
+    final body = jsonEncode({
+      'event_type': eventType,
+      'app_version': _appVersion,
+      if (properties != null && properties.isNotEmpty) 'properties': properties,
+    });
+    final headers = {
+      'Content-Type': 'application/json',
+      if (_deviceId != null) 'X-Device-ID': _deviceId!,
+    };
+    http
+        .post(
+          Uri.parse('${ApiConstants.baseUrl}/analytics/event'),
+          headers: headers,
+          body: body,
+        )
+        .ignore(); // fire-and-forget
+  }
 
   // ------------------------------------------------------------------
   // Feed / swipe
@@ -80,6 +116,17 @@ class EventLogger {
   /// Logs that the user completed onboarding.
   static void logOnboardingComplete() {
     _log('onboarding_complete', {});
+    _send('onboarding_completed');
+  }
+
+  // ------------------------------------------------------------------
+  // App lifecycle
+  // ------------------------------------------------------------------
+
+  /// Fires once per cold launch. Call after device ID is available.
+  static void logAppOpen() {
+    _log('app_opened', {'app_version': _appVersion});
+    _send('app_opened');
   }
 
   // ------------------------------------------------------------------

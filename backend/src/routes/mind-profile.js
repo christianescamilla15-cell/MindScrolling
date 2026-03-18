@@ -136,12 +136,12 @@ export default async function mindProfileRoutes(fastify) {
     // Ensure percentages sum to 100
     const distSum = Object.values(distribution).reduce((s, v) => s + v, 0);
     if (distSum !== 100 && distSum > 0) {
-      const sorted = CATEGORIES.sort((a, b) => catScores[b] - catScores[a]);
+      const sorted = [...CATEGORIES].sort((a, b) => catScores[b] - catScores[a]);
       distribution[sorted[0]] += (100 - distSum);
     }
 
     // Dominant and secondary
-    const ranked = CATEGORIES.sort((a, b) => catScores[b] - catScores[a]);
+    const ranked = [...CATEGORIES].sort((a, b) => catScores[b] - catScores[a]);
     const dominant = ranked[0];
     const secondary = ranked[1];
 

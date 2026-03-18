@@ -1,0 +1,44 @@
+#!/bin/sh
+# MindScrolling — prepare-commit-msg hook
+# Prepopulates the commit message editor with a format reminder.
+# Only adds the template when the editor opens fresh (not during merge/rebase).
+
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="$2"
+
+# Only add template for regular commits (not merge, squash, rebase, etc.)
+if [ -n "$COMMIT_SOURCE" ]; then
+  exit 0
+fi
+
+# If the file already has non-comment content, don't overwrite it
+EXISTING=$(grep -v "^#" "$COMMIT_MSG_FILE" | grep -v "^$" | head -1)
+if [ -n "$EXISTING" ]; then
+  exit 0
+fi
+
+# Prepend template above the default git comments
+TEMPLATE="# type(scope): short description (max 100 chars, no period)
+#
+# Types: feat | fix | sec | docs | chore | refactor | perf | test | ci | build | style | revert
+# Scopes (optional): feed | vault | premium | challenge | map | authors | packs | audio | admin | deps | flutter | backend | db
+#
+# Examples:
+#   feat(feed): add semantic reranking for returning users
+#   fix(premium): correct iOS premium_source detection in /purchase/verify
+#   sec(admin): replace string equality with crypto.timingSafeEqual
+#   docs: add cloud/ directory to ARCHITECTURE.md repo structure
+#   perf(db): add partial indexes for free-user feed query (migration 007)
+#
+# Security rules (enforced by pre-commit hook):
+#   ✗ No .env files — use .env.example with placeholder values
+#   ✗ No hardcoded API keys, JWTs, or secrets
+#   ✗ No Android keystores or google-services.json
+#   ✓ Use process.env.VAR_NAME in all code
+#
+# Body (optional — blank line after first line):
+#   Explain WHY, not what. The diff shows what changed.
+#
+"
+
+printf "%s" "$TEMPLATE" | cat - "$COMMIT_MSG_FILE" > /tmp/mindscroll_commit_tmp && mv /tmp/mindscroll_commit_tmp "$COMMIT_MSG_FILE"

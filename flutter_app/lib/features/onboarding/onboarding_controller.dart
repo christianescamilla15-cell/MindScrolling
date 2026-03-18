@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/analytics/event_logger.dart';
 import '../../core/constants/app_constants.dart';
 import '../../data/models/user_profile_model.dart';
 import '../../data/repositories/feed_repository.dart';
@@ -124,6 +125,9 @@ class OnboardingController extends ChangeNotifier {
 
       // Fire-and-forget profile submission.
       _repository?.postProfile(profileSnapshot).ignore();
+
+      // Analytics: funnel event
+      EventLogger.logOnboardingComplete();
 
       // Mark that audio should auto-start on first feed load
       await prefs.setBool('mindscroll_audio_autostart', true);

@@ -53,7 +53,7 @@ export default async function profileRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to save profile", code: "DB_ERROR" });
     }
 
-    return reply.status(200).send({ saved: true });
+    return reply.status(200).send({ ok: true });
   });
 
   /**
@@ -65,7 +65,7 @@ export default async function profileRoutes(fastify) {
 
     const { data, error } = await supabase
       .from("user_profiles")
-      .select("age_range, interest, goal, preferred_language, created_at, updated_at")
+      .select("device_id, age_range, interest, goal, preferred_language, created_at, updated_at")
       .eq("device_id", deviceId)
       .maybeSingle();
 

@@ -199,44 +199,75 @@ class PaywallCard extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            // Secondary CTA — go to Inside
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
-                onPressed: () => context.push('/premium'),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                      color: AppColors.stoicism.withOpacity(0.5), width: 1),
-                  foregroundColor: AppColors.stoicism,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+            // Secondary CTA — go to Inside (with "Best value" badge)
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton(
+                    onPressed: () => context.push('/premium'),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.stoicism.withOpacity(0.06),
+                      side: BorderSide(
+                          color: AppColors.stoicism.withOpacity(0.6), width: 1.5),
+                      foregroundColor: AppColors.stoicism,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          secondaryCopy,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.stoicism,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (!isTrial) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            insideCopy,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.stoicism.withOpacity(0.65),
+                              fontSize: 10,
+                              height: 1.3,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
-                child: Text(
-                  secondaryCopy,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.stoicism,
-                    fontWeight: FontWeight.w600,
+                // "Best value" badge pinned to top-right corner
+                Positioned(
+                  top: -10,
+                  right: 10,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.stoicism,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      isTrial ? '3 PACKS' : 'BEST VALUE',
+                      style: AppTypography.caption.copyWith(
+                        color: const Color(0xFF0D0D1A),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 9,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
+              ],
             ),
-
-            // Inside value prop note (not shown for trial secondary CTA
-            // since the trial secondary already states "3 packs")
-            if (!isTrial) ...[
-              const SizedBox(height: 10),
-              Text(
-                insideCopy,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textMuted,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
           ],
         ),
       ),

@@ -70,6 +70,20 @@ export default async function premiumRoutes(fastify) {
         trialDaysLeft = Math.ceil((end - now) / 86400000);
       } else {
         trialExpired = true;
+        // Fire trial_expired audit once (deduplicated — fire-and-forget).
+        supabase.from("premium_audit_log")
+          .select("id").eq("device_id", deviceId).eq("event_type", "trial_expired")
+          .limit(1).maybeSingle()
+          .then(({ data }) => {
+            if (!data) {
+              supabase.from("premium_audit_log").insert({
+                device_id: deviceId,
+                event_type: "trial_expired",
+                source: "app",
+                metadata: { expired_at: new Date().toISOString() },
+              }).then(() => {}).catch(() => {});
+            }
+          }).catch(() => {});
       }
     }
 
@@ -232,6 +246,14 @@ export default async function premiumRoutes(fastify) {
     if (updateErr) {
       return reply.status(500).send({ error: "Failed to upgrade user", code: "DB_ERROR" });
     }
+
+    // Audit log — premium_purchased
+    supabase.from("premium_audit_log").insert({
+      device_id: deviceId,
+      event_type: "premium_purchased",
+      source: store === "ios" ? "app_store" : "play_billing",
+      metadata: { product_id, store, purchased_at: now },
+    }).then(() => {}).catch(() => {});
 
     return reply.status(200).send({ success: true, plan: PLAN_NAME, status: "verified" });
   });
