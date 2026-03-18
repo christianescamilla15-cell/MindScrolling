@@ -682,6 +682,7 @@ class _LoadingShimmerState extends State<_LoadingShimmer>
       setState(() {
         _quoteIndex = (_quoteIndex + 1) % _kLoadingQuotes.length;
       });
+      if (!mounted) return;
       _ctrl.forward();
     }
   }

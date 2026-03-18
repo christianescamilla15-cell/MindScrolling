@@ -151,20 +151,10 @@ export function resolveUserState(userRow, ownedPackIds = []) {
  */
 export async function getOwnedPackIds(deviceId, userRow, client = supabase) {
   if (userRow?.is_premium === true) {
-    // Return all grandfathered pack IDs (released before cutoff).
-    // We query distinct pack_names from quotes where released_at < cutoff.
-    const { data: rows } = await client
-      .from("quotes")
-      .select("pack_name")
-      .not("pack_name", "is", null)
-      .neq("pack_name", "free")
-      .lt("released_at", GRANDFATHERING_CUTOFF);
-
-    if (!rows) return [];
-    const ids = [...new Set(rows.map((r) => r.pack_name))].filter((id) =>
-      KNOWN_PACK_IDS.has(id)
-    );
-    return ids;
+    // All known packs were released on 2026-01-01 — always before the
+    // grandfathering cutoff (2026-06-01). Return the static set directly
+    // to avoid a full table scan fetching ~13K quote rows.
+    return [...KNOWN_PACK_IDS];
   }
 
   // Non-Inside: return individual purchases.

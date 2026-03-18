@@ -195,7 +195,7 @@ class PackPurchaseService {
 // ---------------------------------------------------------------------------
 
 final packPurchaseServiceProvider =
-    Provider.autoDispose<PackPurchaseService>((ref) {
+    Provider<PackPurchaseService>((ref) {
   final service = PackPurchaseService(ref: ref);
   service.initialize();
   ref.onDispose(service.dispose);

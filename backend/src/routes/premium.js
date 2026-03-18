@@ -293,8 +293,10 @@ export default async function premiumRoutes(fastify) {
       .eq("status", "verified");
 
     if (purchase_token && transaction_id) {
+      // Use two separate .eq() conditions joined with .or() to avoid raw string
+      // interpolation (SQL injection vector via PostgREST filter syntax).
       insideQuery = insideQuery.or(
-        `purchase_token.eq.${purchase_token},transaction_id.eq.${transaction_id}`
+        `purchase_token.eq."${String(purchase_token).replace(/"/g, '\\"')}",transaction_id.eq."${String(transaction_id).replace(/"/g, '\\"')}"`
       );
     } else if (purchase_token) {
       insideQuery = insideQuery.eq("purchase_token", purchase_token);
@@ -310,7 +312,7 @@ export default async function premiumRoutes(fastify) {
 
     if (purchase_token && transaction_id) {
       packQuery = packQuery.or(
-        `purchase_token.eq.${purchase_token},transaction_id.eq.${transaction_id}`
+        `purchase_token.eq."${String(purchase_token).replace(/"/g, '\\"')}",transaction_id.eq."${String(transaction_id).replace(/"/g, '\\"')}"`
       );
     } else if (purchase_token) {
       packQuery = packQuery.eq("purchase_token", purchase_token);

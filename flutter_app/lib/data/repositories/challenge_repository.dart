@@ -24,12 +24,24 @@ class ChallengeRepository {
   Future<ApiResult<ChallengeModel>> getTodayChallenge() async {
     try {
       final json = await _remote.getTodayChallenge();
-      final data = json['data'] as Map<String, dynamic>? ?? json;
-      final challenge = ChallengeModel.fromJson(data);
+      // Backend returns { challenge: {...}, progress: {...} }
+      final challengeData = json['challenge'] as Map<String, dynamic>? ?? json;
+      final progressData = json['progress'] as Map<String, dynamic>?;
+
+      final challenge = ChallengeModel.fromJson(challengeData);
       await LocalStorage.setString(
         _challengeCacheKey,
         jsonEncode(challenge.toJson()),
       );
+
+      // Cache progress from the same response to avoid a second network call.
+      if (progressData != null) {
+        await LocalStorage.setString(
+          _progressCacheKey,
+          jsonEncode(ChallengeProgressModel.fromJson(progressData).toJson()),
+        );
+      }
+
       return ApiSuccess(challenge);
     } catch (e) {
       final cached = await _loadCachedChallenge();
@@ -37,29 +49,13 @@ class ChallengeRepository {
     }
   }
 
-  /// Fetches the progress for [challengeId] from the server.
-  /// Falls back to locally cached progress on failure.
+  /// Returns the challenge progress — uses the cache populated by
+  /// [getTodayChallenge] to avoid a redundant network round-trip.
   Future<ApiResult<ChallengeProgressModel>> getChallengeProgress(
     String challengeId,
   ) async {
-    try {
-      final json = await _remote.getTodayChallenge();
-      // Progress is usually embedded in the challenge response.
-      final progressJson = json['progress'] as Map<String, dynamic>?;
-      if (progressJson != null) {
-        final progress = ChallengeProgressModel.fromJson(progressJson);
-        await LocalStorage.setString(
-          _progressCacheKey,
-          jsonEncode(progress.toJson()),
-        );
-        return ApiSuccess(progress);
-      }
-      final cached = await _loadCachedProgress();
-      return ApiSuccess(cached);
-    } catch (e) {
-      final cached = await _loadCachedProgress();
-      return ApiSuccess(cached);
-    }
+    final cached = await _loadCachedProgress();
+    return ApiSuccess(cached);
   }
 
   /// Posts progress to the server. Fire-and-forget — failures are silent.
@@ -69,7 +65,7 @@ class ChallengeRepository {
     bool completed,
   ) async {
     try {
-      await _remote.updateProgress(challengeId, progress, completed);
+      await _remote.updateProgress(challengeId);
       // Persist locally so getChallengeProgress can reflect the update.
       final model = ChallengeProgressModel(
         progress: progress,

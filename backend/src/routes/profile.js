@@ -3,6 +3,7 @@ import { supabase } from "../db/client.js";
 const VALID_AGE_RANGES  = ["18-24", "25-34", "35-44", "45+"];
 const VALID_INTERESTS   = ["philosophy", "stoicism", "personal_growth", "mindfulness", "curiosity"];
 const VALID_GOALS       = ["calm_mind", "discipline", "meaning", "emotional_clarity"];
+const VALID_LANGUAGES   = ["en", "es"];
 
 export default async function profileRoutes(fastify) {
   /**
@@ -23,6 +24,9 @@ export default async function profileRoutes(fastify) {
     }
     if (goal && !VALID_GOALS.includes(goal)) {
       return reply.status(400).send({ error: `goal must be one of: ${VALID_GOALS.join(", ")}`, code: "INVALID_FIELD" });
+    }
+    if (preferred_language && !VALID_LANGUAGES.includes(preferred_language)) {
+      return reply.status(400).send({ error: `preferred_language must be one of: ${VALID_LANGUAGES.join(", ")}`, code: "INVALID_FIELD" });
     }
 
     // Ensure the user row exists first (FK requirement)

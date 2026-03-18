@@ -11,8 +11,9 @@ class ProfileRemoteDataSource {
   Future<UserProfileModel?> getProfile() async {
     try {
       final json = await _apiClient.get('/profile');
-      if (json.isEmpty) return null;
-      return UserProfileModel.fromJson(json);
+      final raw = json['data'];
+      if (raw == null) return null;
+      return UserProfileModel.fromJson(raw as Map<String, dynamic>);
     } on ApiException catch (e) {
       if (e.statusCode == 404) return null;
       rethrow;

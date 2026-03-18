@@ -12,15 +12,8 @@ class ChallengeRemoteDataSource {
   }
 
   /// POST /challenges/:id/progress  with { progress, completed }
-  Future<void> updateProgress(
-    String challengeId,
-    int progress,
-    bool completed,
-  ) async {
-    await _apiClient.post(
-      '/challenges/$challengeId/progress',
-      body: {'progress': progress, 'completed': completed},
-    );
+  Future<void> updateProgress(String challengeId) async {
+    await _apiClient.post('/challenges/$challengeId/progress');
   }
 
   /// GET /map

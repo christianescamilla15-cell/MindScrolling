@@ -13,10 +13,10 @@ class PhilosophyScores {
 
   factory PhilosophyScores.fromJson(Map<String, dynamic> json) {
     return PhilosophyScores(
-      wisdom: (json['wisdom'] as num?)?.toDouble() ?? 0.0,
-      discipline: (json['discipline'] as num?)?.toDouble() ?? 0.0,
-      reflection: (json['reflection'] as num?)?.toDouble() ?? 0.0,
-      philosophy: (json['philosophy'] as num?)?.toDouble() ?? 0.0,
+      wisdom: (json['wisdom_score'] as num?)?.toDouble() ?? 0.0,
+      discipline: (json['discipline_score'] as num?)?.toDouble() ?? 0.0,
+      reflection: (json['reflection_score'] as num?)?.toDouble() ?? 0.0,
+      philosophy: (json['philosophy_score'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
