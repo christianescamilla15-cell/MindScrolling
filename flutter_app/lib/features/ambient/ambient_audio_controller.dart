@@ -82,7 +82,13 @@ class AmbientAudioController extends AsyncNotifier<AmbientAudioState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kPrefTrackId, trackId);
     if (current.isPlaying) {
-      await _service.setTrack(track, autoPlay: true);
+      try {
+        await _service.setTrack(track, autoPlay: true);
+      } catch (_) {
+        state = AsyncData(
+          (state.valueOrNull ?? const AmbientAudioState()).copyWith(isPlaying: false),
+        );
+      }
     }
   }
 
@@ -101,10 +107,16 @@ class AmbientAudioController extends AsyncNotifier<AmbientAudioState> {
         state = AsyncData(current.copyWith(isPlaying: false));
         return;
       }
-      await _service.setTrack(track, autoPlay: true);
-      state = AsyncData(
-        (state.valueOrNull ?? const AmbientAudioState()).copyWith(isPlaying: true),
-      );
+      try {
+        await _service.setTrack(track, autoPlay: true);
+        state = AsyncData(
+          (state.valueOrNull ?? const AmbientAudioState()).copyWith(isPlaying: true),
+        );
+      } catch (_) {
+        state = AsyncData(
+          (state.valueOrNull ?? const AmbientAudioState()).copyWith(isPlaying: false),
+        );
+      }
     }
   }
 

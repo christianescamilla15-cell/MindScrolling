@@ -49,6 +49,7 @@ class AmbientAudioService {
 
     if (_currentUrl == url) {
       if (autoPlay && !(_player?.playing ?? false)) {
+        await _player?.setLoopMode(LoopMode.one);
         await _player?.play();
       }
       return;
@@ -63,6 +64,7 @@ class AmbientAudioService {
     } catch (e) {
       debugPrint('[AmbientAudioService] setTrack error: $e');
       _currentUrl = null;
+      rethrow;
     }
   }
 
