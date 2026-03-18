@@ -67,8 +67,19 @@ class _BootstrapScreenState extends State<BootstrapScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Circular splash logo — zen meditation icon
+              ClipOval(
+                child: Image.asset(
+                  'assets/images/splash_logo.png',
+                  width: 160,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _MindScrollLogo(),
+                ),
+              ),
+              const SizedBox(height: 20),
               _MindScrollLogo(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text(
                 context.tr.loadingReflections,
                 style: AppTypography.bodySmall.copyWith(

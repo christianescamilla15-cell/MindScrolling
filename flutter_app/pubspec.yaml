@@ -64,6 +64,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.3
   build_runner: ^2.4.9
   riverpod_generator: ^2.4.0
 
@@ -87,3 +88,14 @@ flutter:
   assets:
     - assets/fonts/
     - assets/images/
+
+# ── Launcher icon configuration ──────────────────────────────────────────────
+# Run: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/images/app_icon.png"
+  adaptive_icon_background: "#0F0F13"
+  adaptive_icon_foreground: "assets/images/app_icon.png"
+  min_sdk_android: 21
