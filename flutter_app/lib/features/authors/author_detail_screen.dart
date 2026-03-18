@@ -31,8 +31,6 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
     _load();
   }
 
-  String? _error;
-
   Future<void> _load() async {
     // Retry once if first attempt fails (Render cold start)
     for (int attempt = 0; attempt < 2; attempt++) {
@@ -49,7 +47,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
       } catch (e) {
         debugPrint('[AuthorDetail] Attempt ${attempt + 1} failed for ${widget.authorName}: $e');
         if (attempt == 1) {
-          if (mounted) setState(() { _error = e.toString(); _loading = false; });
+          if (mounted) setState(() { _loading = false; });
         }
         // Wait 2s before retry
         await Future.delayed(const Duration(seconds: 2));
@@ -95,7 +93,7 @@ class _AuthorDetailScreenState extends ConsumerState<AuthorDetailScreen> {
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: () {
-                          setState(() { _loading = true; _error = null; });
+                          setState(() { _loading = true; _data = null; });
                           _load();
                         },
                         child: Text(context.tr.retry,

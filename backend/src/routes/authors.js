@@ -93,8 +93,8 @@ export default async function authorsRoutes(fastify) {
 
     const fallbackBio =
       lang === "es"
-        ? "Pensador y autor cuyas ideas han inspirado a generaciones."
-        : "Thinker and author whose ideas have inspired generations.";
+        ? "Biografía no disponible."
+        : "No biography available.";
 
     return reply.send({
       slug: author.slug,
