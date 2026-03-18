@@ -131,7 +131,7 @@ AND pack_name NOT IN ('existentialism', 'zen_mindfulness', 'stoicism_deep');
 --   Søren Kierkegaard, Martin Heidegger, Simone de Beauvoir,
 --   Viktor Frankl, Fyodor Dostoevsky, Albert Schweitzer,
 --   William James, Bertrand Russell, Ludwig Wittgenstein
--- Target categories: philosophy, meaning, existence
+-- Target categories: meaning, existence (NOT philosophy — philosophy stays in free feed)
 -- ──────────────────────────────────────────────────────────────
 
 UPDATE quotes
@@ -165,7 +165,7 @@ WHERE id IN (
         'Paul Tillich'
       )
       OR (
-        category IN ('philosophy', 'meaning', 'existence', 'existentialism')
+        category IN ('meaning', 'existence', 'existentialism')
         AND author NOT IN (
           -- stoicism-specific authors
           'Marcus Aurelius', 'Seneca', 'Seneca the Younger', 'Epictetus',
@@ -227,7 +227,7 @@ WHERE id IN (
         'Paul Tillich'
       )
       OR (
-        category IN ('philosophy', 'meaning', 'existence', 'existentialism')
+        category IN ('meaning', 'existence', 'existentialism')
         AND author NOT IN (
           'Marcus Aurelius', 'Seneca', 'Seneca the Younger', 'Epictetus',
           'Zeno of Citium', 'Cleanthes', 'Chrysippus',
@@ -258,7 +258,7 @@ AND pack_name NOT IN ('stoicism_deep', 'zen_mindfulness', 'existentialism');
 --   Buddha / The Buddha / Dhammapada, Bodhidharma, Eckhart Tolle,
 --   Pema Chödrön, Dalai Lama, Zhuang Zhou, Daisaku Ikeda,
 --   Eknath Easwaran, Thomas Merton
--- Target categories: mindfulness, peace, wisdom, zen, reflection
+-- Target categories: mindfulness, peace, zen, wisdom (NOT reflection — reflection stays in free feed)
 -- ──────────────────────────────────────────────────────────────
 
 UPDATE quotes
@@ -293,7 +293,7 @@ WHERE id IN (
         'Thomas Merton'
       )
       OR (
-        category IN ('mindfulness', 'peace', 'zen', 'reflection', 'wisdom')
+        category IN ('mindfulness', 'peace', 'zen', 'wisdom')
         AND author NOT IN (
           -- stoicism-specific
           'Marcus Aurelius', 'Seneca', 'Seneca the Younger', 'Epictetus',
@@ -356,7 +356,7 @@ WHERE id IN (
         'Thomas Merton'
       )
       OR (
-        category IN ('mindfulness', 'peace', 'zen', 'reflection', 'wisdom')
+        category IN ('mindfulness', 'peace', 'zen', 'wisdom')
         AND author NOT IN (
           'Marcus Aurelius', 'Seneca', 'Seneca the Younger', 'Epictetus',
           'Zeno of Citium', 'Cleanthes', 'Chrysippus', 'Heraclitus',
