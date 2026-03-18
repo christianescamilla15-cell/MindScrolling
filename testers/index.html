@@ -8,6 +8,7 @@
 :root {
   --bg: #07070f;
   --card: #0e0e1c;
+  --card2: #111120;
   --border: rgba(255,255,255,.07);
   --text: #e2e2f0;
   --muted: #52526a;
@@ -32,7 +33,6 @@ body::before {
   inset: 0;
   background: radial-gradient(ellipse 60% 40% at 50% -10%, rgba(139,92,246,.12), transparent);
   pointer-events: none;
-  transition: background 0.6s ease;
   z-index: 0;
 }
 #app {
@@ -45,7 +45,7 @@ body::before {
   z-index: 1;
 }
 
-/* ─── SCREENS ───────────────────────────────────────────────── */
+/* ─── SCREENS ─────────────────────────────────────────────── */
 .screen {
   flex: 1;
   display: flex;
@@ -61,28 +61,88 @@ body::before {
 /* ─── WELCOME ─────────────────────────────────────────────── */
 .logo-area {
   text-align: center;
-  padding: 44px 0 36px;
+  padding: 36px 0 28px;
 }
 .logo-mark {
-  font-size: 40px;
+  font-size: 36px;
   display: block;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   filter: drop-shadow(0 0 20px var(--module-color));
   transition: filter .4s;
 }
-.logo-title {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -.5px;
-  color: #fff;
-}
-.logo-sub {
-  font-size: 12px;
+.logo-title { font-size: 22px; font-weight: 800; letter-spacing: -.5px; color: #fff; }
+.logo-sub { font-size: 12px; color: var(--muted); margin-top: 5px; letter-spacing: 1.2px; text-transform: uppercase; }
+
+/* Instructions accordion */
+.instr-toggle {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 13px;
   color: var(--muted);
-  margin-top: 5px;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  transition: background .15s;
+  user-select: none;
 }
+.instr-toggle:hover { background: rgba(255,255,255,.05); }
+.instr-toggle span { font-weight: 600; color: var(--text); }
+.instr-arrow { transition: transform .25s; font-size: 12px; }
+.instr-arrow.open { transform: rotate(180deg); }
+.instr-body {
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 16px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .35s ease, padding .2s;
+  margin-bottom: 16px;
+}
+.instr-body.open { max-height: 600px; padding: 16px; }
+.instr-step {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.instr-step:last-child { margin-bottom: 0; }
+.instr-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--module-color);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.instr-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.instr-text strong { color: var(--text); font-weight: 600; }
+.instr-text code {
+  background: rgba(255,255,255,.07);
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--module-color);
+}
+.instr-state-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.instr-state-chip {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
 .field-label {
   font-size: 11px;
   color: var(--muted);
@@ -108,11 +168,13 @@ body::before {
   box-shadow: 0 0 0 3px rgba(139,92,246,.15);
 }
 .input-field::placeholder { color: var(--muted); }
+
+/* Module grid */
 .module-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 11px;
-  margin: 24px 0;
+  margin: 24px 0 0;
 }
 .module-card {
   background: var(--card);
@@ -126,13 +188,9 @@ body::before {
   user-select: none;
 }
 .module-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--c, #8b5cf6);
-  opacity: 0;
-  transition: opacity .2s;
-  border-radius: 14px;
+  content: ''; position: absolute; inset: 0;
+  background: var(--c, #8b5cf6); opacity: 0;
+  transition: opacity .2s; border-radius: 14px;
 }
 .module-card.selected {
   border-color: var(--c, #8b5cf6);
@@ -142,289 +200,236 @@ body::before {
 .module-card.selected::after { opacity: .07; }
 .module-card:active { transform: scale(.97); }
 .module-num {
-  position: absolute;
-  top: 10px; right: 10px;
-  font-size: 10px;
-  font-weight: 800;
+  position: absolute; top: 10px; right: 10px;
+  font-size: 10px; font-weight: 800;
   color: var(--c, #8b5cf6);
   background: rgba(255,255,255,.05);
-  padding: 2px 7px;
-  border-radius: 20px;
-  letter-spacing: .3px;
+  padding: 2px 7px; border-radius: 20px;
 }
 .module-icon { font-size: 22px; margin-bottom: 9px; display: block; }
 .module-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 3px; }
 .module-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
-.module-testers {
-  font-size: 10px;
-  color: var(--c, #8b5cf6);
-  margin-top: 8px;
-  font-weight: 700;
-  letter-spacing: .2px;
+.module-testers { font-size: 10px; color: var(--c, #8b5cf6); margin-top: 8px; font-weight: 700; }
+
+/* Testing state pills */
+.state-pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 24px 0 0;
 }
-.welcome-note {
+.state-pill {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+  user-select: none;
+}
+.state-pill:active { transform: scale(.96); }
+.state-pill.selected {
+  border-color: var(--sp-color, #8b5cf6);
+  background: rgba(139,92,246,.06);
+}
+.state-pill-icon { font-size: 18px; margin-bottom: 4px; display: block; }
+.state-pill-name { font-size: 11px; font-weight: 700; color: var(--text); display: block; }
+.state-pill-sub { font-size: 10px; color: var(--muted); display: block; margin-top: 1px; }
+
+/* Progress badge for repeated tests */
+.repeat-badge {
   background: rgba(255,255,255,.03);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 15px;
-  font-size: 13px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12px;
   color: var(--muted);
-  margin-bottom: 20px;
-  line-height: 1.6;
   text-align: center;
+  margin: 16px 0 0;
+  line-height: 1.5;
 }
+.repeat-badge strong { color: var(--text); }
 
 /* ─── BUTTONS ─────────────────────────────────────────────── */
 .btn {
-  display: block;
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
-  letter-spacing: -.2px;
-  font-family: inherit;
+  display: block; width: 100%; padding: 16px;
+  border: none; border-radius: 14px;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  transition: all .15s; letter-spacing: -.2px; font-family: inherit;
 }
 .btn:active { transform: scale(.97); }
 .btn:disabled { cursor: not-allowed; }
-.btn-primary {
-  background: var(--module-color);
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(0,0,0,.3);
-}
+.btn-primary { background: var(--module-color); color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
 .btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
 .btn-ghost {
-  background: rgba(255,255,255,.05);
-  color: var(--text);
-  border: 1.5px solid var(--border);
-  margin-top: 10px;
+  background: rgba(255,255,255,.05); color: var(--text);
+  border: 1.5px solid var(--border); margin-top: 10px;
 }
 .btn-ghost:hover { background: rgba(255,255,255,.08); }
 
 /* ─── PROGRESS HEADER ─────────────────────────────────────── */
 .q-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
+  display: flex; align-items: center;
+  gap: 10px; margin-bottom: 14px;
 }
 .back-btn {
-  background: rgba(255,255,255,.06);
-  border: none;
-  color: var(--text);
-  cursor: pointer;
-  font-size: 17px;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background .15s;
+  background: rgba(255,255,255,.06); border: none;
+  color: var(--text); cursor: pointer; font-size: 17px;
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .15s;
 }
 .back-btn:hover { background: rgba(255,255,255,.1); }
 .module-badge {
-  background: var(--module-color);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 11px;
-  border-radius: 20px;
-  letter-spacing: .3px;
-  white-space: nowrap;
+  background: var(--module-color); color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 5px 11px; border-radius: 20px;
+  letter-spacing: .3px; white-space: nowrap;
 }
-.q-counter {
-  margin-left: auto;
-  font-size: 13px;
-  color: var(--muted);
-  white-space: nowrap;
-  font-weight: 600;
+.state-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 4px 9px; border-radius: 20px;
+  border: 1.5px solid; white-space: nowrap;
 }
+.q-counter { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; font-weight: 600; }
 .progress-wrap {
-  height: 4px;
-  background: rgba(255,255,255,.06);
-  border-radius: 4px;
-  margin-bottom: 30px;
-  overflow: hidden;
+  height: 4px; background: rgba(255,255,255,.06);
+  border-radius: 4px; margin-bottom: 28px; overflow: hidden;
 }
 .progress-fill {
-  height: 100%;
-  background: var(--module-color);
-  border-radius: 4px;
-  transition: width .5s cubic-bezier(.4,0,.2,1);
+  height: 100%; background: var(--module-color);
+  border-radius: 4px; transition: width .5s cubic-bezier(.4,0,.2,1);
 }
 
 /* ─── QUESTION ────────────────────────────────────────────── */
-.q-num {
-  font-size: 11px;
-  color: var(--module-color);
-  text-transform: uppercase;
-  letter-spacing: .8px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.q-text {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.4;
-  color: #fff;
-  margin-bottom: 26px;
-  letter-spacing: -.3px;
-}
+.q-num { font-size: 11px; color: var(--module-color); text-transform: uppercase; letter-spacing: .8px; font-weight: 700; margin-bottom: 8px; }
+.q-text { font-size: 20px; font-weight: 700; line-height: 1.4; color: #fff; margin-bottom: 26px; letter-spacing: -.3px; }
 
 /* Stars */
 .stars-wrap { display: flex; gap: 10px; justify-content: center; padding: 4px 0 28px; }
-.star {
-  font-size: 38px;
-  cursor: pointer;
-  transition: transform .15s, opacity .15s, filter .15s;
-  opacity: .2;
-  user-select: none;
-  filter: grayscale(1);
-}
+.star { font-size: 38px; cursor: pointer; transition: transform .15s, opacity .15s, filter .15s; opacity: .2; user-select: none; filter: grayscale(1); }
 .star.active { opacity: 1; filter: none; color: var(--module-color); }
 .star:hover { transform: scale(1.15); }
 .star:active { transform: scale(1.25); }
-.stars-label {
-  text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: -16px;
-  margin-bottom: 20px;
-  min-height: 20px;
-}
+.stars-label { text-align: center; font-size: 13px; color: var(--muted); margin-top: -16px; margin-bottom: 20px; min-height: 20px; }
 
 /* Choice pills */
 .choices { display: flex; flex-direction: column; gap: 10px; }
 .choice-btn {
-  background: var(--card);
-  border: 2px solid var(--border);
-  border-radius: 13px;
-  color: var(--text);
-  font-size: 15px;
-  padding: 15px 16px;
-  cursor: pointer;
-  text-align: left;
-  transition: all .15s;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: inherit;
-  line-height: 1.4;
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 13px; color: var(--text); font-size: 15px;
+  padding: 15px 16px; cursor: pointer; text-align: left;
+  transition: all .15s; display: flex; align-items: center;
+  gap: 12px; font-family: inherit; line-height: 1.4;
 }
 .choice-btn:active { transform: scale(.98); }
-.choice-btn.selected {
-  border-color: var(--module-color);
-  background: rgba(139,92,246,.07);
-  color: #fff;
-}
+.choice-btn.selected { border-color: var(--module-color); background: rgba(139,92,246,.07); color: #fff; }
 .choice-check {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  font-size: 12px; font-weight: 700;
-  transition: all .15s;
+  flex-shrink: 0; font-size: 12px; font-weight: 700; transition: all .15s;
 }
-.choice-btn.selected .choice-check {
-  background: var(--module-color);
-  border-color: var(--module-color);
-  color: #fff;
-}
+.choice-btn.selected .choice-check { background: var(--module-color); border-color: var(--module-color); color: #fff; }
 
 /* Textarea */
 .text-input {
-  width: 100%;
-  background: var(--card);
-  border: 2px solid var(--border);
-  border-radius: 13px;
-  color: var(--text);
-  font-size: 15px;
-  padding: 14px 16px;
-  outline: none;
-  resize: none;
-  min-height: 110px;
-  font-family: inherit;
-  line-height: 1.6;
-  transition: border-color .2s, box-shadow .2s;
+  width: 100%; background: var(--card); border: 2px solid var(--border);
+  border-radius: 13px; color: var(--text); font-size: 15px;
+  padding: 14px 16px; outline: none; resize: none; min-height: 100px;
+  font-family: inherit; line-height: 1.6; transition: border-color .2s, box-shadow .2s;
 }
-.text-input:focus {
-  border-color: var(--module-color);
-  box-shadow: 0 0 0 3px rgba(139,92,246,.12);
-}
+.text-input:focus { border-color: var(--module-color); box-shadow: 0 0 0 3px rgba(139,92,246,.12); }
 .text-input::placeholder { color: var(--muted); }
+
+/* ─── IMAGE UPLOAD ─────────────────────────────────────────── */
+.img-area { margin-top: 14px; }
+.img-upload-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.04); border: 1.5px dashed rgba(255,255,255,.15);
+  border-radius: 11px; padding: 10px 16px; cursor: pointer;
+  font-size: 13px; color: var(--muted); transition: all .15s;
+  user-select: none;
+}
+.img-upload-label:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.25); color: var(--text); }
+.img-upload-input { display: none; }
+.img-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.img-thumb-wrap {
+  position: relative;
+  width: 70px; height: 70px;
+}
+.img-thumb {
+  width: 70px; height: 70px;
+  object-fit: cover; border-radius: 9px;
+  border: 1.5px solid var(--border);
+  display: block;
+}
+.img-thumb-del {
+  position: absolute; top: -6px; right: -6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(239,68,68,.9); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+
 .skip-link {
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
-  margin-top: 14px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-align: center; color: var(--muted); font-size: 13px;
+  cursor: pointer; margin-top: 14px;
+  text-decoration: underline; text-underline-offset: 3px;
 }
 .skip-link:hover { color: var(--text); }
 
 /* ─── DONE SCREEN ─────────────────────────────────────────── */
-.done-hero {
-  text-align: center;
-  padding: 44px 0 28px;
-}
-.done-icon {
-  font-size: 56px;
-  display: block;
-  margin-bottom: 16px;
-  animation: popIn .4s ease;
-}
+.done-hero { text-align: center; padding: 40px 0 24px; }
+.done-icon { font-size: 52px; display: block; margin-bottom: 14px; animation: popIn .4s ease; }
 @keyframes popIn {
   from { transform: scale(.5); opacity: 0; }
   60%  { transform: scale(1.2); }
   to   { transform: scale(1); opacity: 1; }
 }
-.done-title {
-  font-size: 26px; font-weight: 800;
-  color: #fff; margin-bottom: 8px; letter-spacing: -.5px;
-}
-.done-sub {
-  font-size: 15px; color: var(--muted);
-  max-width: 300px; margin: 0 auto 32px; line-height: 1.6;
-}
+.done-title { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -.5px; }
+.done-sub { font-size: 14px; color: var(--muted); max-width: 300px; margin: 0 auto 28px; line-height: 1.6; }
 .wa-status {
-  background: rgba(37,211,102,.08);
-  border: 1px solid rgba(37,211,102,.2);
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-size: 14px;
-  color: #25d366;
-  text-align: center;
-  margin-bottom: 16px;
-  font-weight: 600;
+  background: rgba(37,211,102,.08); border: 1px solid rgba(37,211,102,.2);
+  border-radius: 12px; padding: 14px 16px; font-size: 14px;
+  color: #25d366; text-align: center; margin-bottom: 14px; font-weight: 600;
 }
 .report-box {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 16px;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 220px;
-  overflow-y: auto;
-  text-align: left;
-  margin-bottom: 18px;
-  line-height: 1.7;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  font-size: 12px; color: var(--muted);
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 180px; overflow-y: auto; text-align: left;
+  margin-bottom: 16px; line-height: 1.7;
   font-family: 'Menlo', 'Monaco', monospace;
 }
-.action-hint {
-  font-size: 12px; color: var(--muted);
-  text-align: center; margin-top: 6px;
-  min-height: 18px; transition: color .2s;
+
+/* Screenshots gallery in done screen */
+.screenshots-section { margin-bottom: 16px; }
+.screenshots-title {
+  font-size: 11px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .8px; font-weight: 600; margin-bottom: 10px;
 }
+.screenshots-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.screenshots-grid img {
+  width: 80px; height: 80px;
+  object-fit: cover; border-radius: 10px;
+  border: 1.5px solid var(--border); cursor: pointer;
+  transition: transform .15s;
+}
+.screenshots-grid img:active { transform: scale(.95); }
+.img-forward-note {
+  background: rgba(245,158,11,.07);
+  border: 1px solid rgba(245,158,11,.2);
+  border-radius: 11px; padding: 12px 14px;
+  font-size: 13px; color: rgba(245,158,11,.9);
+  margin-bottom: 14px; line-height: 1.5;
+}
+.img-forward-note strong { font-weight: 700; }
+
+.action-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 6px; min-height: 18px; }
 
 /* ─── UTILS ───────────────────────────────────────────────── */
 .spacer { flex: 1; }
@@ -432,326 +437,144 @@ body::before {
 .mt12 { margin-top: 12px; }
 .mt16 { margin-top: 16px; }
 .mt24 { margin-top: 24px; }
-.divider { height: 1px; background: var(--border); margin: 20px 0; }
+.divider { height: 1px; background: var(--border); margin: 18px 0; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+
+/* Lightbox */
+.lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,.92);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; animation: fadeIn .2s;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 12px; }
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-// Pon el número de WhatsApp del coordinador (código de país sin +)
-// Ejemplo: "5215512345678" para México, "573001234567" para Colombia
-const COORDINATOR_WA = "";
+const COORDINATOR_WA = "525546822297";
+
+// ─── TESTING STATES ──────────────────────────────────────────────────────────
+const TESTING_STATES = {
+  free:    { label: "Free",                icon: "🔒", color: "#6b7280", sub: "sin premium"    },
+  trial:   { label: "Free Trial",          icon: "⏳", color: "#f59e0b", sub: "trial activo"   },
+  premium: { label: "MindScrolling Inside",icon: "✦",  color: "#8b5cf6", sub: "premium completo" },
+};
 
 // ─── MODULE DATA ─────────────────────────────────────────────────────────────
 const MODULES = {
   1: {
-    name: "Feed & UX",
-    color: "#8b5cf6",
-    icon: "⚡",
-    desc: "Swipes · Likes · Vault · Animaciones",
-    testers: "Testers 1, 2 y 3",
+    name: "Feed & UX", color: "#8b5cf6", icon: "⚡",
+    desc: "Swipes · Likes · Vault · Animaciones", testers: "Testers 1, 2 y 3",
     questions: [
-      {
-        id: "q1",
-        text: "¿El feed carga bien al abrir la app?",
-        type: "choice",
-        options: ["Sí, sin problemas", "Tarda pero carga", "A veces falla", "No cargó"]
-      },
-      {
-        id: "q2",
-        text: "¿Los swipes (derecha/izquierda) se sienten fluidos y responden bien?",
-        type: "stars",
-        labels: ["Muy torpe", "Torpe", "Aceptable", "Fluido", "Perfecto"]
-      },
-      {
-        id: "q3",
-        text: "¿Los haptics (vibración al swipear) se sienten presentes y bien calibrados?",
-        type: "choice",
-        options: ["Sí, se sienten bien", "Están pero se sienten raros", "No los noté", "Mi dispositivo no los soporta"]
-      },
-      {
-        id: "q4",
-        text: "¿Pudiste guardar quotes en el vault?",
-        type: "choice",
-        options: ["Sí, funcionó perfecto", "Sí, pero algo estuvo raro", "No lo intenté", "No funcionó"]
-      },
-      {
-        id: "q5",
-        text: "¿El contenido del feed se repite mucho?",
-        type: "choice",
-        options: ["Nunca lo noté", "A veces repite", "Se repite bastante"]
-      },
-      {
-        id: "q6",
-        text: "¿El like (♥) en quotes funciona correctamente?",
-        type: "choice",
-        options: ["Sí, perfecto", "A veces falla", "No funcionó", "No lo intenté"]
-      },
-      {
-        id: "q7",
-        text: "¿Encontraste textos cortados, mal traducidos o mezclados de idioma?",
-        type: "choice",
-        options: ["No, todo OK", "Sí, encontré algo", "No presté atención"]
-      },
-      {
-        id: "q8",
-        text: "Si encontraste problemas de texto o idioma, descríbelos aquí:",
-        type: "text",
-        optional: true,
-        placeholder: "Ej: 'En la pantalla X aparece texto en inglés' o 'Un quote está cortado'"
-      },
-      {
-        id: "q9",
-        text: "¿Qué tan intuitiva es la navegación general?",
-        type: "stars",
-        labels: ["Muy confusa", "Confusa", "Normal", "Clara", "Muy intuitiva"]
-      },
-      {
-        id: "q10",
-        text: "¿Algo te confundió o te trabó? Cuéntanos:",
-        type: "text",
-        optional: true,
-        placeholder: "Cualquier cosa que no fue clara o que te molestó"
-      },
-      {
-        id: "q11",
-        text: "Calificación general — Feed & UX",
-        type: "stars",
-        final: true,
-        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
-      }
+      { id:"q1", text:"¿El feed carga bien al abrir la app?", type:"choice",
+        options:["Sí, sin problemas","Tarda pero carga","A veces falla","No cargó"] },
+      { id:"q2", text:"¿Los swipes (derecha/izquierda) se sienten fluidos?", type:"stars",
+        labels:["Muy torpe","Torpe","Aceptable","Fluido","Perfecto"] },
+      { id:"q3", text:"¿Los haptics (vibración al swipear) se sienten bien?", type:"choice",
+        options:["Sí, se sienten bien","Están pero raros","No los noté","No los soporta mi dispositivo"] },
+      { id:"q4", text:"¿Pudiste guardar quotes en el vault?", type:"choice",
+        options:["Sí, funcionó perfecto","Sí, pero algo estuvo raro","No lo intenté","No funcionó"] },
+      { id:"q5", text:"¿El contenido del feed se repite mucho?", type:"choice",
+        options:["Nunca lo noté","A veces repite","Se repite bastante"] },
+      { id:"q6", text:"¿El like (♥) en quotes funciona correctamente?", type:"choice",
+        options:["Sí, perfecto","A veces falla","No funcionó","No lo intenté"] },
+      { id:"q7", text:"¿Encontraste textos cortados, mal traducidos o con idioma mezclado?", type:"choice",
+        options:["No, todo OK","Sí, encontré algo","No presté atención"] },
+      { id:"q8", text:"Si encontraste problemas de texto o idioma, descríbelos aquí:", type:"text",
+        optional:true, placeholder:"Ej: 'En la pantalla X aparece texto en inglés'" },
+      { id:"q9", text:"¿Qué tan intuitiva es la navegación general?", type:"stars",
+        labels:["Muy confusa","Confusa","Normal","Clara","Muy intuitiva"] },
+      { id:"q10", text:"¿Algo te confundió o te trabó? Cuéntanos:", type:"text",
+        optional:true, placeholder:"Cualquier cosa que no fue clara o te molestó" },
+      { id:"q11", text:"Calificación general — Feed & UX", type:"stars", final:true,
+        labels:["Muy malo","Malo","Regular","Bueno","Excelente"] },
     ]
   },
   2: {
-    name: "Premium & Packs",
-    color: "#f59e0b",
-    icon: "✦",
-    desc: "Trial · Límites · Packs · Upgrade",
-    testers: "Testers 4, 5 y 6",
+    name: "Premium & Packs", color: "#f59e0b", icon: "✦",
+    desc: "Trial · Límites · Packs · Upgrade", testers: "Testers 4, 5 y 6",
     questions: [
-      {
-        id: "q1",
-        text: "¿Pudiste iniciar el trial de 7 días sin problemas?",
-        type: "choice",
-        options: ["Sí, inició bien", "Ya lo tenía activo", "No lo intenté", "Falló"]
-      },
-      {
-        id: "q2",
-        text: "¿Los contenidos premium están correctamente bloqueados en modo free?",
-        type: "choice",
-        options: ["Sí, todo bloqueado", "Algunos no estaban bloqueados", "No estaba en modo free", "No lo verifiqué"]
-      },
-      {
-        id: "q3",
-        text: "¿Llegaste al límite de 20 quotes en el vault (modo free)?",
-        type: "choice",
-        options: ["Sí, vi el mensaje de límite", "No llegué al límite", "No estaba en modo free"]
-      },
-      {
-        id: "q4",
-        text: "¿La sección de Packs carga y muestra contenido?",
-        type: "choice",
-        options: ["Sí, perfecta", "Carga pero con errores", "No cargó", "No la encontré"]
-      },
-      {
-        id: "q5",
-        text: "¿Pudiste ver el detalle de al menos un pack (preview, quotes, autores)?",
-        type: "choice",
-        options: ["Sí, funcionó bien", "Entré pero algo estuvo raro", "No lo intenté", "No funcionó"]
-      },
-      {
-        id: "q6",
-        text: "¿Qué tan clara y confiable se ve la pantalla de premium/upgrade?",
-        type: "stars",
-        labels: ["Muy confusa", "Confusa", "Aceptable", "Clara", "Muy clara"]
-      },
-      {
-        id: "q7",
-        text: "¿Encontraste algún contenido premium accesible sin pagar ni tener trial?",
-        type: "choice",
-        options: ["No, todo bien bloqueado", "Sí, encontré algo", "No lo verifiqué"]
-      },
-      {
-        id: "q8",
-        text: "Si encontraste contenido premium accesible sin pagar, descríbelo:",
-        type: "text",
-        optional: true,
-        placeholder: "Ej: 'En packs pude acceder al pack X sin trial activo'"
-      },
-      {
-        id: "q9",
-        text: "¿Qué cambiarías del flujo de trial/premium para que sea más claro?",
-        type: "text",
-        optional: true,
-        placeholder: "Cualquier sugerencia de mejora"
-      },
-      {
-        id: "q10",
-        text: "Calificación general — Premium & Packs",
-        type: "stars",
-        final: true,
-        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
-      }
+      { id:"q1", text:"¿Pudiste iniciar el trial de 7 días sin problemas?", type:"choice",
+        options:["Sí, inició bien","Ya lo tenía activo","No lo intenté","Falló"] },
+      { id:"q2", text:"¿Los contenidos premium están correctamente bloqueados en modo Free?", type:"choice",
+        options:["Sí, todo bloqueado","Algunos no estaban bloqueados","No lo verifiqué"] },
+      { id:"q3", text:"¿Llegaste al límite de 20 quotes en el vault (modo Free)?", type:"choice",
+        options:["Sí, vi el mensaje de límite","No llegué al límite","No estaba en modo Free"] },
+      { id:"q4", text:"¿La sección de Packs carga y muestra contenido?", type:"choice",
+        options:["Sí, perfecta","Carga pero con errores","No cargó","No la encontré"] },
+      { id:"q5", text:"¿Pudiste ver el detalle de al menos un pack?", type:"choice",
+        options:["Sí, funcionó bien","Entré pero algo estuvo raro","No lo intenté","No funcionó"] },
+      { id:"q6", text:"¿Qué tan clara se ve la pantalla de premium/upgrade?", type:"stars",
+        labels:["Muy confusa","Confusa","Aceptable","Clara","Muy clara"] },
+      { id:"q7", text:"¿Encontraste contenido premium accesible sin pagar ni tener trial?", type:"choice",
+        options:["No, todo bien bloqueado","Sí, encontré algo","No lo verifiqué"] },
+      { id:"q8", text:"Si encontraste contenido premium accesible gratis, descríbelo:", type:"text",
+        optional:true, placeholder:"Ej: 'Pude acceder al pack X sin trial'" },
+      { id:"q9", text:"¿Qué cambiarías del flujo de trial/premium?", type:"text",
+        optional:true, placeholder:"Cualquier sugerencia de mejora" },
+      { id:"q10", text:"Calificación general — Premium & Packs", type:"stars", final:true,
+        labels:["Muy malo","Malo","Regular","Bueno","Excelente"] },
     ]
   },
   3: {
-    name: "Mapa · Autores · Retos",
-    color: "#10b981",
-    icon: "◈",
-    desc: "Mapa filosófico · Perfiles · Daily challenge",
-    testers: "Testers 7, 8 y 9",
+    name: "Mapa · Autores · Retos", color: "#10b981", icon: "◈",
+    desc: "Mapa filosófico · Perfiles · Daily challenge", testers: "Testers 7, 8 y 9",
     questions: [
-      {
-        id: "q1",
-        text: "¿El mapa filosófico cargó correctamente?",
-        type: "choice",
-        options: ["Sí, sin problemas", "Cargó con errores visuales", "Tardó mucho", "No cargó"]
-      },
-      {
-        id: "q2",
-        text: "¿Puedes hacer tap en los nodos del mapa y ver información?",
-        type: "choice",
-        options: ["Sí, funcionan bien", "Algunos sí, otros no", "No funcionaron", "No lo intenté"]
-      },
-      {
-        id: "q3",
-        text: "¿La sección de Autores carga y muestra los perfiles?",
-        type: "choice",
-        options: ["Sí, perfecto", "Carga pero incompleto", "No cargó", "No la encontré"]
-      },
-      {
-        id: "q4",
-        text: "¿Los perfiles de autor tienen foto, bio y quotes visibles?",
-        type: "choice",
-        options: ["Todos completos", "La mayoría completos", "Varios incompletos", "Casi todos vacíos"]
-      },
-      {
-        id: "q5",
-        text: "¿El reto diario estaba disponible al abrir la app?",
-        type: "choice",
-        options: ["Sí, estaba disponible", "No apareció", "Apareció después de un rato"]
-      },
-      {
-        id: "q6",
-        text: "¿Pudiste completar el reto diario?",
-        type: "choice",
-        options: ["Sí, funcionó bien", "Lo intenté pero falló", "No lo intenté"]
-      },
-      {
-        id: "q7",
-        text: "¿El idioma del mapa, autores y retos es consistente?",
-        type: "choice",
-        options: ["Sí, todo en el mismo idioma", "Mezclado (español/inglés)", "No presté atención"]
-      },
-      {
-        id: "q8",
-        text: "¿Encontraste autores sin foto, con bio vacía o info incorrecta?",
-        type: "text",
-        optional: true,
-        placeholder: "Ej: 'El autor X no tiene foto' o 'El autor Y tiene la bio en inglés'"
-      },
-      {
-        id: "q9",
-        text: "¿Qué te pareció el mapa filosófico como feature?",
-        type: "text",
-        optional: true,
-        placeholder: "Primera impresión, qué cambiarías, qué está bien"
-      },
-      {
-        id: "q10",
-        text: "Calificación general — Mapa / Autores / Retos",
-        type: "stars",
-        final: true,
-        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
-      }
+      { id:"q1", text:"¿El mapa filosófico cargó correctamente?", type:"choice",
+        options:["Sí, sin problemas","Cargó con errores visuales","Tardó mucho","No cargó"] },
+      { id:"q2", text:"¿Puedes hacer tap en los nodos del mapa y ver información?", type:"choice",
+        options:["Sí, funcionan bien","Algunos sí, otros no","No funcionaron","No lo intenté"] },
+      { id:"q3", text:"¿La sección de Autores carga y muestra los perfiles?", type:"choice",
+        options:["Sí, perfecto","Carga pero incompleto","No cargó","No la encontré"] },
+      { id:"q4", text:"¿Los perfiles de autor tienen foto, bio y quotes visibles?", type:"choice",
+        options:["Todos completos","La mayoría completos","Varios incompletos","Casi todos vacíos"] },
+      { id:"q5", text:"¿El reto diario estaba disponible al abrir la app?", type:"choice",
+        options:["Sí, disponible","No apareció","Apareció después de un rato"] },
+      { id:"q6", text:"¿Pudiste completar el reto diario?", type:"choice",
+        options:["Sí, funcionó bien","Lo intenté pero falló","No lo intenté"] },
+      { id:"q7", text:"¿El idioma del mapa, autores y retos es consistente?", type:"choice",
+        options:["Sí, todo en el mismo idioma","Mezclado (español/inglés)","No presté atención"] },
+      { id:"q8", text:"¿Encontraste autores sin foto o con info incompleta?", type:"text",
+        optional:true, placeholder:"Ej: 'El autor X no tiene foto'" },
+      { id:"q9", text:"¿Qué te pareció el mapa filosófico como feature?", type:"text",
+        optional:true, placeholder:"Primera impresión, qué cambiarías, qué está bien" },
+      { id:"q10", text:"Calificación general — Mapa / Autores / Retos", type:"stars", final:true,
+        labels:["Muy malo","Malo","Regular","Bueno","Excelente"] },
     ]
   },
   4: {
-    name: "Rendimiento & Percepción",
-    color: "#3b82f6",
-    icon: "◎",
-    desc: "Performance · Batería · Primera impresión",
-    testers: "Testers 10, 11 y 12",
+    name: "Rendimiento & Percepción", color: "#3b82f6", icon: "◎",
+    desc: "Performance · Batería · Primera impresión", testers: "Testers 10, 11 y 12",
     questions: [
-      {
-        id: "q1",
-        text: "¿En qué dispositivo y versión de Android probaste la app?",
-        type: "text",
-        placeholder: "Ej: 'Samsung Galaxy S21, Android 13' o 'Xiaomi Redmi 10, Android 12'"
-      },
-      {
-        id: "q2",
-        text: "¿Cuánto tardó la app en cargar al abrirla por primera vez?",
-        type: "choice",
-        options: ["Menos de 2 segundos", "Entre 2 y 5 segundos", "Más de 5 segundos", "No lo medí"]
-      },
-      {
-        id: "q3",
-        text: "¿Notaste lag, freezes o animaciones lentas durante el uso?",
-        type: "choice",
-        options: ["Nunca", "En momentos puntuales", "Seguido", "La app se sentía lenta en general"]
-      },
-      {
-        id: "q4",
-        text: "¿La app se cerró sola en algún momento (crash)?",
-        type: "choice",
-        options: ["No, nunca", "Sí, una vez", "Sí, varias veces"]
-      },
-      {
-        id: "q5",
-        text: "¿Alguna pantalla tardó más de 5 segundos en cargar?",
-        type: "choice",
-        options: ["No, todo rápido", "Sí, lo anoto abajo", "No lo noté"]
-      },
-      {
-        id: "q6",
-        text: "Si hubo pantallas lentas, ¿cuáles fueron?",
-        type: "text",
-        optional: true,
-        placeholder: "Ej: 'El mapa tarda bastante' o 'Los packs tardaron en cargar'"
-      },
-      {
-        id: "q7",
-        text: "¿La app consumió batería de forma notoria?",
-        type: "choice",
-        options: ["No, normal", "Sí, algo", "Sí, bastante", "No lo medí"]
-      },
-      {
-        id: "q8",
-        text: "¿El audio (si lo usaste) funcionó correctamente?",
-        type: "choice",
-        options: ["Sí, funcionó bien", "Tuve problemas con el audio", "No usé el audio"]
-      },
-      {
-        id: "q9",
-        text: "¿Cuál fue tu primera sensación al abrir la app?",
-        type: "text",
-        placeholder: "Honesto y libre — qué pensaste la primera vez que la viste"
-      },
-      {
-        id: "q10",
-        text: "¿La recomendarías tal como está a alguien?",
-        type: "stars",
-        labels: ["Jamás", "Dudoso", "Tal vez", "Probablemente", "Sin dudar"]
-      },
-      {
-        id: "q11",
-        text: "Comentario final — lo que quieras agregar:",
-        type: "text",
-        optional: true,
-        placeholder: "Bugs, ideas, sensaciones generales, lo que sea"
-      },
-      {
-        id: "q12",
-        text: "Calificación general — Rendimiento & Percepción",
-        type: "stars",
-        final: true,
-        labels: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
-      }
+      { id:"q1", text:"¿En qué dispositivo y versión de Android probaste la app?", type:"text",
+        placeholder:"Ej: 'Samsung Galaxy S21, Android 13'" },
+      { id:"q2", text:"¿Cuánto tardó la app en cargar al abrirla?", type:"choice",
+        options:["Menos de 2 segundos","Entre 2 y 5 segundos","Más de 5 segundos","No lo medí"] },
+      { id:"q3", text:"¿Notaste lag, freezes o animaciones lentas?", type:"choice",
+        options:["Nunca","En momentos puntuales","Seguido","La app se sentía lenta en general"] },
+      { id:"q4", text:"¿La app se cerró sola en algún momento (crash)?", type:"choice",
+        options:["No, nunca","Sí, una vez","Sí, varias veces"] },
+      { id:"q5", text:"¿Alguna pantalla tardó más de 5 segundos en cargar?", type:"choice",
+        options:["No, todo rápido","Sí, lo anoto abajo","No lo noté"] },
+      { id:"q6", text:"Si hubo pantallas lentas, ¿cuáles fueron?", type:"text",
+        optional:true, placeholder:"Ej: 'El mapa tarda bastante'" },
+      { id:"q7", text:"¿La app consumió batería de forma notoria?", type:"choice",
+        options:["No, normal","Sí, algo","Sí, bastante","No lo medí"] },
+      { id:"q8", text:"¿El audio (si lo usaste) funcionó correctamente?", type:"choice",
+        options:["Sí, funcionó bien","Tuve problemas con el audio","No usé el audio"] },
+      { id:"q9", text:"¿Cuál fue tu primera sensación al abrir la app?", type:"text",
+        placeholder:"Honesto y libre — qué pensaste la primera vez que la viste" },
+      { id:"q10", text:"¿La recomendarías tal como está a alguien?", type:"stars",
+        labels:["Jamás","Dudoso","Tal vez","Probablemente","Sin dudar"] },
+      { id:"q11", text:"Comentario final — lo que quieras agregar:", type:"text",
+        optional:true, placeholder:"Bugs, ideas, sensaciones generales, lo que sea" },
+      { id:"q12", text:"Calificación general — Rendimiento & Percepción", type:"stars", final:true,
+        labels:["Muy malo","Malo","Regular","Bueno","Excelente"] },
     ]
   }
 };
@@ -761,16 +584,18 @@ let state = {
   screen: "welcome",
   testerName: "",
   moduleId: null,
+  testingState: null,   // 'free' | 'trial' | 'premium'
   currentQ: 0,
-  answers: {}
+  answers: {},
 };
+// Images stored separately: { 'q1': [{ url, name }], ... }
+let capturedImages = {};
 
 const app = document.getElementById("app");
 
 function setColor(color) {
   document.documentElement.style.setProperty("--module-color", color);
 }
-
 function render() {
   if (state.screen === "welcome")   renderWelcome();
   else if (state.screen === "questions") renderQuestion();
@@ -782,12 +607,60 @@ function renderWelcome() {
   const color = state.moduleId ? MODULES[state.moduleId].color : "#8b5cf6";
   setColor(color);
 
+  // Count how many states already tested (rough heuristic via sessionStorage)
+  const testedKey = `ms_tested_${state.moduleId || 0}`;
+  const testedStates = JSON.parse(sessionStorage.getItem(testedKey) || "[]");
+
   app.innerHTML = `
     <div class="screen">
       <div class="logo-area">
         <span class="logo-mark">◈</span>
         <div class="logo-title">MindScrolling</div>
         <div class="logo-sub">Pre-Release · Test Form</div>
+      </div>
+
+      <!-- Instructions accordion -->
+      <div class="instr-toggle" id="instr-toggle">
+        <span>📋 Instrucciones de testeo</span>
+        <span class="instr-arrow" id="instr-arrow">▾</span>
+      </div>
+      <div class="instr-body" id="instr-body">
+        <div class="instr-step">
+          <div class="instr-num">1</div>
+          <div class="instr-text">
+            <strong>Instala la APK</strong> en tu dispositivo Android y ábrela por primera vez.
+          </div>
+        </div>
+        <div class="instr-step">
+          <div class="instr-num">2</div>
+          <div class="instr-text">
+            <strong>Cambia de cuenta</strong> para simular distintos escenarios:<br>
+            Abre la app → <code>Settings</code> → toca <strong>"1.0.0"</strong> <strong>5 veces seguidas</strong> → aparece el panel Dev Tools → selecciona el estado deseado.
+            <div class="instr-state-row">
+              <span class="instr-state-chip" style="background:rgba(107,114,128,.15);color:#9ca3af;border:1px solid rgba(107,114,128,.3)">🔒 Free</span>
+              <span class="instr-state-chip" style="background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3)">⏳ Trial</span>
+              <span class="instr-state-chip" style="background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.3)">✦ Inside</span>
+            </div>
+          </div>
+        </div>
+        <div class="instr-step">
+          <div class="instr-num">3</div>
+          <div class="instr-text">
+            <strong>Completa este formulario 3 veces</strong> — una por cada estado (Free, Trial, Inside). En cada sesión verifica que las funcionalidades premium están <strong>bloqueadas en Free</strong> y <strong>desbloqueadas en Trial/Inside</strong>.
+          </div>
+        </div>
+        <div class="instr-step">
+          <div class="instr-num">4</div>
+          <div class="instr-text">
+            Toma <strong>screenshots</strong> de todo lo que encuentres raro y adjúntalos en cada pregunta con el botón <code>📷 Screenshot</code>. Se enviarán junto con el reporte.
+          </div>
+        </div>
+        <div class="instr-step">
+          <div class="instr-num">5</div>
+          <div class="instr-text">
+            Al finalizar, el reporte se envía automáticamente por <strong>WhatsApp</strong> al coordinador. Si hay screenshots, fórwardea también las imágenes al mismo chat.
+          </div>
+        </div>
       </div>
 
       <div class="field-label">Tu nombre o alias</div>
@@ -809,16 +682,39 @@ function renderWelcome() {
         `).join("")}
       </div>
 
-      <div class="welcome-note">
-        Responde con honestidad — cada bug que encuentres hace la app mejor 🙌
+      <div class="field-label mt24">¿En qué estado estás probando ahora?</div>
+      <div class="state-pills">
+        ${Object.entries(TESTING_STATES).map(([k, s]) => `
+          <div class="state-pill ${state.testingState === k ? 'selected' : ''}"
+            style="--sp-color:${s.color}" data-state="${k}">
+            <span class="state-pill-icon">${s.icon}</span>
+            <span class="state-pill-name">${s.label}</span>
+            <span class="state-pill-sub">${s.sub}</span>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="repeat-badge">
+        Debes completar el formulario <strong>3 veces</strong>, una por cada estado.<br>
+        ${testedStates.length > 0
+          ? `✓ Ya completaste: <strong>${testedStates.map(k => TESTING_STATES[k]?.icon + ' ' + TESTING_STATES[k]?.label).join(', ')}</strong>`
+          : 'Aún no has enviado ningún estado.'}
       </div>
 
       <div class="spacer"></div>
-      <button class="btn btn-primary" id="start-btn"
-        ${!state.moduleId || !state.testerName.trim() ? 'disabled style="opacity:.4"' : ''}>
+      <button class="btn btn-primary mt16" id="start-btn"
+        ${canStart() ? "" : 'disabled style="opacity:.4"'}>
         Empezar test →
       </button>
     </div>`;
+
+  // Instructions toggle
+  document.getElementById("instr-toggle").addEventListener("click", () => {
+    const body = document.getElementById("instr-body");
+    const arrow = document.getElementById("instr-arrow");
+    body.classList.toggle("open");
+    arrow.classList.toggle("open");
+  });
 
   document.getElementById("tester-name").addEventListener("input", e => {
     state.testerName = e.target.value;
@@ -829,18 +725,27 @@ function renderWelcome() {
     card.addEventListener("click", () => {
       state.moduleId = parseInt(card.dataset.id);
       setColor(MODULES[state.moduleId].color);
-      document.querySelectorAll(".module-card").forEach(c => {
-        c.classList.toggle("selected", c.dataset.id == state.moduleId);
-      });
+      document.querySelectorAll(".module-card").forEach(c =>
+        c.classList.toggle("selected", c.dataset.id == state.moduleId));
+      updateStartBtn();
+    });
+  });
+
+  document.querySelectorAll(".state-pill").forEach(pill => {
+    pill.addEventListener("click", () => {
+      state.testingState = pill.dataset.state;
+      document.querySelectorAll(".state-pill").forEach(p =>
+        p.classList.toggle("selected", p === pill));
       updateStartBtn();
     });
   });
 
   document.getElementById("start-btn").addEventListener("click", () => {
-    if (!state.testerName.trim() || !state.moduleId) return;
+    if (!canStart()) return;
     state.screen = "questions";
     state.currentQ = 0;
     state.answers = {};
+    capturedImages = {};
     render();
   });
 
@@ -850,10 +755,14 @@ function renderWelcome() {
   }, 100);
 }
 
+function canStart() {
+  return !!(state.testerName && state.testerName.trim() && state.moduleId && state.testingState);
+}
+
 function updateStartBtn() {
   const btn = document.getElementById("start-btn");
   if (!btn) return;
-  const ok = state.moduleId && state.testerName.trim();
+  const ok = canStart();
   btn.disabled = !ok;
   btn.style.opacity = ok ? "1" : ".4";
 }
@@ -867,6 +776,7 @@ function renderQuestion() {
   const pct = Math.round((qi / questions.length) * 100);
   const ans = state.answers[q.id];
   const canNext = q.optional || (ans !== undefined && ans !== "" && ans !== null);
+  const ts = TESTING_STATES[state.testingState];
 
   setColor(mod.color);
 
@@ -875,7 +785,10 @@ function renderQuestion() {
       <div class="q-header">
         <button class="back-btn" id="back-btn">←</button>
         <span class="module-badge">${mod.icon} ${mod.name}</span>
-        <span class="q-counter">${qi + 1} / ${questions.length}</span>
+        <span class="state-badge" style="color:${ts.color};border-color:${ts.color}40;background:${ts.color}12">
+          ${ts.icon} ${ts.label}
+        </span>
+        <span class="q-counter">${qi + 1}/${questions.length}</span>
       </div>
       <div class="progress-wrap">
         <div class="progress-fill" style="width:${pct}%"></div>
@@ -886,6 +799,18 @@ function renderQuestion() {
 
       <div id="answer-area">${buildAnswerHTML(q, ans)}</div>
 
+      <!-- Image attachment -->
+      <div class="img-area">
+        <label class="img-upload-label" for="img-input-${q.id}">
+          📷 Adjuntar screenshot
+          <input type="file" class="img-upload-input" id="img-input-${q.id}"
+            accept="image/*" multiple>
+        </label>
+        <div class="img-thumbs" id="thumbs-${q.id}">
+          ${renderThumbs(q.id)}
+        </div>
+      </div>
+
       <div class="spacer"></div>
       ${q.optional ? `<div class="skip-link" id="skip-btn">Saltar esta pregunta</div>` : ""}
       <button class="btn btn-primary mt16" id="next-btn"
@@ -895,6 +820,7 @@ function renderQuestion() {
     </div>`;
 
   wireAnswerEvents(q);
+  wireImageInput(q.id);
 
   document.getElementById("back-btn").addEventListener("click", () => {
     if (state.currentQ === 0) { state.screen = "welcome"; render(); }
@@ -904,10 +830,7 @@ function renderQuestion() {
   document.getElementById("next-btn").addEventListener("click", () => {
     if (document.getElementById("next-btn").disabled) return;
     const isLast = qi === questions.length - 1;
-    if (isLast) {
-      // Send via WhatsApp immediately (triggered by user click — no popup block)
-      sendToWhatsApp();
-    }
+    if (isLast) sendToWhatsApp();
     advanceQuestion(questions);
   });
 
@@ -918,6 +841,63 @@ function renderQuestion() {
       advanceQuestion(questions);
     });
   }
+}
+
+function renderThumbs(qid) {
+  const imgs = capturedImages[qid] || [];
+  return imgs.map((img, i) => `
+    <div class="img-thumb-wrap" data-qid="${qid}" data-idx="${i}">
+      <img class="img-thumb" src="${img.url}" alt="${esc(img.name)}">
+      <button class="img-thumb-del" data-qid="${qid}" data-idx="${i}">×</button>
+    </div>
+  `).join("");
+}
+
+function wireImageInput(qid) {
+  const input = document.getElementById(`img-input-${qid}`);
+  if (!input) return;
+
+  input.addEventListener("change", () => {
+    if (!capturedImages[qid]) capturedImages[qid] = [];
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        capturedImages[qid].push({ url: e.target.result, name: file.name });
+        const thumbs = document.getElementById(`thumbs-${qid}`);
+        if (thumbs) thumbs.innerHTML = renderThumbs(qid);
+        wireThumDel(qid);
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = "";
+  });
+
+  wireThumDel(qid);
+}
+
+function wireThumDel(qid) {
+  document.querySelectorAll(`.img-thumb-del[data-qid="${qid}"]`).forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      capturedImages[qid].splice(idx, 1);
+      const thumbs = document.getElementById(`thumbs-${qid}`);
+      if (thumbs) thumbs.innerHTML = renderThumbs(qid);
+      wireThumDel(qid);
+    });
+  });
+  // Tap to enlarge
+  document.querySelectorAll(`.img-thumb[data-qid="${qid}"], .img-thumb-wrap[data-qid="${qid}"] img`).forEach(img => {
+    img.addEventListener("click", () => openLightbox(img.src));
+  });
+}
+
+function openLightbox(src) {
+  const lb = document.createElement("div");
+  lb.className = "lightbox";
+  lb.innerHTML = `<img src="${src}">`;
+  lb.addEventListener("click", () => lb.remove());
+  document.body.appendChild(lb);
 }
 
 function buildAnswerHTML(q, ans) {
@@ -995,6 +975,13 @@ function advanceQuestion(questions) {
     state.currentQ++;
     render();
   } else {
+    // Mark this state as completed
+    const testedKey = `ms_tested_${state.moduleId}`;
+    const testedStates = JSON.parse(sessionStorage.getItem(testedKey) || "[]");
+    if (!testedStates.includes(state.testingState)) {
+      testedStates.push(state.testingState);
+      sessionStorage.setItem(testedKey, JSON.stringify(testedStates));
+    }
     state.screen = "done";
     render();
   }
@@ -1002,7 +989,6 @@ function advanceQuestion(questions) {
 
 // ─── WHATSAPP ────────────────────────────────────────────────────────────────
 function sendToWhatsApp() {
-  if (!COORDINATOR_WA) return;
   const report = buildReport();
   const url = `https://wa.me/${COORDINATOR_WA}?text=${encodeURIComponent(report)}`;
   window.open(url, "_blank");
@@ -1011,9 +997,19 @@ function sendToWhatsApp() {
 // ─── DONE ────────────────────────────────────────────────────────────────────
 function renderDone() {
   const mod = MODULES[state.moduleId];
+  const ts = TESTING_STATES[state.testingState];
   setColor(mod.color);
+
   const report = buildReport();
-  const waSent = !!COORDINATOR_WA;
+  const allImages = collectAllImages();
+  const hasImages = allImages.length > 0;
+
+  // Which states still pending?
+  const testedKey = `ms_tested_${state.moduleId}`;
+  const testedStates = JSON.parse(sessionStorage.getItem(testedKey) || "[]");
+  const pendingStates = Object.entries(TESTING_STATES)
+    .filter(([k]) => !testedStates.includes(k))
+    .map(([, v]) => `${v.icon} ${v.label}`);
 
   app.innerHTML = `
     <div class="screen">
@@ -1021,33 +1017,49 @@ function renderDone() {
         <span class="done-icon">✓</span>
         <div class="done-title">¡Gracias, ${esc(state.testerName)}!</div>
         <div class="done-sub">
-          ${waSent
-            ? "Tu reporte se envió por WhatsApp al coordinador. Si no se abrió, usa el botón de abajo."
-            : "Tu feedback fue registrado. Compártelo al coordinador usando uno de los botones de abajo."}
+          Reporte de <strong style="color:${ts.color}">${ts.icon} ${ts.label}</strong> enviado.
+          ${pendingStates.length > 0
+            ? `<br>Aún te faltan: <strong>${pendingStates.join(', ')}</strong>`
+            : '<br>¡Completaste los 3 estados! 🎉'}
         </div>
       </div>
 
-      ${waSent ? `<div class="wa-status">✓ WhatsApp abierto con tu reporte</div>` : ""}
+      <div class="wa-status">✓ WhatsApp abierto con tu reporte de texto</div>
+
+      ${hasImages ? `
+        <div class="img-forward-note">
+          <strong>📎 Tienes ${allImages.length} screenshot${allImages.length > 1 ? 's' : ''} adjunto${allImages.length > 1 ? 's</strong>' : '</strong>'}.
+          Después de enviar el texto, fórwardea estas imágenes al mismo chat de WhatsApp.
+        </div>
+        <div class="screenshots-section">
+          <div class="screenshots-title">Screenshots para reenviar</div>
+          <div class="screenshots-grid" id="screenshots-grid">
+            ${allImages.map(img => `
+              <img src="${img.url}" alt="${esc(img.name)}" title="${esc(img.name)}">
+            `).join("")}
+          </div>
+        </div>
+      ` : ""}
 
       <div class="report-box">${esc(report)}</div>
 
-      <button class="btn btn-primary" id="wa-btn">💬 ${waSent ? "Reenviar por WhatsApp" : "Enviar por WhatsApp"}</button>
+      <button class="btn btn-primary" id="wa-btn">💬 ${hasImages ? 'Reenviar texto por WhatsApp' : 'Reenviar por WhatsApp'}</button>
       <button class="btn btn-ghost" id="copy-btn">📋 Copiar reporte</button>
       <div class="action-hint" id="action-hint"></div>
 
       <div class="divider"></div>
-      <button class="btn btn-ghost" id="restart-btn">← Hacer otro test</button>
+      <button class="btn btn-ghost" id="next-state-btn">
+        ${pendingStates.length > 0 ? `↺ Probar próximo estado (${pendingStates[0]})` : '← Volver al inicio'}
+      </button>
     </div>`;
 
+  // Wire screenshots lightbox
+  document.querySelectorAll("#screenshots-grid img").forEach(img => {
+    img.addEventListener("click", () => openLightbox(img.src));
+  });
+
   document.getElementById("wa-btn").addEventListener("click", () => {
-    if (COORDINATOR_WA) {
-      window.open(`https://wa.me/${COORDINATOR_WA}?text=${encodeURIComponent(report)}`, "_blank");
-    } else if (navigator.share) {
-      navigator.share({ text: report }).catch(() => {});
-    } else {
-      copyText(report);
-      document.getElementById("action-hint").textContent = "✓ Copiado — pégalo en WhatsApp";
-    }
+    window.open(`https://wa.me/${COORDINATOR_WA}?text=${encodeURIComponent(report)}`, "_blank");
   });
 
   document.getElementById("copy-btn").addEventListener("click", () => {
@@ -1064,8 +1076,11 @@ function renderDone() {
     }, 2500);
   });
 
-  document.getElementById("restart-btn").addEventListener("click", () => {
-    state = { screen: "welcome", testerName: "", moduleId: null, currentQ: 0, answers: {} };
+  document.getElementById("next-state-btn").addEventListener("click", () => {
+    const prevName = state.testerName;
+    const prevModule = state.moduleId;
+    state = { screen:"welcome", testerName: prevName, moduleId: prevModule, testingState: null, currentQ:0, answers:{} };
+    capturedImages = {};
     render();
   });
 }
@@ -1073,29 +1088,42 @@ function renderDone() {
 // ─── BUILD REPORT ────────────────────────────────────────────────────────────
 function buildReport() {
   const mod = MODULES[state.moduleId];
+  const ts = TESTING_STATES[state.testingState];
   const date = new Date().toLocaleDateString("es", {
     day: "2-digit", month: "2-digit", year: "numeric"
   });
+  const totalImages = collectAllImages().length;
+
   const lines = [
     `🧪 MindScrolling · Test Pre-Release`,
     `━━━━━━━━━━━━━━━━━━━━━━━━`,
-    `Tester : ${state.testerName}`,
-    `Módulo : M${state.moduleId} — ${mod.name}`,
-    `Fecha  : ${date}`,
+    `Tester  : ${state.testerName}`,
+    `Módulo  : M${state.moduleId} — ${mod.name}`,
+    `Estado  : ${ts.icon} ${ts.label}`,
+    `Fecha   : ${date}`,
+    totalImages > 0 ? `Screenshots: ${totalImages} imagen${totalImages > 1 ? 'es' : ''} adjunta${totalImages > 1 ? 's' : ''}` : "",
     `━━━━━━━━━━━━━━━━━━━━━━━━`,
     ""
-  ];
+  ].filter(Boolean);
+
   mod.questions.forEach((q, i) => {
     const ans = state.answers[q.id];
     if (ans === undefined || ans === null || ans === "") return;
     const display = typeof ans === "number"
       ? "★".repeat(ans) + "☆".repeat(5 - ans) + ` (${ans}/5)`
       : ans;
-    lines.push(`${i + 1}. ${q.text}`);
+    const imgs = capturedImages[q.id];
+    const imgNote = imgs && imgs.length > 0 ? ` 📷×${imgs.length}` : "";
+    lines.push(`${i + 1}. ${q.text}${imgNote}`);
     lines.push(`   → ${display}`);
     lines.push("");
   });
+
   return lines.join("\n");
+}
+
+function collectAllImages() {
+  return Object.values(capturedImages).flat();
 }
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
