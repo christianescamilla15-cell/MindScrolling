@@ -47,21 +47,12 @@ export default async function authorsRoutes(fastify) {
       return reply.status(400).send({ error: "Author slug required", code: "MISSING_FIELD" });
     }
 
-    // Fetch author row and their quotes in parallel
-    const [authorResult, quotesResult] = await Promise.all([
-      supabase
-        .from("authors")
-        .select(`slug, name, ${bioCol}, quote_count`)
-        .eq("slug", slug)
-        .single(),
-
-      supabase
-        .from("quotes")
-        .select("id, text, category, lang, author")
-        .eq("lang", lang)
-        .order("created_at", { ascending: false })
-        .limit(20),
-    ]);
+    // Fetch author row first, then quotes filtered by author name
+    const authorResult = await supabase
+      .from("authors")
+      .select(`slug, name, ${bioCol}, quote_count`)
+      .eq("slug", slug)
+      .single();
 
     if (authorResult.error || !authorResult.data) {
       if (authorResult.error?.code === "PGRST116") {
@@ -71,17 +62,23 @@ export default async function authorsRoutes(fastify) {
       return reply.status(500).send({ error: "Failed to fetch author", code: "DB_ERROR" });
     }
 
+    const author = authorResult.data;
+
+    // Filter by author name in SQL — previously fetched last 20 of all authors
+    // and filtered in memory, causing empty results for most authors.
+    const quotesResult = await supabase
+      .from("quotes")
+      .select("id, text, category, lang, author")
+      .eq("lang", lang)
+      .eq("author", author.name)
+      .limit(20);
+
     if (quotesResult.error) {
       fastify.log.error({ err: quotesResult.error, slug }, "GET /authors/:slug — quotes fetch error");
       return reply.status(500).send({ error: "Failed to fetch author quotes", code: "DB_ERROR" });
     }
 
-    const author = authorResult.data;
-
-    // Filter quotes to this author (quotes table uses name, not slug)
-    const authorQuotes = (quotesResult.data || []).filter(
-      (q) => q.author === author.name
-    );
+    const authorQuotes = quotesResult.data || [];
 
     // Category distribution
     const categories = {};

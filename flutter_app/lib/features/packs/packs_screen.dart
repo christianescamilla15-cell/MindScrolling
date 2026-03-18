@@ -6,7 +6,6 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/providers/core_providers.dart';
 import '../../shared/extensions/context_extensions.dart';
-import '../../shared/widgets/swipe_back_wrapper.dart';
 import '../settings/settings_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -62,8 +61,7 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
   Widget build(BuildContext context) {
     final tr = context.tr;
 
-    return SwipeBackWrapper(
-      child: Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,

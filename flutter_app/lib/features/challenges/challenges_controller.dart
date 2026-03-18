@@ -108,14 +108,7 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
       failure: (message, _) {
         state = AsyncData(
           ChallengeState(
-            challenge: ChallengeModel(
-              id: 'offline',
-              code: 'offline_reflection',
-              title: 'Daily Reflection',
-              description: 'Reflect on one Stoic principle today.',
-              activeDate:
-                  DateTime.now().toIso8601String().substring(0, 10),
-            ),
+            challenge: null,
             error: message,
           ),
         );
@@ -138,7 +131,8 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
       ),
     );
 
-    if (current.challenge != null) {
+    // Skip persistence for the fallback challenge — it has no DB row
+    if (current.challenge != null && current.challenge!.id != 'default') {
       await _repo.updateProgress(
         current.challenge!.id,
         newProgress,
@@ -163,7 +157,7 @@ class ChallengesController extends AsyncNotifier<ChallengeState> {
       ),
     );
 
-    if (current.challenge != null) {
+    if (current.challenge != null && current.challenge!.id != 'default') {
       await _repo.updateProgress(
         current.challenge!.id,
         clamped,
