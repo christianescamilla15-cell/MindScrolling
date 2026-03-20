@@ -7,8 +7,8 @@
 | Metric | Value |
 |--------|-------|
 | App Version | `1.2.1+8` |
-| Total Commits | 77 |
-| Last Commit | `9253ccb fix: profile reflections reads correct key, router param renamed to :slug` |
+| Total Commits | 89 |
+| Last Commit | `ba3187e fix(ci): resolve all CI failures + add self-healing ci-doctor workflow` |
 | Backend Files (JS) | 33 |
 | Flutter Files (Dart) | 127 |
 | API Route Files | 16 |
