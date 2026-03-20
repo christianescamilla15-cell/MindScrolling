@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter: Debug",
+      "type": "dart",
+      "request": "launch",
+      "program": "flutter_app/lib/main.dart",
+      "cwd": "${workspaceFolder}/flutter_app",
+      "flutterMode": "debug"
+    },
+    {
+      "name": "Flutter: Profile",
+      "type": "dart",
+      "request": "launch",
+      "program": "flutter_app/lib/main.dart",
+      "cwd": "${workspaceFolder}/flutter_app",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Flutter: Release",
+      "type": "dart",
+      "request": "launch",
+      "program": "flutter_app/lib/main.dart",
+      "cwd": "${workspaceFolder}/flutter_app",
+      "flutterMode": "release"
+    },
+    {
+      "name": "Backend: Debug",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/src/app.js",
+      "cwd": "${workspaceFolder}/backend",
+      "env": { "NODE_ENV": "development" },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Backend: Run Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/tests/pre-release-scenarios.js",
+      "cwd": "${workspaceFolder}/backend",
+      "args": ["--test"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack: Backend + Flutter",
+      "configurations": ["Backend: Debug", "Flutter: Debug"]
+    }
+  ]
+}

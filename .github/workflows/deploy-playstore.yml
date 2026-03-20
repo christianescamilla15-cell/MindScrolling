@@ -1,0 +1,74 @@
+name: Deploy to Play Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store track'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - beta
+          - production
+
+jobs:
+  deploy:
+    name: Build & Deploy to Play Store
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Setup Ruby (for Fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: flutter_app/android
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > flutter_app/android/app/upload-keystore.jks
+          echo "$KEY_PROPERTIES" > flutter_app/android/key.properties
+
+      - name: Decode Play Store service account key
+        env:
+          PLAY_STORE_KEY: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          echo "$PLAY_STORE_KEY" > flutter_app/android/fastlane/play-store-key.json
+
+      - name: Get dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+
+      - name: Build AAB
+        working-directory: flutter_app
+        run: flutter build appbundle --release
+
+      - name: Deploy to Play Store
+        working-directory: flutter_app/android
+        run: bundle exec fastlane ${{ github.event.inputs.track }}
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: flutter_app/build/app/outputs/bundle/release/app-release.aab

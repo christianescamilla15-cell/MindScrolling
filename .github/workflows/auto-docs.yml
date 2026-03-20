@@ -1,0 +1,41 @@
+name: Auto-Generate Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/src/routes/**'
+      - 'flutter_app/pubspec.yaml'
+      - 'backend/src/db/migrations/**'
+
+jobs:
+  generate-docs:
+    name: Update Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate docs
+        run: node scripts/generate-docs.js
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "No docs changes to commit"
+          else
+            git commit -m "docs: auto-update API reference, changelog, and project status"
+            git push
+          fi

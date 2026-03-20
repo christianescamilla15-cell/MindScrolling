@@ -1,0 +1,102 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ─── Backend ─────────────────────────────────
+    {
+      "label": "Backend: Dev Server",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: Run Tests",
+      "type": "shell",
+      "command": "npm test",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: Syntax Check All",
+      "type": "shell",
+      "command": "for f in src/routes/*.js src/services/*.js src/utils/*.js; do node --check \"$f\" && echo \"✓ $f\"; done",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "test",
+      "problemMatcher": []
+    },
+
+    // ─── Flutter ─────────────────────────────────
+    {
+      "label": "Flutter: Build APK",
+      "type": "shell",
+      "command": "C:\\flutter\\flutter\\bin\\flutter.bat build apk --release",
+      "options": { "cwd": "${workspaceFolder}/flutter_app" },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter: Build AAB",
+      "type": "shell",
+      "command": "C:\\flutter\\flutter\\bin\\flutter.bat build appbundle --release",
+      "options": { "cwd": "${workspaceFolder}/flutter_app" },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter: Pub Get",
+      "type": "shell",
+      "command": "C:\\flutter\\flutter\\bin\\flutter.bat pub get",
+      "options": { "cwd": "${workspaceFolder}/flutter_app" },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter: Analyze",
+      "type": "shell",
+      "command": "C:\\flutter\\flutter\\bin\\flutter.bat analyze",
+      "options": { "cwd": "${workspaceFolder}/flutter_app" },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter: Run on Device",
+      "type": "shell",
+      "command": "C:\\flutter\\flutter\\bin\\flutter.bat run",
+      "options": { "cwd": "${workspaceFolder}/flutter_app" },
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+
+    // ─── Docs ────────────────────────────────────
+    {
+      "label": "Generate Docs",
+      "type": "shell",
+      "command": "node scripts/generate-docs.js",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "problemMatcher": []
+    },
+
+    // ─── Full Pipeline ───────────────────────────
+    {
+      "label": "Full: Build & Test All",
+      "dependsOn": [
+        "Backend: Syntax Check All",
+        "Backend: Run Tests",
+        "Flutter: Analyze",
+        "Flutter: Build APK",
+        "Generate Docs"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
