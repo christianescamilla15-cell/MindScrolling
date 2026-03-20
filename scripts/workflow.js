@@ -238,6 +238,99 @@ const commands = {
     run(`node scripts/qa-runner.js ${qaArgs}`);
   },
 
+  'auto-commit': async function() {
+    header('Auto Commit & Push');
+
+    // 1. Check if there are changes
+    const status = execSync('git status --porcelain', { cwd: ROOT, encoding: 'utf-8' }).trim();
+    if (!status) {
+      console.log('\n  No changes to commit.\n');
+      return;
+    }
+
+    // 2. Show what changed
+    console.log('\n  Changes detected:');
+    status.split('\n').forEach(l => console.log(`    ${l}`));
+
+    // 3. Run quality gates
+    console.log('\n  Running quality gates...\n');
+
+    // Backend syntax check (always runs)
+    let gatesPass = true;
+    const routeDir = path.join(BACKEND, 'src', 'routes');
+    if (fs.existsSync(routeDir)) {
+      for (const f of fs.readdirSync(routeDir).filter(f => f.endsWith('.js'))) {
+        if (!run(`node --check src/routes/${f}`, BACKEND)) gatesPass = false;
+      }
+    }
+
+    // Backend tests (skip if server not running — CI will catch it)
+    try {
+      const http = require('http');
+      const checkServer = new Promise((resolve) => {
+        const req = http.get('http://127.0.0.1:3000/health', { timeout: 2000 }, (res) => {
+          resolve(res.statusCode === 200);
+        });
+        req.on('error', () => resolve(false));
+        req.on('timeout', () => { req.destroy(); resolve(false); });
+      });
+      const serverUp = await checkServer;
+      if (serverUp) {
+        if (!run('npm test', BACKEND)) gatesPass = false;
+      } else {
+        console.log('  Backend not running locally — skipping npm test (CI will run it)');
+      }
+    } catch {
+      console.log('  Backend not running locally — skipping npm test (CI will run it)');
+    }
+
+    if (!gatesPass) {
+      console.log('\n  Quality gates FAILED. Fix errors before committing.\n');
+      process.exit(1);
+    }
+
+    // 4. Generate commit message from diff
+    const diff = execSync('git diff --cached --stat 2>/dev/null || git diff --stat', { cwd: ROOT, encoding: 'utf-8' }).trim();
+    const files = status.split('\n').map(l => l.trim().split(/\s+/).pop());
+    const types = new Set();
+    files.forEach(f => {
+      if (f.startsWith('backend/')) types.add('backend');
+      if (f.startsWith('flutter_app/')) types.add('flutter');
+      if (f.startsWith('.github/')) types.add('ci');
+      if (f.startsWith('scripts/')) types.add('chore');
+      if (f.startsWith('docs/') || f.endsWith('.md')) types.add('docs');
+      if (f.startsWith('cloud/')) types.add('chore');
+    });
+
+    const scope = types.size === 1 ? `(${[...types][0]})` : '';
+    const type = types.has('backend') || types.has('flutter') ? 'feat' : 'chore';
+    const fileCount = files.length;
+    const msg = `${type}${scope}: auto-commit ${fileCount} file(s)`;
+
+    // 5. Stage, commit, push
+    run('git add -A');
+    const commitOk = run(`git commit -m "${msg}"`);
+    if (!commitOk) {
+      console.log('\n  Commit failed.\n');
+      process.exit(1);
+    }
+
+    if (!run('git push origin main')) {
+      console.log('\n  Push failed. Run manually: git push origin main\n');
+      process.exit(1);
+    }
+
+    // 6. Update control tower
+    const dashboard = path.join(ROOT, 'cloud', 'control_tower', 'build_history.md');
+    if (fs.existsSync(dashboard)) {
+      const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      const hash = execSync('git rev-parse --short HEAD', { cwd: ROOT, encoding: 'utf-8' }).trim();
+      fs.appendFileSync(dashboard, `| ${now} | ${hash} | ${msg} | auto |\n`);
+    }
+
+    console.log(`\n  Auto-committed and pushed: ${msg}\n`);
+  },
+
   'full-release'() {
     header('Full Release Pipeline');
     console.log('\n  Step 1/6: Pre-release checks...');
@@ -308,6 +401,9 @@ if (!cmd || !commands[cmd]) {
     sentry         Check Sentry configuration
     status         Show project status
 
+  Automation:
+    auto-commit    Run gates → stage → commit → push → update dashboard
+
   Sprint Workflow:
     sprint start "<goal>"   Start a new sprint with the given goal
     sprint status           Show current sprint phase status
@@ -325,4 +421,10 @@ if (!cmd || !commands[cmd]) {
   process.exit(0);
 }
 
-commands[cmd]();
+const result = commands[cmd]();
+if (result && typeof result.catch === 'function') {
+  result.catch(err => {
+    console.error(`\n  Error: ${err.message || err}`);
+    process.exit(1);
+  });
+}
