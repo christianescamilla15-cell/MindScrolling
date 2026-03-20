@@ -9,6 +9,10 @@ on:
     # Run full secret scan every Monday at 08:00 UTC
     - cron: "0 8 * * 1"
 
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
   secret-scan:
     name: Secret & Credential Scan

@@ -8,6 +8,10 @@ on:
       - 'flutter_app/pubspec.yaml'
       - 'backend/src/db/migrations/**'
 
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
   generate-docs:
     name: Update Documentation
