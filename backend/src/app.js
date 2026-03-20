@@ -38,6 +38,7 @@ import authorsRoutes     from "./routes/authors.js";
 import packsRoutes       from "./routes/packs.js";
 import webhooksRoutes    from "./routes/webhooks.js";
 import analyticsRoutes   from "./routes/analytics.js";
+import deviceLockRoutes  from "./routes/device-lock.js";
 import deviceIdPlugin   from "./plugins/deviceId.js";
 
 const app = Fastify({
@@ -98,6 +99,7 @@ await app.register(authorsRoutes,     { prefix: "/authors" });
 await app.register(packsRoutes,       { prefix: "/packs" });
 await app.register(webhooksRoutes,    { prefix: "/webhooks" });
 await app.register(analyticsRoutes,   { prefix: "/analytics" });
+await app.register(deviceLockRoutes,  { prefix: "/device-lock" });
 
 /* ─── Health ───────────────────────────────────────────────────────────────── */
 app.get("/health", async () => ({ status: "ok", ts: new Date().toISOString() }));

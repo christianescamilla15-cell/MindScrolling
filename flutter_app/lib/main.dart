@@ -6,7 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
 import 'core/analytics/event_logger.dart';
+import 'core/constants/api_constants.dart';
+import 'core/network/api_client.dart';
 import 'core/providers/core_providers.dart';
+import 'core/services/device_lock_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/utils/device_id.dart';
 
@@ -35,6 +38,14 @@ Future<void> main() async {
 
   // Resolve device ID once before the widget tree builds
   final deviceId = await DeviceIdService.getOrCreate();
+
+  // Device lock check — only 1 device allowed
+  final apiClient = ApiClient(deviceId: deviceId, baseUrl: ApiConstants.baseUrl);
+  final allowed = await DeviceLockService.checkOrRegister(apiClient);
+  if (!allowed) {
+    runApp(const _BlockedApp());
+    return;
+  }
 
   // Register device ID with EventLogger so analytics events include it
   EventLogger.setDeviceId(deviceId);
@@ -67,4 +78,51 @@ void _runApp(String deviceId) {
       child: const MindScrollApp(),
     ),
   );
+}
+
+/// Shown when the device is not authorized.
+class _BlockedApp extends StatelessWidget {
+  const _BlockedApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF0F0F13),
+      ),
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.lock_outline, size: 64, color: Colors.redAccent),
+                const SizedBox(height: 24),
+                const Text(
+                  'Device Not Authorized',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'This app is licensed for a single device. '
+                  'Please contact the developer for access.',
+                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  onPressed: () => SystemNavigator.pop(),
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
