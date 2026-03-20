@@ -6,30 +6,53 @@
 BASE="${1:-https://mindscrolling.onrender.com}"
 DID="00000000-0000-0000-0000-000000000001"
 PASS=0; FAIL=0
+# Handle 429 rate limiting with retry
+MAX_RETRIES=2
+TMPBODY=$(mktemp)
+trap "rm -f $TMPBODY" EXIT
 
 t() {
   local m="$1" u="$2" e="$3" d="$4" b="$5"
   local ca=(-s -w "\n%{http_code}" -H "x-device-id: $DID" -H "Content-Type: application/json" --max-time 15)
-  [ "$m" = "POST" ] && ca+=(-X POST -d "${b:-\{\}}")
+  if [ "$m" = "POST" ]; then
+    if [ -n "$b" ]; then printf '%s' "$b" > "$TMPBODY"
+    else printf '%s' '{}' > "$TMPBODY"; fi
+    ca+=(-X POST --data-binary "@$TMPBODY")
+  fi
   [ "$m" = "DELETE" ] && ca+=(-X DELETE)
-  local r=$(curl "${ca[@]}" "$BASE$u" 2>/dev/null)
-  local s=$(echo "$r" | tail -1)
+  local r s retry=0
+  while true; do
+    r=$(curl "${ca[@]}" "$BASE$u" 2>/dev/null)
+    s=$(printf '%s' "$r" | tail -1)
+    if [ "$s" = "429" ] && [ $retry -lt $MAX_RETRIES ]; then
+      ((retry++))
+      sleep 10
+      continue
+    fi
+    break
+  done
   if [ "$s" = "$e" ]; then echo "  PASS [$s] $m $u"; ((PASS++))
-  else echo "  FAIL [$s!=$e] $m $u — $d"; echo "    $(echo "$r" | head -n -1 | head -c 120)"; ((FAIL++)); fi
+  else echo "  FAIL [$s!=$e] $m $u — $d"; printf '    %.120s\n' "$(printf '%s' "$r" | head -n -1)"; ((FAIL++)); fi
 }
 
 tn() {
-  local r=$(curl -s -w "\n%{http_code}" --max-time 10 "$BASE$1" 2>/dev/null)
-  local s=$(echo "$r" | tail -1)
+  local r s retry=0
+  while true; do
+    r=$(curl -s -w "\n%{http_code}" --max-time 10 "$BASE$1" 2>/dev/null)
+    s=$(printf '%s' "$r" | tail -1)
+    if [ "$s" = "429" ] && [ $retry -lt $MAX_RETRIES ]; then
+      ((retry++)); sleep 10; continue
+    fi
+    break
+  done
   if [ "$s" = "$2" ]; then echo "  PASS [$s] NO-HDR $1"; ((PASS++))
   else echo "  FAIL [$s!=$2] NO-HDR $1"; ((FAIL++)); fi
 }
 
 echo ""
-echo "══════════════════════════════════════════════════"
 echo "  MindScrolling API Tests — $BASE"
 echo "  $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-echo "══════════════════════════════════════════════════"
+echo "  ────────────────────────────────────────"
 
 echo ""; echo "── Core ──"
 t GET "/health" 200 "Health"
@@ -102,7 +125,6 @@ tn "/packs" 401
 tn "/premium/status" 401
 
 echo ""
-echo "══════════════════════════════════════════════════"
+echo "  ────────────────────────────────────────"
 echo "  TOTAL: $PASS passed, $FAIL failed"
-echo "══════════════════════════════════════════════════"
 exit $FAIL

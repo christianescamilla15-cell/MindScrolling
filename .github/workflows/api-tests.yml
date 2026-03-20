@@ -53,7 +53,7 @@ jobs:
           t() {
             local m="$1" u="$2" e="$3" d="$4" b="$5"
             local ca=(-s -w "\n%{http_code}" -H "x-device-id: $DID" -H "Content-Type: application/json" --max-time 15)
-            [ "$m" = "POST" ] && ca+=(-X POST -d "${b:-\{\}}")
+            [ "$m" = "POST" ] && ca+=(-X POST -d "${b:-{}}")
             local r=$(curl "${ca[@]}" "$BASE$u" 2>/dev/null)
             local s=$(echo "$r" | tail -1)
             if [ "$s" = "$e" ]; then
