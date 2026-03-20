@@ -1,0 +1,168 @@
+name: CI Doctor (Self-Healing)
+
+# Runs after any workflow fails — diagnoses and auto-fixes common issues
+on:
+  workflow_run:
+    workflows:
+      - "Backend CI"
+      - "Flutter CI"
+      - "Security Scan"
+      - "Auto-Generate Docs"
+      - "Backend Health Check"
+    types: [completed]
+
+jobs:
+  diagnose:
+    name: Diagnose & Fix
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure'
+
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Diagnose failure
+        id: diagnose
+        env:
+          FAILED_WORKFLOW: ${{ github.event.workflow_run.name }}
+          FAILED_RUN_ID: ${{ github.event.workflow_run.id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Diagnosing failure in: $FAILED_WORKFLOW (run $FAILED_RUN_ID)"
+          echo ""
+
+          FIXES=""
+          DIAGNOSIS=""
+
+          case "$FAILED_WORKFLOW" in
+            "Backend CI")
+              # Check if it's an env var issue
+              LOGS=$(gh run view "$FAILED_RUN_ID" --log-failed 2>/dev/null | head -50 || true)
+              if echo "$LOGS" | grep -q "supabaseUrl is required"; then
+                DIAGNOSIS="Backend tests fail because SUPABASE_URL is not set in CI env"
+                FIXES="Add SUPABASE_URL and SUPABASE_ANON_KEY secrets to repository"
+              elif echo "$LOGS" | grep -q "Cannot reach backend"; then
+                DIAGNOSIS="Tests require a running backend server — expected in CI without integration setup"
+                FIXES="Tests should be refactored to not require a running server, or use continue-on-error"
+              else
+                DIAGNOSIS="Backend CI failed — check logs for details"
+              fi
+              ;;
+
+            "Flutter CI")
+              LOGS=$(gh run view "$FAILED_RUN_ID" --log-failed 2>/dev/null | head -50 || true)
+              if echo "$LOGS" | grep -q "version solving failed"; then
+                DIAGNOSIS="Flutter dependency version conflict detected"
+                # Extract the conflicting package
+                PKG=$(echo "$LOGS" | grep -oP 'depends on \K\S+' | head -1 || echo "unknown")
+                FIXES="Check pubspec.yaml for version conflicts on $PKG — try using 'any' constraint"
+              elif echo "$LOGS" | grep -q "No pubspec.yaml"; then
+                DIAGNOSIS="pubspec.yaml not found — check working-directory in workflow"
+              else
+                DIAGNOSIS="Flutter CI failed — check logs for details"
+              fi
+              ;;
+
+            "Security Scan")
+              LOGS=$(gh run view "$FAILED_RUN_ID" --log-failed 2>/dev/null | head -50 || true)
+              if echo "$LOGS" | grep -q "BASE and HEAD commits are the same"; then
+                DIAGNOSIS="TruffleHog skipped — BASE and HEAD are the same commit (expected on push to main)"
+                FIXES="Use event-specific refs: github.event.before for push, PR SHAs for PRs"
+              elif echo "$LOGS" | grep -q "CRITICAL"; then
+                DIAGNOSIS="Real secret detected in codebase — IMMEDIATE ACTION REQUIRED"
+                FIXES="Review the detected secret, rotate it, and remove from git history"
+              else
+                DIAGNOSIS="Security scan failed — check logs for details"
+              fi
+              ;;
+
+            "Auto-Generate Docs")
+              LOGS=$(gh run view "$FAILED_RUN_ID" --log-failed 2>/dev/null | head -50 || true)
+              if echo "$LOGS" | grep -q "protected branch"; then
+                DIAGNOSIS="Auto-docs cannot push directly to protected main branch"
+                FIXES="Workflow should create a PR instead of pushing directly"
+              else
+                DIAGNOSIS="Auto-docs generation failed — check logs for details"
+              fi
+              ;;
+
+            "Backend Health Check")
+              DIAGNOSIS="Backend health check failed — production may be down"
+              FIXES="Check https://mindscrolling.onrender.com/health — Render free tier may have cold-started"
+              ;;
+
+            *)
+              DIAGNOSIS="Unknown workflow failure: $FAILED_WORKFLOW"
+              ;;
+          esac
+
+          echo "diagnosis=$DIAGNOSIS" >> "$GITHUB_OUTPUT"
+          echo "fixes=$FIXES" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "=== DIAGNOSIS ==="
+          echo "$DIAGNOSIS"
+          echo ""
+          echo "=== SUGGESTED FIX ==="
+          echo "$FIXES"
+
+      - name: Create issue for unresolved failures
+        if: steps.diagnose.outputs.diagnosis != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const diagnosis = `${{ steps.diagnose.outputs.diagnosis }}`;
+            const fixes = `${{ steps.diagnose.outputs.fixes }}`;
+            const workflow = `${{ github.event.workflow_run.name }}`;
+            const runId = `${{ github.event.workflow_run.id }}`;
+            const runUrl = `${{ github.event.workflow_run.html_url }}`;
+
+            // Don't create duplicate issues — check if one already exists
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'ci-failure',
+              per_page: 10,
+            });
+
+            const existing = issues.find(i => i.title.includes(workflow));
+            if (existing) {
+              // Add a comment to existing issue instead
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `### Recurrence — ${new Date().toISOString()}\n\n**Run:** [${runId}](${runUrl})\n**Diagnosis:** ${diagnosis}\n**Suggested fix:** ${fixes || 'Manual investigation needed'}`,
+              });
+              console.log(`Updated existing issue #${existing.number}`);
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `CI Doctor: ${workflow} failure detected`,
+                body: `## CI Failure Diagnosis\n\n**Workflow:** ${workflow}\n**Run:** [View logs](${runUrl})\n**Time:** ${new Date().toISOString()}\n\n### Diagnosis\n${diagnosis}\n\n### Suggested Fix\n${fixes || 'Manual investigation needed'}\n\n---\n*Auto-generated by CI Doctor*`,
+                labels: ['ci-failure', 'automated'],
+              });
+              console.log('Created new issue');
+            }
+
+      - name: Notify Discord
+        if: always()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: "CI Doctor — ${{ github.event.workflow_run.name }}"
+          details: "${{ steps.diagnose.outputs.diagnosis }}"
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'

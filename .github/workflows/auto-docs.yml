@@ -40,9 +40,17 @@ jobs:
           if git diff --staged --quiet; then
             echo "No docs changes to commit"
           else
+            BRANCH="auto-docs/update-$(date +%Y%m%d-%H%M%S)"
+            git checkout -b "$BRANCH"
             git commit -m "docs: auto-update API reference, changelog, and project status"
-            git push
+            git push origin "$BRANCH"
+            gh pr create --title "docs: auto-update generated documentation" \
+              --body "Automated documentation update triggered by code changes." \
+              --base main --head "$BRANCH"
+            gh pr merge "$BRANCH" --auto --squash --delete-branch
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Only notify on failure — successful doc generation is low-priority
       - name: Notify Discord on failure

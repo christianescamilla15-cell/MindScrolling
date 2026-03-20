@@ -12,3 +12,4 @@
 | 3 | Sprint 7 perf+webhook | 2026-03-18 | Integration QA | 91 | Release Ready ✅ | ELIGIBLE | Sentry integrated (app.js + error handler); RevenueCat webhook handler (POST /webhooks/revenuecat, timing-safe, grant/revoke logic, audit log); Migration 007 (8 partial indexes: feed, vault, challenge, map, audit); .env.example updated |
 | 4 | Sprint 7 automation | 2026-03-20 | — | 91 | Release Ready ✅ | ELIGIBLE | Control tower dashboard updated; blockers.md expanded (B-05–B-08); automation-rules.md created; CI concurrency controls added (backend-ci, flutter-ci, security-scan, staging-deploy, auto-docs); flutter test --coverage step added; docs/checklist.md created |
 | 2026-03-20 09:35:01 | fb8a3c3 | chore(chore): auto-commit 1 file(s) | auto |
+| 2026-03-20 09:35:22 | 84341e5 | docs: auto-commit 2 file(s) | auto |

@@ -42,7 +42,7 @@ dependencies:
   # Localization
   flutter_localizations:
     sdk: flutter
-  intl: ^0.20.2
+  intl: any
 
   # Loading indicators
   shimmer: ^3.0.0
