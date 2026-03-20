@@ -302,8 +302,13 @@ const commands = {
       if (f.startsWith('cloud/')) types.add('chore');
     });
 
-    const scope = types.size === 1 ? `(${[...types][0]})` : '';
-    const type = types.has('backend') || types.has('flutter') ? 'feat' : 'chore';
+    const primaryType = types.has('backend') || types.has('flutter') ? 'feat'
+      : types.has('ci') ? 'ci'
+      : types.has('docs') ? 'docs'
+      : 'chore';
+    const scopeSet = new Set([...types].filter(t => t !== 'chore' && t !== 'docs'));
+    const scope = scopeSet.size === 1 ? `(${[...scopeSet][0]})` : '';
+    const type = primaryType;
     const fileCount = files.length;
     const msg = `${type}${scope}: auto-commit ${fileCount} file(s)`;
 
