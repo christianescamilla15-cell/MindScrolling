@@ -61,9 +61,11 @@ await app.register(helmet, {
   crossOriginEmbedderPolicy: false,
 });
 
-await app.register(cors, {
-  origin: process.env.ALLOWED_ORIGIN || "http://localhost:5173",
-});
+const corsOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
+if (process.env.NODE_ENV === "production" && corsOrigin === "http://localhost:5173") {
+  app.log.warn("ALLOWED_ORIGIN not set in production — CORS will reject browser requests");
+}
+await app.register(cors, { origin: corsOrigin });
 
 await app.register(rateLimit, {
   max:        Number(process.env.RATE_LIMIT_MAX)        || 60,

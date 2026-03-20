@@ -156,28 +156,44 @@ export default async function challengesRoutes(fastify) {
       return reply.status(200).send({ updated: false, completed: true, progress: existing.progress, target: TARGET_QUOTES });
     }
 
-    // Atomic increment: use raw SQL to avoid TOCTOU race on concurrent requests.
-    // LEAST() caps at TARGET_QUOTES so progress never exceeds the target.
-    const currentProgress = existing?.progress ?? 0;
-    const newProgress = Math.min(currentProgress + count, TARGET_QUOTES);
-    const completed   = newProgress >= TARGET_QUOTES;
-
-    const { error: upsertErr } = await supabase
-      .from("challenge_progress")
-      .upsert(
-        {
-          device_id:    deviceId,
-          challenge_id: challengeId,
-          progress:     newProgress,
-          completed,
-          updated_at:   new Date().toISOString(),
-        },
-        { onConflict: "device_id,challenge_id" }
-      );
+    // Atomic increment via SQL to prevent TOCTOU race on concurrent requests.
+    // Uses INSERT ... ON CONFLICT with LEAST() so progress never exceeds target.
+    const { data: result, error: upsertErr } = await supabase.rpc("increment_challenge_progress", {
+      p_device_id: deviceId,
+      p_challenge_id: challengeId,
+      p_count: count,
+      p_target: TARGET_QUOTES,
+    });
 
     if (upsertErr) {
-      return reply.status(500).send({ error: "Failed to update progress", code: "INTERNAL_ERROR" });
+      // Fallback: if the RPC doesn't exist yet, use the old read-then-write path
+      const currentProgress = existing?.progress ?? 0;
+      const newProgress = Math.min(currentProgress + count, TARGET_QUOTES);
+      const completed   = newProgress >= TARGET_QUOTES;
+
+      const { error: fallbackErr } = await supabase
+        .from("challenge_progress")
+        .upsert(
+          {
+            device_id:    deviceId,
+            challenge_id: challengeId,
+            progress:     newProgress,
+            completed,
+            updated_at:   new Date().toISOString(),
+          },
+          { onConflict: "device_id,challenge_id" }
+        );
+
+      if (fallbackErr) {
+        return reply.status(500).send({ error: "Failed to update progress", code: "INTERNAL_ERROR" });
+      }
+
+      return reply.status(200).send({ updated: true, progress: newProgress, completed, target: TARGET_QUOTES });
     }
+
+    const row = Array.isArray(result) ? result[0] : result;
+    const newProgress = row?.progress ?? 0;
+    const completed = row?.completed ?? false;
 
     return reply.status(200).send({ updated: true, progress: newProgress, completed, target: TARGET_QUOTES });
   });
