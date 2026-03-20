@@ -7,12 +7,12 @@
 | Metric | Value |
 |--------|-------|
 | App Version | `1.2.1+8` |
-| Total Commits | 77 |
-| Last Commit | `9253ccb fix: profile reflections reads correct key, router param renamed to :slug` |
+| Total Commits | 90 |
+| Last Commit | `586871e fix: resolve 4 bugs from QA audit — race condition, slug separator, CORS, docs` |
 | Backend Files (JS) | 33 |
 | Flutter Files (Dart) | 127 |
 | API Route Files | 16 |
-| DB Migrations | 19 |
+| DB Migrations | 20 |
 
 ## Architecture
 
