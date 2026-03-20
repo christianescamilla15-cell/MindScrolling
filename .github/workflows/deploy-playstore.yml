@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # -----------------------------------------------------------------------
       # Path A: caller provided a pre-built AAB (workflow_call with skip_build)
