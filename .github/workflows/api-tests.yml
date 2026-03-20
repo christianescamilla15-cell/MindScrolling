@@ -1,0 +1,172 @@
+name: API Integration Tests
+
+on:
+  # Run after every deploy (backend changes pushed to main)
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+  # Run on schedule (every 6 hours)
+  schedule:
+    - cron: '0 */6 * * *'
+  # Manual trigger
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  api-tests:
+    name: API Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for deploy to stabilize
+        if: github.event_name == 'push'
+        run: sleep 30
+
+      - name: Wake up server (Render cold start)
+        run: |
+          echo "Waking up server..."
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "https://mindscrolling.onrender.com/health")
+            if [ "$STATUS" = "200" ]; then
+              echo "Server is awake (attempt $i)"
+              break
+            fi
+            echo "Attempt $i: HTTP $STATUS — waiting 15s..."
+            sleep 15
+          done
+
+      - name: Run API tests
+        id: tests
+        run: |
+          BASE="https://mindscrolling.onrender.com"
+          DID="00000000-0000-0000-0000-test-ci-run"
+          PASS=0
+          FAIL=0
+          FAILURES=""
+
+          t() {
+            local m="$1" u="$2" e="$3" d="$4" b="$5"
+            local ca=(-s -w "\n%{http_code}" -H "x-device-id: $DID" -H "Content-Type: application/json" --max-time 15)
+            [ "$m" = "POST" ] && ca+=(-X POST -d "${b:-\{\}}")
+            local r=$(curl "${ca[@]}" "$BASE$u" 2>/dev/null)
+            local s=$(echo "$r" | tail -1)
+            if [ "$s" = "$e" ]; then
+              echo "  PASS [$s] $m $u"
+              ((PASS++))
+            else
+              echo "  FAIL [$s!=$e] $m $u — $d"
+              ((FAIL++))
+              FAILURES="${FAILURES}\n- $m $u: got $s, expected $e ($d)"
+            fi
+          }
+
+          tn() {
+            local r=$(curl -s -w "\n%{http_code}" --max-time 10 "$BASE$1" 2>/dev/null)
+            local s=$(echo "$r" | tail -1)
+            if [ "$s" = "$2" ]; then echo "  PASS [$s] NO-HDR $1"; ((PASS++))
+            else echo "  FAIL [$s!=$2] NO-HDR $1"; ((FAIL++))
+              FAILURES="${FAILURES}\n- NO-HDR $1: got $s, expected $2"; fi
+          }
+
+          echo "══════════ API Integration Tests ══════════"
+
+          # Core endpoints
+          t GET "/health" 200 "Health"
+          t GET "/quotes/feed?lang=en" 200 "Feed EN"
+          t GET "/quotes/feed?lang=es" 200 "Feed ES"
+          t GET "/quotes/feed" 200 "Feed default"
+
+          # Authors
+          t GET "/authors" 200 "List authors"
+          t GET "/authors/marcus_aurelius" 200 "Author valid slug"
+          t GET "/authors/nonexistent" 404 "Author not found"
+
+          # Challenges
+          t GET "/challenges/today" 200 "Today challenge"
+
+          # Stats
+          t GET "/stats" 200 "Stats"
+
+          # Profile
+          t GET "/profile" 200 "Get profile"
+          t POST "/profile" 200 "Update profile" '{"preferred_categories":["stoicism"]}'
+
+          # Vault
+          t GET "/vault" 200 "Vault"
+
+          # Swipes validation
+          t POST "/swipes" 400 "Empty swipe body" '{}'
+          t POST "/swipes" 400 "Invalid UUID" '{"quote_id":"xxx","direction":"right","category":"stoicism"}'
+
+          # Likes validation
+          t POST "/quotes/test/like" 400 "Invalid like ID" '{"action":"like"}'
+
+          # Packs
+          t GET "/packs" 200 "List packs"
+
+          # Premium
+          t GET "/premium/status" 200 "Premium status"
+          t POST "/premium/restore" 400 "Empty restore" '{}'
+
+          # Map
+          t GET "/map" 200 "Map"
+
+          # Mind Profile
+          t GET "/mind-profile/daily" 200 "Mind profile"
+
+          # Insights
+          t GET "/insights/weekly" 200 "Insights"
+
+          # Analytics
+          t POST "/analytics/event" 202 "Event" '{"event_type":"test_ci","properties":{}}'
+
+          # Auth rejection
+          t GET "/admin/codes/list" 403 "Admin no secret"
+          t POST "/webhooks/revenuecat" 401 "Webhook no auth" '{"event":{}}'
+
+          # Missing header tests
+          tn "/quotes/feed" 401
+          tn "/stats" 401
+          tn "/vault" 401
+          tn "/packs" 401
+
+          echo ""
+          echo "══════════════════════════════════════════"
+          echo "  Results: $PASS passed, $FAIL failed"
+          echo "══════════════════════════════════════════"
+
+          echo "pass_count=$PASS" >> "$GITHUB_OUTPUT"
+          echo "fail_count=$FAIL" >> "$GITHUB_OUTPUT"
+
+          if [ $FAIL -gt 0 ]; then
+            echo "failures<<EOFAIL" >> "$GITHUB_OUTPUT"
+            echo -e "$FAILURES" >> "$GITHUB_OUTPUT"
+            echo "EOFAIL" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: success
+          title: API Integration Tests
+          details: "${{ steps.tests.outputs.pass_count }} endpoints tested — all passed."
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: API Integration Tests
+          details: "${{ steps.tests.outputs.fail_count }} endpoint(s) failed:\n${{ steps.tests.outputs.failures }}"
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'
