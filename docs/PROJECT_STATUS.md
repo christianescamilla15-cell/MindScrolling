@@ -7,12 +7,12 @@
 | Metric | Value |
 |--------|-------|
 | App Version | `1.2.1+8` |
-| Total Commits | 77 |
-| Last Commit | `9253ccb fix: profile reflections reads correct key, router param renamed to :slug` |
-| Backend Files (JS) | 33 |
-| Flutter Files (Dart) | 127 |
-| API Route Files | 16 |
-| DB Migrations | 19 |
+| Total Commits | 95 |
+| Last Commit | `6cc8763 feat(security): single-device lock — APK restricted to one physical device` |
+| Backend Files (JS) | 34 |
+| Flutter Files (Dart) | 128 |
+| API Route Files | 17 |
+| DB Migrations | 22 |
 
 ## Architecture
 
@@ -22,7 +22,7 @@
 - **AI**: Claude API for weekly insights
 - **Payments**: RevenueCat + Google Play Billing
 
-## API Endpoints: 16 route files
+## API Endpoints: 17 route files
 
 See [API_REFERENCE.md](API_REFERENCE.md) for full details.
 

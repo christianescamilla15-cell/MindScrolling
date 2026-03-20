@@ -35,17 +35,23 @@ Base URL: `https://mindscrolling.onrender.com/api`
 | `GET` | `/api/challenges/today` | Retrieve today |
 | `POST` | `/api/challenges/:id/progress` | Create/update {id}/progress |
 
+### Device Lock (`/api/device-lock`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/device-lock/register` | Create/update register |
+
 ### Insights (`/api/insights`)
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/insights/weekly` | Retrieve weekly |
 
-### Likes (registered under `/api/quotes`)
+### Likes (`/api/likes`)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/quotes/:id/like` | Like or unlike a quote. Body: `{ action: "like" \| "unlike" }` |
+| `POST` | `/api/likes/:id/like` | POST /quotes/:id/like  body: { action: "like" | "unlike" } |
 
 ### Map (`/api/map`)
 
@@ -121,11 +127,7 @@ Base URL: `https://mindscrolling.onrender.com/api`
 
 ## Authentication
 
-All endpoints require `x-device-id` header (UUID v4), except:
-- `/health` — public health check
-- `/admin/*` — uses `X-Admin-Secret` header instead
-- `/webhooks/*` — uses `Authorization` header instead
-
+All endpoints require `x-device-id` header (UUID v4).
 Premium endpoints additionally check entitlement status.
 
 ## Rate Limits

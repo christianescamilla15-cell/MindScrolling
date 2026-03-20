@@ -4,21 +4,22 @@
 
 ## Features
 
+- `6cc8763` (security): single-device lock — APK restricted to one physical device
+- `bbfb10e` (ci): automated API integration test suite — 36 endpoints, runs on deploy + every 6h
+- `7a1615b` port WordForge workflow patterns — control tower, automation rules, concurrency, coverage
+- `066d7ff` full automation suite — deploy, migrations, bootstrap, QA, notifications
+- `00a19b7` complete CI/CD, automation scripts, and dev workflow
 - `bd57b62` add zen meditation splash logo and app launcher icon
 - `d53f630` real IAP for individual packs (B-01)
-- `95eab5a` Sprint 7 — analytics, rating prompt, trial funnel, paywall UX
-- `97d9b2d` add Growth/ASO + UX Synthesizer agents, CODEOWNERS, branch protection
-- `7282ddb` add 5 new specialist agents + project memory
-- `1dc3f4a` Bloque A — content distribution, authors table, preview curation
-- `dfd6e0c` Bloque C + D — swipe navigation y reflection card fixes
-- `82b9c6f` Bloque B — pack monetization nueva arquitectura
-- `bfe2e09` tester form v2 — instructions, 3-state selector, screenshot upload, WA auto-send
-- `f462d29` dev tools panel — switch Free / Trial / Premium for testing
-- `fc9771f` tester form + security hardening (helmet, dependabot, TruffleHog, SECURITY.md)
-- `688b48d` expand author bios to 80 unique profiles (EN + ES)
 
 ## Bug Fixes
 
+- `b11ef51` resolve 3 HIGH + 4 MEDIUM bugs from SCRUM feature audit
+- `eddda84` (ci): api-test handles rate limiting with retry + fix JSON body encoding
+- `3620d50` (backend): revert authorSlug to underscore separator — matches DB slugs
+- `586871e` resolve 4 bugs from QA audit — race condition, slug separator, CORS, docs
+- `ba3187e` (ci): resolve all CI failures + add self-healing ci-doctor workflow
+- `490356a` (ci): keystore filename matches key.properties (mindscrolling-release.jks)
 - `9253ccb` profile reflections reads correct key, router param renamed to :slug
 - `dacba9d` authorSlug handles ø/ð/þ/ł/ß/æ, vault sends author_slug, Kierkegaard dedup
 - `f611118` ES author names match authors table for correct bio lookups
@@ -49,12 +50,17 @@
 - `336f590` backend MED/LOW cleanup — remove is_premium leak, hardcoded count, rawBody stub
 - `d7684f1` QA round 2 — dangling completers, table scans, author slugs, analytics
 - `d9c9654` QA audit — HIGH/MEDIUM/LOW bugs from Sprint 7 review
-- `e134cc2` trial countdown always showing 7 days (offline fallback bug)
-- `094f81c` 4 bugs from v1.4 tester feedback
-- `04a106c` downgrade @fastify/helmet to v11 for Fastify 4 compatibility
-- `c8e884e` add missing webhooks.js + fix AllowedSwipeDirection.only top→up
-- `4a2d922` weekly insight respects language change (cache keyed by lang)
-- `a9f7e58` balanced feed categories + author retry + notification toggle
-- `b624afb` correction sprint — packs explorer, challenge auto-complete, haptics
-- `ebb4f57` notification toggle UI + trial fallback for first-time users
+
+## Documentation
+
+- `84341e5` auto-commit 2 file(s)
+
+## Chores
+
+- `ec2010d` (deps): Bump @anthropic-ai/sdk from 0.36.3 to 0.79.0 in /backend (#7)
+- `6ec2dd4` (deps): Bump fastify-plugin from 4.5.1 to 5.1.0 in /backend (#6)
+- `06fa71b` (deps): Bump dotenv from 16.6.1 to 17.3.1 in /backend (#5)
+- `2746d51` (deps): Bump actions/setup-node from 4 to 6 (#4)
+- `71f6776` (deps): Bump actions/configure-pages from 4 to 5 (#1)
+- `fb8a3c3` (chore): auto-commit 1 file(s)
 
