@@ -7,12 +7,12 @@
 | Metric | Value |
 |--------|-------|
 | App Version | `1.2.1+8` |
-| Total Commits | 77 |
-| Last Commit | `9253ccb fix: profile reflections reads correct key, router param renamed to :slug` |
+| Total Commits | 94 |
+| Last Commit | `b11ef51 fix: resolve 3 HIGH + 4 MEDIUM bugs from SCRUM feature audit` |
 | Backend Files (JS) | 33 |
 | Flutter Files (Dart) | 127 |
 | API Route Files | 16 |
-| DB Migrations | 19 |
+| DB Migrations | 21 |
 
 ## Architecture
 
