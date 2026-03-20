@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/user_profile_model.dart';
+import '../../features/philosophy_map/philosophy_map_controller.dart';
 import '../../shared/extensions/context_extensions.dart';
 import 'profile_controller.dart';
 
@@ -236,7 +238,7 @@ class _StatsSection extends StatelessWidget {
             const SizedBox(height: 20),
             const Divider(color: AppColors.border),
             const SizedBox(height: 16),
-            _CategoryBarsSection(profile: profile!),
+            const _CategoryBarsSection(),
           ],
         ],
       ),
@@ -274,56 +276,102 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-class _CategoryBarsSection extends StatelessWidget {
-  final UserProfileModel profile;
-  const _CategoryBarsSection({required this.profile});
+class _CategoryBarsSection extends ConsumerWidget {
+  const _CategoryBarsSection();
+
+  static const _categories = [
+    'stoicism',
+    'discipline',
+    'reflection',
+    'philosophy',
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    // Simple visual category bars derived from profile interest / goal
-    final interest = profile.interest ?? '';
-    final goal = profile.goal ?? '';
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mapState = ref.watch(philosophyMapStateProvider);
 
-    final categories = {
-      'stoicism': interest == 'stoicism' ? 0.8 : 0.3,
-      'discipline': goal == 'discipline' ? 0.75 : 0.25,
-      'reflection': interest == 'mindfulness' ? 0.7 : 0.35,
-      'philosophy': interest == 'philosophy' ? 0.9 : 0.4,
-    };
+    // Trigger load on first render if data is absent and not already loading.
+    if (mapState.mapData == null && !mapState.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(philosophyMapControllerProvider.notifier).load();
+      });
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(context.tr.categories, style: AppTypography.authorText),
         const SizedBox(height: 8),
-        ...categories.entries.map((entry) {
-          final color = AppColors.categoryColor(entry.key);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 80,
-                  child: Text(
-                    context.tr.categoryLabels[entry.key] ?? entry.key,
-                    style: AppTypography.bodySmall.copyWith(color: color),
+        if (mapState.isLoading && mapState.mapData == null)
+          // Loading shimmer while map data is being fetched.
+          Shimmer.fromColors(
+            baseColor: AppColors.surface,
+            highlightColor: AppColors.surfaceVariant,
+            child: Column(
+              children: List.generate(
+                4,
+                (_) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: entry.value,
-                      backgroundColor: color.withOpacity(0.1),
-                      valueColor: AlwaysStoppedAnimation<Color>(color),
-                      minHeight: 6,
+              ),
+            ),
+          )
+        else
+          ..._categories.map((key) {
+            // wisdom_score is the API field for 'stoicism' swipe direction.
+            // PhilosophyScores.toMap() uses 'wisdom' as key for that bucket.
+            final scoreKey = key == 'stoicism' ? 'wisdom' : key;
+            final scores = mapState.mapData?.current;
+            final value = scores != null ? scores.normalized(scoreKey) : 0.0;
+            final color = AppColors.categoryColor(key);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 80,
+                    child: Text(
+                      context.tr.categoryLabels[key] ?? key,
+                      style: AppTypography.bodySmall.copyWith(color: color),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        }),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        backgroundColor: color.withOpacity(0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                        minHeight: 6,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
       ],
     );
   }

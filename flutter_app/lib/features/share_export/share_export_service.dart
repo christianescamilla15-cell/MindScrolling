@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../data/models/quote_model.dart';
+import '../../shared/extensions/context_extensions.dart';
 
 /// Service for sharing and exporting quotes.
 ///
@@ -77,7 +78,7 @@ class ShareExportService {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Image ready to share'),
+            content: Text(context.tr.imageReadyToShare),
             backgroundColor: const Color(0xFF14B8A6).withOpacity(0.9),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),

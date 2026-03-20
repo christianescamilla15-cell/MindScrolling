@@ -83,6 +83,7 @@ abstract class AppStrings {
   String get copied;
   String get doubleTapToLike;
   String get exportImage;
+  String get imageReadyToShare;
 
   // ------------------------------------------------------------------
   // Category names

@@ -173,6 +173,9 @@ class StringsEs implements AppStrings {
   @override
   String get exportImage => 'Exportar como imagen';
 
+  @override
+  String get imageReadyToShare => 'Imagen lista para compartir';
+
   // ------------------------------------------------------------------
   // Category names
   // ------------------------------------------------------------------

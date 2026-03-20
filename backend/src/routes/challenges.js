@@ -166,29 +166,8 @@ export default async function challengesRoutes(fastify) {
     });
 
     if (upsertErr) {
-      // Fallback: if the RPC doesn't exist yet, use the old read-then-write path
-      const currentProgress = existing?.progress ?? 0;
-      const newProgress = Math.min(currentProgress + count, TARGET_QUOTES);
-      const completed   = newProgress >= TARGET_QUOTES;
-
-      const { error: fallbackErr } = await supabase
-        .from("challenge_progress")
-        .upsert(
-          {
-            device_id:    deviceId,
-            challenge_id: challengeId,
-            progress:     newProgress,
-            completed,
-            updated_at:   new Date().toISOString(),
-          },
-          { onConflict: "device_id,challenge_id" }
-        );
-
-      if (fallbackErr) {
-        return reply.status(500).send({ error: "Failed to update progress", code: "INTERNAL_ERROR" });
-      }
-
-      return reply.status(200).send({ updated: true, progress: newProgress, completed, target: TARGET_QUOTES });
+      fastify.log.error({ err: upsertErr }, "challenges/progress: increment_challenge_progress RPC failed — ensure migration 020 has been applied");
+      return reply.status(500).send({ error: "Failed to update progress", code: "INTERNAL_ERROR" });
     }
 
     const row = Array.isArray(result) ? result[0] : result;

@@ -195,6 +195,7 @@ export default async function packsRoutes(fastify) {
         color: meta.color,
         quote_count: packCounts[id] ?? 0,
         is_active: true,
+        is_premium: true, // all content packs are premium content
         released_at: "2026-01-01T00:00:00Z", // backfilled value from migration 009
         is_grandfathered: isGrandfathered,
         access_status: accessStatus,
@@ -292,7 +293,7 @@ export default async function packsRoutes(fastify) {
       supabase
         .from("quotes")
         .select(
-          "id, text, author, category, lang, swipe_dir, pack_preview_rank"
+          "id, text, author, category, lang, swipe_dir, pack_preview_rank, is_premium"
         )
         .eq("pack_name", id)
         .eq("lang", lang)

@@ -173,6 +173,9 @@ class StringsEn implements AppStrings {
   @override
   String get exportImage => 'Export as image';
 
+  @override
+  String get imageReadyToShare => 'Image ready to share';
+
   // ------------------------------------------------------------------
   // Category names
   // ------------------------------------------------------------------

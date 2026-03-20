@@ -189,6 +189,10 @@ export default async function premiumRoutes(fastify) {
    * (Individual pack purchase uses POST /packs/:id/purchase/verify.)
    */
   fastify.post("/purchase/verify", async (request, reply) => {
+    // WARNING: This endpoint does NOT perform server-side receipt validation.
+    // Real validation occurs via the RevenueCat webhook at POST /webhooks/revenuecat.
+    // Client-side verification is trusted for now — hardening planned for Sprint 8.
+    // TODO(S8): Add RevenueCat REST API validation before marking purchase as verified.
     const deviceId = request.deviceId;
     const {
       store,

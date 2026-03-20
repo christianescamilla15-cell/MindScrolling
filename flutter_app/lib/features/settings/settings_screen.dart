@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -105,7 +106,7 @@ class SettingsScreen extends ConsumerWidget {
             _SectionHeader(title: context.tr.about),
             _SettingsCard(
               children: [
-                const _DevVersionTile(version: '1.1.0'),
+                const _DevVersionTile(),
                 _Divider(),
                 _NavTile(
                   icon: Icons.privacy_tip_outlined,
@@ -541,8 +542,7 @@ class _Divider extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _DevVersionTile extends StatefulWidget {
-  final String version;
-  const _DevVersionTile({required this.version});
+  const _DevVersionTile();
 
   @override
   State<_DevVersionTile> createState() => _DevVersionTileState();
@@ -551,6 +551,18 @@ class _DevVersionTile extends StatefulWidget {
 class _DevVersionTileState extends State<_DevVersionTile> {
   int _tapCount = 0;
   DateTime? _lastTap;
+  String? _version;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _version = info.version);
+  }
 
   void _onTap() {
     final now = DateTime.now();
@@ -583,7 +595,10 @@ class _DevVersionTileState extends State<_DevVersionTile> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
         leading: const Icon(Icons.info_outline, color: AppColors.textMuted, size: 22),
         title: Text(context.tr.appVersion, style: AppTypography.bodyMedium),
-        trailing: Text(widget.version, style: AppTypography.bodySmall),
+        trailing: Text(
+          _version ?? '—',
+          style: AppTypography.bodySmall,
+        ),
       ),
     );
   }
