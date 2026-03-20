@@ -38,3 +38,14 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      # Only notify on failure — GitHub Pages deploys are low-priority
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: GitHub Pages Deploy
+          details: Tester form failed to deploy to GitHub Pages.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'

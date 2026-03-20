@@ -165,6 +165,12 @@ $RECYCLE.BIN/
 .idea/libraries/
 .idea/caches/
 
+# ─── Sprint & QA workflow ─────────────────────────────────────────────────────
+.sprint-state.json
+.sprint-prompts/
+.sprint-reports/
+.qa-reports/
+
 # ─── Tags / misc generated ───────────────────────────────────────────────────
 tags_temp.json
 *.tags

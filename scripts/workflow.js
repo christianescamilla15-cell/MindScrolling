@@ -6,6 +6,7 @@
  *   node scripts/workflow.js <command>
  *
  * Commands:
+ *   bootstrap    One-command new-developer setup
  *   dev          Start backend dev server
  *   test         Run all tests (backend syntax + tests)
  *   build:apk    Build Android APK
@@ -15,6 +16,8 @@
  *   release      Full release pipeline (test → build → docs → tag)
  *   status       Show project status
  *   doctor       Check dev environment health
+ *   sprint       Sprint orchestration workflow (start/status/next/complete/fail/reset/report)
+ *   qa           Run automated QA checks (--fix, --summary)
  */
 
 const { execSync, spawnSync } = require('child_process');
@@ -48,6 +51,11 @@ function header(text) {
 // ─── Commands ────────────────────────────────────────
 
 const commands = {
+  bootstrap() {
+    header('New Developer Bootstrap');
+    run('node scripts/bootstrap.js');
+  },
+
   dev() {
     header('Starting Backend Dev Server');
     run('npm run dev', BACKEND);
@@ -213,6 +221,23 @@ const commands = {
     run('node scripts/setup-sentry.js');
   },
 
+  sprint() {
+    // Pass all remaining args through to sprint-runner.js
+    // e.g. workflow.js sprint start "my goal"
+    //      workflow.js sprint status
+    //      workflow.js sprint next
+    const sprintArgs = process.argv.slice(3).join(' ');
+    header('Sprint Runner');
+    run(`node scripts/sprint-runner.js ${sprintArgs}`);
+  },
+
+  qa() {
+    // Pass flags through: --fix, --summary
+    const qaArgs = process.argv.slice(3).join(' ');
+    header('QA Runner');
+    run(`node scripts/qa-runner.js ${qaArgs}`);
+  },
+
   'full-release'() {
     header('Full Release Pipeline');
     console.log('\n  Step 1/6: Pre-release checks...');
@@ -256,6 +281,9 @@ if (!cmd || !commands[cmd]) {
 
   Usage: node scripts/workflow.js <command>
 
+  Onboarding:
+    bootstrap      One-command new-developer setup (deps + .env + hooks + verify)
+
   Development:
     dev            Start backend dev server
     test           Run all tests
@@ -279,6 +307,20 @@ if (!cmd || !commands[cmd]) {
     migrations     Show DB migration status
     sentry         Check Sentry configuration
     status         Show project status
+
+  Sprint Workflow:
+    sprint start "<goal>"   Start a new sprint with the given goal
+    sprint status           Show current sprint phase status
+    sprint next             Print prompt for next pending phase
+    sprint complete <phase> Mark a phase done (SCOPE/CONTRACT/BACKEND/MOBILE/QA/DOCS)
+    sprint fail <phase>     Mark a phase failed
+    sprint report           Print all handoff reports
+    sprint reset            Clear sprint state
+
+  QA:
+    qa                      Run all automated QA checks
+    qa --fix                Run checks + auto-fix (flutter format, etc.)
+    qa --summary            Print last QA report summary
   `);
   process.exit(0);
 }

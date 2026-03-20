@@ -1,0 +1,67 @@
+name: Discord Notify (Reusable)
+
+# Reusable workflow — call with:
+#   uses: ./.github/workflows/notify.yml
+#   with:
+#     status: success
+#     workflow_name: My Workflow
+#   secrets:
+#     DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+on:
+  workflow_call:
+    inputs:
+      status:
+        description: 'Job result: success or failure'
+        required: true
+        type: string
+      workflow_name:
+        description: 'Human-readable workflow name shown in the embed title'
+        required: true
+        type: string
+      details:
+        description: 'Optional extra context line included in the embed'
+        required: false
+        type: string
+        default: ''
+      environment:
+        description: 'Deployment environment label (e.g. production, staging)'
+        required: false
+        type: string
+        default: ''
+      notify_on_failure:
+        description: 'Ping @everyone when status is failure'
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      DISCORD_WEBHOOK_URL:
+        required: true
+
+jobs:
+  notify:
+    name: Send Discord Notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (needed for composite action)
+        uses: actions/checkout@v4
+
+      - name: Build notification details
+        id: meta
+        shell: bash
+        run: |
+          DETAILS="${{ inputs.details }}"
+          ENV="${{ inputs.environment }}"
+          if [ -n "$ENV" ]; then
+            DETAILS="Environment: \`${ENV}\`${DETAILS:+$'\n'}${DETAILS}"
+          fi
+          echo "details=${DETAILS}" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Discord
+        uses: ./.github/actions/notify-discord
+        with:
+          status: ${{ inputs.status }}
+          title: ${{ inputs.workflow_name }}
+          details: ${{ steps.meta.outputs.details }}
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: ${{ inputs.notify_on_failure }}

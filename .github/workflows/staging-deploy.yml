@@ -72,3 +72,23 @@ jobs:
               issue_number: context.issue.number,
               body
             });
+
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: success
+          title: Staging Deploy
+          details: "PR #${{ github.event.pull_request.number }} passed tests. Staging deployment triggered at https://mindscrolling-staging.onrender.com"
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Staging Deploy
+          details: "PR #${{ github.event.pull_request.number }} failed tests or staging deploy. Merge blocked."
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

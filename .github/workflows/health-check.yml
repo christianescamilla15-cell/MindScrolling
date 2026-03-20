@@ -21,7 +21,7 @@ jobs:
       - name: Run health check
         run: node scripts/health-monitor.js --endpoints
 
-      - name: Alert on failure
+      - name: Alert on failure — create GitHub issue
         if: failure()
         uses: actions/github-script@v7
         with:
@@ -29,7 +29,18 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '🚨 Backend Health Check Failed',
+              title: 'Backend Health Check Failed',
               body: `Backend health check failed at ${new Date().toISOString()}.\n\nCheck the [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.`,
               labels: ['bug', 'critical']
             });
+
+      # Only notify on failure — success would spam every 30 minutes
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Backend Health Check
+          details: "Production endpoint is unreachable or returned an unhealthy status. https://mindscrolling.onrender.com/health"
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

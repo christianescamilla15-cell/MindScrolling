@@ -1,5 +1,17 @@
 name: Deploy to Play Store
 
+# This workflow has two entry points:
+#
+#   1. workflow_dispatch  — manual one-off deploy triggered from the GitHub UI.
+#      Builds the AAB from scratch (useful for hotfixes outside the release tag flow).
+#
+#   2. workflow_call      — reusable entry point so other workflows (e.g. release.yml)
+#      can call this job and pass a pre-built AAB artifact instead of rebuilding.
+#
+# When called via workflow_call the caller MUST upload an artifact named
+# "app-release-aab" before invoking this workflow.  The build steps are then
+# skipped and the artifact is downloaded instead.
+
 on:
   workflow_dispatch:
     inputs:
@@ -12,36 +24,75 @@ on:
           - internal
           - beta
           - production
+      skip_build:
+        description: 'Skip AAB build and download artifact instead (artifact must exist in current run)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+  workflow_call:
+    inputs:
+      track:
+        description: 'Play Store track (internal / beta / production)'
+        required: false
+        type: string
+        default: 'internal'
+      # When called from release.yml the AAB artifact is already uploaded by
+      # build-aab.  Set to true to skip the Flutter build steps.
+      skip_build:
+        description: 'Skip Flutter build and download pre-built AAB artifact'
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      KEYSTORE_BASE64:
+        required: false   # Only needed when skip_build is false
+      KEY_PROPERTIES:
+        required: false   # Only needed when skip_build is false
+      PLAY_STORE_SERVICE_ACCOUNT_KEY:
+        required: true
 
 jobs:
   deploy:
-    name: Build & Deploy to Play Store
+    name: Deploy to Play Store (${{ inputs.track }})
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
+      # -----------------------------------------------------------------------
+      # Path A: caller provided a pre-built AAB (workflow_call with skip_build)
+      # -----------------------------------------------------------------------
+      - name: Download pre-built AAB artifact
+        if: ${{ inputs.skip_build == true || inputs.skip_build == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-aab
+          path: flutter_app/build/app/outputs/bundle/release
+
+      # -----------------------------------------------------------------------
+      # Path B: standalone manual dispatch — build the AAB here
+      # -----------------------------------------------------------------------
       - name: Setup Java
+        if: ${{ inputs.skip_build == false || inputs.skip_build == 'false' }}
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Setup Flutter
+        if: ${{ inputs.skip_build == false || inputs.skip_build == 'false' }}
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
           cache: true
 
-      - name: Setup Ruby (for Fastlane)
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: flutter_app/android
-
       - name: Decode keystore
+        if: ${{ inputs.skip_build == false || inputs.skip_build == 'false' }}
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
@@ -49,26 +100,60 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 --decode > flutter_app/android/app/upload-keystore.jks
           echo "$KEY_PROPERTIES" > flutter_app/android/key.properties
 
+      - name: Get dependencies
+        if: ${{ inputs.skip_build == false || inputs.skip_build == 'false' }}
+        working-directory: flutter_app
+        run: flutter pub get
+
+      - name: Build AAB
+        if: ${{ inputs.skip_build == false || inputs.skip_build == 'false' }}
+        working-directory: flutter_app
+        run: flutter build appbundle --release
+
+      - name: Upload AAB artifact (standalone build)
+        if: ${{ inputs.skip_build == false || inputs.skip_build == 'false' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 7
+
+      # -----------------------------------------------------------------------
+      # Common: Fastlane deploy (runs for both paths)
+      # -----------------------------------------------------------------------
+      - name: Setup Ruby (for Fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: flutter_app/android
+
       - name: Decode Play Store service account key
         env:
           PLAY_STORE_KEY: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_KEY }}
         run: |
           echo "$PLAY_STORE_KEY" > flutter_app/android/fastlane/play-store-key.json
 
-      - name: Get dependencies
-        working-directory: flutter_app
-        run: flutter pub get
-
-      - name: Build AAB
-        working-directory: flutter_app
-        run: flutter build appbundle --release
-
-      - name: Deploy to Play Store
+      - name: Deploy via Fastlane
         working-directory: flutter_app/android
-        run: bundle exec fastlane ${{ github.event.inputs.track }}
+        run: bundle exec fastlane ${{ inputs.track || github.event.inputs.track }}
 
-      - name: Upload AAB artifact
-        uses: actions/upload-artifact@v4
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
         with:
-          name: app-release-aab
-          path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+          status: success
+          title: Deploy to Play Store
+          details: "Deployed to Play Store track: `${{ inputs.track || github.event.inputs.track }}`"
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Deploy to Play Store
+          details: "Play Store deploy to track `${{ inputs.track || github.event.inputs.track }}` failed."
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

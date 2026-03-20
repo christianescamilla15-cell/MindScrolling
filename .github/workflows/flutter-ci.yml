@@ -43,3 +43,23 @@ jobs:
       - name: Build APK
         working-directory: flutter_app
         run: flutter build apk --release
+
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: success
+          title: Flutter CI
+          details: APK build and analysis completed successfully.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Flutter CI
+          details: Flutter APK build failed.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

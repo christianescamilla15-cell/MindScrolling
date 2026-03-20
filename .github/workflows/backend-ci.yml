@@ -62,3 +62,23 @@ jobs:
         run: npm test
         env:
           NODE_ENV: test
+
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: success
+          title: Backend CI
+          details: Lint, syntax checks, and tests all passed.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Backend CI
+          details: One or more backend lint/test steps failed.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

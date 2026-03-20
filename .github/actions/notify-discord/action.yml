@@ -1,0 +1,102 @@
+name: Notify Discord
+description: Send a Discord embed notification via webhook
+
+inputs:
+  status:
+    description: 'Job status: success or failure'
+    required: true
+  title:
+    description: 'Notification title (workflow name)'
+    required: true
+  details:
+    description: 'Optional extra details to include in the embed'
+    required: false
+    default: ''
+  webhook_url:
+    description: 'Discord webhook URL'
+    required: true
+  notify_everyone_on_failure:
+    description: 'Mention @everyone when status is failure'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Send Discord notification
+      shell: bash
+      env:
+        STATUS: ${{ inputs.status }}
+        TITLE: ${{ inputs.title }}
+        DETAILS: ${{ inputs.details }}
+        WEBHOOK_URL: ${{ inputs.webhook_url }}
+        NOTIFY_EVERYONE: ${{ inputs.notify_everyone_on_failure }}
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_REF_NAME: ${{ github.ref_name }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_SERVER_URL: ${{ github.server_url }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_RUN_ID: ${{ github.run_id }}
+      run: |
+        # Resolve color and status label
+        if [ "$STATUS" = "success" ]; then
+          COLOR=3066993
+          STATUS_LABEL="SUCCESS"
+          EMOJI="✅"
+        else
+          COLOR=15158332
+          STATUS_LABEL="FAILURE"
+          EMOJI="❌"
+        fi
+
+        SHORT_SHA="${GITHUB_SHA:0:7}"
+        RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+        COMMIT_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+
+        # Build optional @everyone mention
+        MENTION=""
+        if [ "$STATUS" = "failure" ] && [ "$NOTIFY_EVERYONE" = "true" ]; then
+          MENTION="@everyone "
+        fi
+
+        # Build optional details field — only included when non-empty
+        DETAILS_FIELD=""
+        if [ -n "$DETAILS" ]; then
+          DETAILS_ESCAPED=$(echo "$DETAILS" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))" 2>/dev/null || echo "\"$DETAILS\"")
+          DETAILS_FIELD=",{\"name\":\"Details\",\"value\":${DETAILS_ESCAPED},\"inline\":false}"
+        fi
+
+        PAYLOAD=$(cat <<JSON
+        {
+          "content": "${MENTION}",
+          "embeds": [{
+            "title": "${EMOJI} ${TITLE} — ${STATUS_LABEL}",
+            "color": ${COLOR},
+            "fields": [
+              {"name": "Branch", "value": "\`${GITHUB_REF_NAME}\`", "inline": true},
+              {"name": "Commit", "value": "[\`${SHORT_SHA}\`](${COMMIT_URL})", "inline": true},
+              {"name": "Actor", "value": "\`${GITHUB_ACTOR}\`", "inline": true},
+              {"name": "Run", "value": "[View logs](${RUN_URL})", "inline": false}
+              ${DETAILS_FIELD}
+            ],
+            "footer": {"text": "MindScrolling CI/CD"},
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }]
+        }
+        JSON
+        )
+
+        HTTP_STATUS=$(curl -s -o /tmp/discord_response.txt -w "%{http_code}" \
+          -H "Content-Type: application/json" \
+          -X POST \
+          -d "$PAYLOAD" \
+          "$WEBHOOK_URL")
+
+        echo "Discord webhook response: $HTTP_STATUS"
+        if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+          echo "Discord notification failed (HTTP $HTTP_STATUS):"
+          cat /tmp/discord_response.txt
+          # Do not fail the workflow because of a notification error
+          exit 0
+        fi
+        echo "Discord notification sent successfully."

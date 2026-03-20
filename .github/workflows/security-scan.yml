@@ -33,6 +33,16 @@ jobs:
           head: HEAD
           extra_args: --only-verified
 
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Security Scan — Secret Detection
+          details: Gitleaks or TruffleHog detected a potential secret in the repository.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'
+
   dependency-audit:
     name: Dependency Vulnerability Audit
     runs-on: ubuntu-latest
@@ -48,6 +58,16 @@ jobs:
         working-directory: backend
         run: npm audit --audit-level=high
         continue-on-error: true  # Report but don't block (upgrade separately)
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Security Scan — Dependency Audit
+          details: High-severity vulnerability found in backend dependencies.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'
 
   env-file-check:
     name: .env File Leak Check
@@ -89,3 +109,13 @@ jobs:
             exit 1
           fi
           echo "OK: No Anthropic keys found"
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Security Scan — .env Leak Check
+          details: A real .env file or hardcoded API key was detected in the repository.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

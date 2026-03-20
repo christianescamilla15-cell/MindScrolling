@@ -39,3 +39,14 @@ jobs:
             git commit -m "docs: auto-update API reference, changelog, and project status"
             git push
           fi
+
+      # Only notify on failure — successful doc generation is low-priority
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Auto-Generate Docs
+          details: Documentation generation or git push failed.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'

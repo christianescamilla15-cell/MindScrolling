@@ -67,3 +67,23 @@ jobs:
         with:
           name: app-release-ipa
           path: flutter_app/build/ios/ipa/*.ipa
+
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: success
+          title: iOS TestFlight Deploy
+          details: IPA built and uploaded to TestFlight successfully.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: iOS TestFlight Deploy
+          details: iOS build or TestFlight upload failed.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

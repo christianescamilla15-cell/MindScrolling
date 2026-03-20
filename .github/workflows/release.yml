@@ -4,10 +4,21 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store track to deploy to after build'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - beta
+          - production
 
 jobs:
   build-aab:
-    name: Build Release AAB
+    name: Build Release AAB + APK
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +37,14 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > flutter_app/android/app/upload-keystore.jks
+          echo "$KEY_PROPERTIES" > flutter_app/android/key.properties
+
       - name: Get dependencies
         working-directory: flutter_app
         run: flutter pub get
@@ -43,17 +62,107 @@ jobs:
         with:
           name: app-release-aab
           path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+          # Retained for 7 days — enough for the deploy job and any manual re-runs
+          retention-days: 7
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
+        # Only runs on tag pushes, not workflow_dispatch
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             flutter_app/build/app/outputs/bundle/release/app-release.aab
             flutter_app/build/app/outputs/flutter-apk/app-release.apk
           generate_release_notes: true
+
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: success
+          title: Release Build
+          details: AAB and APK built successfully. GitHub Release created.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Release Build
+          details: Release build failed — AAB or APK could not be produced.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'
+
+  deploy-playstore:
+    name: Deploy to Play Store
+    needs: build-aab
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Download the AAB built by the build job — no rebuild
+      - name: Download AAB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-aab
+          # Restore to the path the Fastlane lanes expect relative to flutter_app/android
+          path: flutter_app/build/app/outputs/bundle/release
+
+      - name: Setup Ruby (for Fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: flutter_app/android
+
+      - name: Decode Play Store service account key
+        env:
+          PLAY_STORE_KEY: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          echo "$PLAY_STORE_KEY" > flutter_app/android/fastlane/play-store-key.json
+
+      # Resolve the target track:
+      #   - tag push  → always 'internal' (safe default)
+      #   - manual dispatch → use the workflow_dispatch input
+      - name: Resolve deploy track
+        id: track
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "track=${{ github.event.inputs.track }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "track=internal" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy to Play Store (${{ steps.track.outputs.track }})
+        working-directory: flutter_app/android
+        run: bundle exec fastlane ${{ steps.track.outputs.track }}
+
+      - name: Notify Discord on success
+        if: success()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: success
+          title: Release — Play Store Deploy
+          details: "Deployed to Play Store track: `${{ steps.track.outputs.track }}`"
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'false'
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: ./.github/actions/notify-discord
+        with:
+          status: failure
+          title: Release — Play Store Deploy
+          details: "Play Store deploy to track `${{ steps.track.outputs.track }}` failed."
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          notify_everyone_on_failure: 'true'

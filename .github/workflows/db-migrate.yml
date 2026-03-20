@@ -1,0 +1,139 @@
+name: Database Migrations
+
+on:
+  # Manual trigger — actually runs migrations
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "yes" to confirm you want to run migrations against production'
+        required: true
+        default: ''
+      force:
+        description: 'Re-run already-applied migrations (use with extreme caution)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+  # Automatic trigger on migration file changes — dry-run only, never executes
+  push:
+    branches: [main]
+    paths:
+      - 'backend/src/db/migrations/**'
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 1: Dry-run on push (always safe — no execution)
+  # ──────────────────────────────────────────────────────────────────────────
+  dry-run:
+    name: Migration Dry Run
+    runs-on: ubuntu-latest
+    # Only runs on push events (not manual dispatch)
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Show pending migrations (dry-run)
+        run: node scripts/run-migrations.js --dry-run --yes
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 2: Migration status (runs on every manual dispatch, always first)
+  # ──────────────────────────────────────────────────────────────────────────
+  migration-status:
+    name: Migration Status
+    runs-on: ubuntu-latest
+    # Only runs on manual dispatch
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Show current migration status
+        run: node scripts/run-migrations.js --status --yes
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 3: Execute migrations (manual dispatch with confirm=yes only)
+  # ──────────────────────────────────────────────────────────────────────────
+  run-migrations:
+    name: Run Migrations
+    runs-on: ubuntu-latest
+    needs: migration-status
+    # Guard: manual dispatch AND confirm input must equal "yes"
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.confirm == 'yes'
+
+    environment:
+      name: production
+      url: https://mindscrolling.onrender.com/health
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run pending migrations
+        run: |
+          EXTRA_FLAGS=""
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            EXTRA_FLAGS="--force"
+          fi
+          node scripts/run-migrations.js --run --yes $EXTRA_FLAGS
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Verify health endpoint
+        run: |
+          echo "Checking backend health..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://mindscrolling.onrender.com/health)
+          if [ "$STATUS" = "200" ]; then
+            echo "Health check passed (HTTP $STATUS)"
+          else
+            echo "Health check FAILED (HTTP $STATUS)"
+            exit 1
+          fi
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 4: Safety gate — inform when manual dispatch is rejected
+  # ──────────────────────────────────────────────────────────────────────────
+  confirm-required:
+    name: Confirmation Required
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.confirm != 'yes'
+
+    steps:
+      - name: Fail with helpful message
+        run: |
+          echo "Migration execution was NOT triggered."
+          echo ""
+          echo "You must type 'yes' in the 'confirm' input field to run migrations."
+          echo "Re-run this workflow and type 'yes' to proceed."
+          exit 1
