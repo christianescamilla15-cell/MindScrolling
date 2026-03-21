@@ -246,11 +246,12 @@ export default async function quotesRoutes(fastify) {
       const categoryQueries = CATEGORIES.map(cat => {
         let q = supabase
           .from("quotes")
-          .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at")
+          .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at, content_type, tags")
           .eq("lang", effectiveLang)
           .eq("category", cat)
           // Mirror the get_feed_candidates filter: pack quotes never appear in the free feed
           .or("pack_name.eq.free,pack_name.is.null")
+          .eq("is_hidden_mode", false)
           .limit(perCategory);
         if (!isPremium) q = q.eq("is_premium", false);
         return q;
@@ -324,7 +325,12 @@ export default async function quotesRoutes(fastify) {
 
     const last = selected[selected.length - 1];
     return reply.send({
-      data:        selected.map(({ _score, _similarity, similarity, ...q }) => ({ ...q, author_slug: authorSlug(q.author) })),
+      data:        selected.map(({ _score, _similarity, similarity, ...q }) => ({
+        ...q,
+        author_slug: authorSlug(q.author),
+        content_type: q.content_type ?? 'philosophical',
+        tags: q.tags ?? [],
+      })),
       next_cursor: last?.id ?? null,
       has_more:    candidates.length >= poolSize,
       algorithm:   hasVector ? "hybrid" : "behavioural",   // visible in dev for debugging

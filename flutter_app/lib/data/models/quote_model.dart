@@ -12,6 +12,21 @@ class QuoteModel {
   /// Falls back to client-side derivation if absent (backward compat).
   final String authorSlug;
 
+  /// Content type: 'philosophical', 'science', 'coding'
+  final String contentType;
+
+  /// Finer categorization within category (e.g., 'physics', 'frontend', 'humanism')
+  final String? subCategory;
+
+  /// Emotional/thematic tags for Insight matching
+  final List<String> tags;
+
+  /// Which hidden mode locks this content (null = not locked)
+  final String? lockedBy;
+
+  /// Whether this content belongs to a hidden mode
+  final bool isHiddenMode;
+
   const QuoteModel({
     required this.id,
     required this.text,
@@ -22,10 +37,19 @@ class QuoteModel {
     required this.packName,
     required this.isPremium,
     required this.authorSlug,
+    this.contentType = 'philosophical',
+    this.subCategory,
+    this.tags = const [],
+    this.lockedBy,
+    this.isHiddenMode = false,
   });
 
   factory QuoteModel.fromJson(Map<String, dynamic> json) {
     final author = json['author'] as String? ?? '';
+    final rawTags = json['tags'];
+    final tags = rawTags is List
+        ? rawTags.whereType<String>().toList()
+        : <String>[];
     return QuoteModel(
       id: json['id'] as String? ?? '',
       text: json['text'] as String? ?? '',
@@ -36,6 +60,11 @@ class QuoteModel {
       packName: json['pack_name'] as String? ?? '',
       isPremium: json['is_premium'] as bool? ?? false,
       authorSlug: json['author_slug'] as String? ?? _deriveSlug(author),
+      contentType: json['content_type'] as String? ?? 'philosophical',
+      subCategory: json['sub_category'] as String?,
+      tags: tags,
+      lockedBy: json['locked_by'] as String?,
+      isHiddenMode: json['is_hidden_mode'] as bool? ?? false,
     );
   }
 
@@ -74,6 +103,11 @@ class QuoteModel {
       'pack_name': packName,
       'is_premium': isPremium,
       'author_slug': authorSlug,
+      'content_type': contentType,
+      if (subCategory != null) 'sub_category': subCategory,
+      'tags': tags,
+      if (lockedBy != null) 'locked_by': lockedBy,
+      'is_hidden_mode': isHiddenMode,
     };
   }
 
@@ -87,6 +121,11 @@ class QuoteModel {
     String? packName,
     bool? isPremium,
     String? authorSlug,
+    String? contentType,
+    String? subCategory,
+    List<String>? tags,
+    String? lockedBy,
+    bool? isHiddenMode,
   }) {
     return QuoteModel(
       id: id ?? this.id,
@@ -98,6 +137,11 @@ class QuoteModel {
       packName: packName ?? this.packName,
       isPremium: isPremium ?? this.isPremium,
       authorSlug: authorSlug ?? this.authorSlug,
+      contentType: contentType ?? this.contentType,
+      subCategory: subCategory ?? this.subCategory,
+      tags: tags ?? this.tags,
+      lockedBy: lockedBy ?? this.lockedBy,
+      isHiddenMode: isHiddenMode ?? this.isHiddenMode,
     );
   }
 

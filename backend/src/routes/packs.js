@@ -451,7 +451,7 @@ export default async function packsRoutes(fastify) {
     let query = supabase
       .from("quotes")
       .select(
-        "id, text, author, category, lang, swipe_dir, pack_name"
+        "id, text, author, category, lang, swipe_dir, pack_name, content_type, tags"
       )
       .eq("pack_name", id)
       .eq("lang", lang)
@@ -509,7 +509,12 @@ export default async function packsRoutes(fastify) {
         quote_count: totalInLang,
         access_reason: accessReason,
       },
-      data: pageQuotes.map(q => ({ ...q, author_slug: authorSlug(q.author) })),
+      data: pageQuotes.map(q => ({
+        ...q,
+        author_slug: authorSlug(q.author),
+        content_type: q.content_type ?? 'philosophical',
+        tags: q.tags ?? [],
+      })),
       next_cursor: nextCursor,
       has_more: hasMore,
       total_in_lang: totalInLang,
