@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../app/theme/colors.dart';
-import '../../app/theme/typography.dart';
+
 
 /// A 4-axis radar/spider chart for the philosophy map.
 ///
