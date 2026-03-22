@@ -18,6 +18,7 @@ import '../features/packs/pack_feed_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/insights/insights_screen.dart';
+import '../features/hidden_modes/quiz_screen.dart';
 import '../features/vault/vault_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -113,6 +114,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             packName: extra['packName'] as String? ?? packId,
             packColor: extra['packColor'] as String? ?? '#14B8A6',
           );
+        },
+      ),
+      GoRoute(
+        path: '/quiz/:mode',
+        builder: (context, state) {
+          final mode = state.pathParameters['mode'] ?? 'science';
+          return QuizScreen(mode: mode);
         },
       ),
       GoRoute(
