@@ -24,6 +24,11 @@ const VALID_CURRENCIES     = ["USD", "EUR", "GBP", "ARS", "BRL"];
 const RC_API_KEY = process.env.REVENUECAT_API_KEY;   // Secret API key from RevenueCat dashboard
 const RC_API_URL = "https://api.revenuecat.com/v1";
 
+// MED-01: Loud warning if RC key is missing in production
+if (!RC_API_KEY && process.env.NODE_ENV === "production") {
+  console.error("⚠️  CRITICAL: REVENUECAT_API_KEY not set in production — purchase verification DISABLED");
+}
+
 /**
  * Validate a purchase receipt with RevenueCat.
  * Returns { valid: true, entitlement } on success, { valid: false, reason } on failure.
@@ -78,8 +83,9 @@ async function validateReceiptWithRevenueCat(deviceId, store, purchaseToken, tra
     // No active entitlement found — purchase may be fraudulent
     return { valid: false, reason: "no_active_entitlement" };
   } catch (err) {
-    // Network error — fail open in production to avoid blocking legitimate purchases
-    return { valid: true, reason: "rc_network_error", dev: false };
+    // CRIT-01 fix: Fail CLOSED on network error — IAP system will re-deliver
+    // the unfinished transaction on next app launch for retry.
+    return { valid: false, reason: "rc_network_error" };
   }
 }
 
@@ -186,7 +192,11 @@ export default async function premiumRoutes(fastify) {
    * Starts a 7-day trial for the device. Only works once per device.
    * Unchanged from pre-Block B.
    */
-  fastify.post("/start-trial", async (request, reply) => {
+  fastify.post("/start-trial", {
+    config: {
+      rateLimit: { max: 3, timeWindow: 60_000, keyGenerator: (req) => req.deviceId ?? req.ip },
+    },
+  }, async (request, reply) => {
     const deviceId = request.deviceId;
 
     // Ensure user row exists
@@ -251,7 +261,11 @@ export default async function premiumRoutes(fastify) {
    * Verifies an Inside purchase. Unchanged from pre-Block B.
    * (Individual pack purchase uses POST /packs/:id/purchase/verify.)
    */
-  fastify.post("/purchase/verify", async (request, reply) => {
+  fastify.post("/purchase/verify", {
+    config: {
+      rateLimit: { max: 5, timeWindow: 60_000, keyGenerator: (req) => req.deviceId ?? req.ip },
+    },
+  }, async (request, reply) => {
     const deviceId = request.deviceId;
     const {
       store,
@@ -373,7 +387,11 @@ export default async function premiumRoutes(fastify) {
    *   - Also restores individual pack_purchases rows.
    *   - Returns restored_packs[] and updated message.
    */
-  fastify.post("/restore", async (request, reply) => {
+  fastify.post("/restore", {
+    config: {
+      rateLimit: { max: 5, timeWindow: 60_000, keyGenerator: (req) => req.deviceId ?? req.ip },
+    },
+  }, async (request, reply) => {
     const deviceId = request.deviceId;
     const {
       store,
