@@ -312,6 +312,41 @@ class FeedController extends StateNotifier<FeedState> {
   }
 
   // -------------------------------------------------------------------------
+  // Refinement card injection (swipe 50)
+  // -------------------------------------------------------------------------
+
+  static const _kRefinementShownKey = 'mindscroll_refinement_shown';
+  static const _kRefinementInjectionSwipe = 50;
+
+  /// Injects the refinement card into the feed at swipe 50.
+  /// Only shown once — idempotent after first injection.
+  Future<void> maybeInjectRefinementCard() async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyShown = prefs.getBool(_kRefinementShownKey) ?? false;
+    if (alreadyShown) return;
+
+    if (state.reflections < _kRefinementInjectionSwipe) return;
+
+    final alreadyInjected = state.items.any((i) => i.isRefinementCard);
+    if (alreadyInjected) return;
+
+    // Determine top category from swipe counts.
+    String topCategory = 'stoicism';
+    if (state.swipeCounts.isNotEmpty) {
+      topCategory = state.swipeCounts.entries
+          .reduce((a, b) => a.value >= b.value ? a : b)
+          .key;
+    }
+
+    final insertAt = (state.currentIndex + 1).clamp(0, state.items.length);
+    final updated = List<FeedItemModel>.from(state.items)
+      ..insert(insertAt, FeedItemModel.refinement({'topCategory': topCategory}));
+    state = state.copyWith(items: updated);
+
+    await prefs.setBool(_kRefinementShownKey, true);
+  }
+
+  // -------------------------------------------------------------------------
   // Soft paywall injection (Block B — US-B07)
   // -------------------------------------------------------------------------
 

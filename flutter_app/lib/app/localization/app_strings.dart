@@ -424,6 +424,33 @@ abstract class AppStrings {
   String get quizStart;
   String quizScore(int score, int total);
 
+  // ------------------------------------------------------------------
+  // Feature 1: Similar quotes
+  // ------------------------------------------------------------------
+  String get similarQuotesTitle;
+  String get similarQuotesEmpty;
+  String get moreLikeThis;
+
+  // ------------------------------------------------------------------
+  // Feature 2: Author affinity
+  // ------------------------------------------------------------------
+  String get topAuthors;
+  String get authorAffinityEmpty;
+
+  // ------------------------------------------------------------------
+  // Feature 4: Refinement card
+  // ------------------------------------------------------------------
+  String get refinementCardTitle;
+  String refinementCardBody(String topCategory);
+  String get refinementCardYes;
+  String get refinementCardNo;
+
+  // ------------------------------------------------------------------
+  // Feature 5: Mood streak
+  // ------------------------------------------------------------------
+  String get moodJourney;
+  String get moodJourneyEmpty;
+
   // API Contract keys (from contract section 7)
   String get packIncludedInInside;
   String get packGetFor;

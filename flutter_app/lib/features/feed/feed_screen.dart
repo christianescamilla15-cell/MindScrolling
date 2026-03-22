@@ -27,6 +27,7 @@ import 'feed_controller.dart';
 import 'feed_state.dart';
 import 'widgets/challenge_card.dart';
 import 'widgets/quote_card.dart';
+import 'widgets/refinement_card.dart';
 import 'widgets/reflection_card.dart';
 import 'widgets/soft_paywall_card.dart';
 import 'widgets/swipe_direction_overlay.dart';
@@ -294,6 +295,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           }
         }
       }
+      // Refinement card injection at swipe 50 (all users, once only).
+      if (prev != null &&
+          next.reflections >= 50 &&
+          prev.reflections < 50 &&
+          mounted) {
+        ref
+            .read(feedControllerProvider.notifier)
+            .maybeInjectRefinementCard()
+            .ignore();
+      }
       // Soft paywall injection at swipe 100 for Trial users (US-B07).
       if (prev != null &&
           next.reflections >= 100 &&
@@ -455,6 +466,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (item.isSoftPaywallCard) {
       return const SoftPaywallCard();
     }
+    if (item.isRefinementCard) {
+      final extra = item.extra ?? {};
+      final topCategory = extra['topCategory'] as String? ?? 'stoicism';
+      return RefinementCard(
+        topCategory: topCategory,
+        onDismiss: () => controller.advanceIndex(),
+      );
+    }
     if (item.isChallengeCard) {
       final extra = item.extra ?? {};
       return ChallengeCard(
@@ -477,6 +496,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         onSave: () => controller.onVaultSave(quote, isPremium: isPremium),
         onShare: () => ShareExportService.exportQuoteAsImage(context, quote),
         onExport: null,
+        onMoreLikeThis: () => context.push('/similar/${quote.id}'),
       );
     }
     return const SizedBox.shrink();
@@ -492,7 +512,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message, style: AppTypography.caption.copyWith(color: Colors.white)),
-        backgroundColor: color.withOpacity(0.9),
+        backgroundColor: color.withValues(alpha: 0.9),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -581,9 +601,9 @@ class _FreeSwipeChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.10),
+          color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.30), width: 1),
+          border: Border.all(color: color.withValues(alpha: 0.30), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -627,9 +647,9 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.25), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -745,7 +765,7 @@ class _LoadingShimmerState extends State<_LoadingShimmer>
                       style: AppTypography.quoteText.copyWith(
                         fontSize: 20,
                         height: 1.6,
-                        color: AppColors.textPrimary.withOpacity(0.88),
+                        color: AppColors.textPrimary.withValues(alpha: 0.88),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -769,7 +789,7 @@ class _LoadingShimmerState extends State<_LoadingShimmer>
                     height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 1.5,
-                      color: AppColors.stoicism.withOpacity(0.4),
+                      color: AppColors.stoicism.withValues(alpha: 0.4),
                     ),
                   ),
                   const SizedBox(width: 10),

@@ -698,6 +698,26 @@ class StringsEn implements AppStrings {
   @override String get packComingSoon          => 'Purchase coming soon';
   @override String get trialSoftPaywall        => 'Enjoying MindScrolling? Go Inside for \$4.99';
 
+  // Feature 1: Similar quotes
+  @override String get similarQuotesTitle  => 'Similar Quotes';
+  @override String get similarQuotesEmpty  => 'No similar quotes found';
+  @override String get moreLikeThis        => 'More like this';
+
+  // Feature 2: Author affinity
+  @override String get topAuthors          => 'Your Favourite Authors';
+  @override String get authorAffinityEmpty => 'Like or save quotes to discover your favourite authors';
+
+  // Feature 4: Refinement card
+  @override String get refinementCardTitle => 'We see a pattern';
+  @override String refinementCardBody(String topCategory) =>
+      'You are drawn to $topCategory quotes. Want to refine your experience?';
+  @override String get refinementCardYes   => 'Yes, update';
+  @override String get refinementCardNo    => 'I\'m good';
+
+  // Feature 5: Mood journey
+  @override String get moodJourney         => 'Your Mood Journey';
+  @override String get moodJourneyEmpty    => 'Submit a feeling to start your mood journey';
+
   // API Contract keys
   @override String get packIncludedInInside    => 'Included in Inside';
   @override String get packGetFor              => 'Get for \$2.99';

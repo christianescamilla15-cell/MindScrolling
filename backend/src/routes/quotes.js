@@ -1,6 +1,6 @@
 import { supabase }              from "../db/client.js";
 import { getPreferenceVector }   from "../services/embeddings.js";
-import { authorSlug }            from "../utils/validation.js";
+import { authorSlug, normalizeLang, UUID_RE } from "../utils/validation.js";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -334,6 +334,244 @@ export default async function quotesRoutes(fastify) {
       next_cursor: last?.id ?? null,
       has_more:    candidates.length >= poolSize,
       algorithm:   hasVector ? "hybrid" : "behavioural",   // visible in dev for debugging
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * GET /quotes/daily-pick?lang=en
+   *
+   * Returns a single personalized daily quote for the device.
+   * The pick is cached in `analytics_events` (event_type='daily_pick') so the
+   * same quote is served for the entire calendar day regardless of how many
+   * times the endpoint is called.
+   *
+   * Algorithm:
+   *   1. If a pick already exists for today + deviceId, return it immediately.
+   *   2. If the device has a preference vector, use match_quotes (pool_size=5)
+   *      and take the top result → algorithm: 'semantic'.
+   *   3. Otherwise pick a random premium quote → algorithm: 'random'.
+   *
+   * Response: { quote: QuoteModel, picked_at: ISO string, algorithm: string }
+   */
+  fastify.get("/daily-pick", async (request, reply) => {
+    const { lang = "en" } = request.query;
+    const { deviceId }    = request;
+    const effectiveLang   = normalizeLang(lang);
+    const today           = new Date().toISOString().slice(0, 10);   // "YYYY-MM-DD"
+
+    // ── 1. Check cache: has a pick already been made today? ──────────────────
+    const { data: cached, error: cacheErr } = await supabase
+      .from("analytics_events")
+      .select("properties, created_at")
+      .eq("device_id", deviceId)
+      .eq("event_type", "daily_pick")
+      .gte("created_at", `${today}T00:00:00.000Z`)
+      .lt("created_at",  `${today}T23:59:59.999Z`)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (cacheErr) {
+      fastify.log.warn({ err: cacheErr }, "daily-pick: cache lookup failed");
+    }
+
+    if (cached?.properties?.quote_id) {
+      // Return the cached quote
+      const { data: cachedQuote, error: quoteErr } = await supabase
+        .from("quotes")
+        .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
+        .eq("id", cached.properties.quote_id)
+        .maybeSingle();
+
+      if (!quoteErr && cachedQuote) {
+        return reply.send({
+          quote: {
+            ...cachedQuote,
+            author_slug:  authorSlug(cachedQuote.author),
+            content_type: cachedQuote.content_type ?? "philosophical",
+            tags:         cachedQuote.tags ?? [],
+          },
+          picked_at: cached.created_at,
+          algorithm: cached.properties.algorithm ?? "cached",
+        });
+      }
+      // Cached quote ID no longer valid — fall through to generate a new pick
+    }
+
+    // ── 2. Generate a new pick ────────────────────────────────────────────────
+    const prefVector = await getPreferenceVector(deviceId);
+    const hasVector  = Array.isArray(prefVector) && prefVector.length > 0;
+
+    let pickedQuote = null;
+    let algorithm   = "random";
+
+    if (hasVector) {
+      // Semantic: use ANN search with pool_size=5, take the closest match
+      const { data: semanticPool, error: rpcErr } = await supabase.rpc("match_quotes", {
+        query_embedding: prefVector,
+        p_device_id:     deviceId,
+        p_lang:          effectiveLang,
+        p_is_premium:    true,
+        p_pool_size:     5,
+      });
+
+      if (!rpcErr && semanticPool?.length > 0) {
+        pickedQuote = semanticPool[0];
+        algorithm   = "semantic";
+      }
+    }
+
+    if (!pickedQuote) {
+      // Random fallback: a single premium quote in the requested language
+      const { data: randomPool, error: randErr } = await supabase
+        .from("quotes")
+        .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
+        .eq("lang", effectiveLang)
+        .eq("is_hidden_mode", false)
+        .limit(50);
+
+      if (randErr || !randomPool?.length) {
+        return reply.status(500).send({ error: "Failed to fetch daily pick", code: "INTERNAL_ERROR" });
+      }
+
+      pickedQuote = randomPool[Math.floor(Math.random() * randomPool.length)];
+    }
+
+    // ── 3. Cache the pick as an analytics event ───────────────────────────────
+    const pickedAt = new Date().toISOString();
+    supabase
+      .from("analytics_events")
+      .insert({
+        device_id:  deviceId,
+        event_type: "daily_pick",
+        properties: { quote_id: pickedQuote.id, algorithm, lang: effectiveLang },
+      })
+      .then(() => {})
+      .catch((err) => {
+        fastify.log.warn({ err }, "daily-pick: failed to persist pick cache");
+      });
+
+    return reply.send({
+      quote: {
+        ...pickedQuote,
+        author_slug:  authorSlug(pickedQuote.author),
+        content_type: pickedQuote.content_type ?? "philosophical",
+        tags:         pickedQuote.tags ?? [],
+        // Strip internal similarity field if it came from RPC
+        similarity:   undefined,
+      },
+      picked_at: pickedAt,
+      algorithm,
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * GET /quotes/:id/similar?lang=en&limit=5
+   *
+   * Returns quotes semantically similar to the given source quote.
+   *
+   * Algorithm:
+   *   1. Fetch the source quote's embedding.
+   *   2. If embedding exists: call match_quotes (pool_size = limit*3), filter
+   *      out the source quote itself → algorithm: 'semantic'.
+   *   3. If no embedding: same-category + overlapping-tags fallback
+   *      → algorithm: 'category_tags'.
+   *
+   * Response: { source_id: string, data: QuoteModel[], algorithm: string }
+   */
+  fastify.get("/:id/similar", async (request, reply) => {
+    const { id }          = request.params;
+    const { lang = "en", limit = 5 } = request.query;
+    const { deviceId }    = request;
+    const effectiveLang   = normalizeLang(lang);
+    const take            = Math.min(Math.max(Number(limit) || 5, 1), 20);
+
+    if (!UUID_RE.test(id)) {
+      return reply.status(400).send({ error: "Invalid quote id", code: "INVALID_ID" });
+    }
+
+    // ── 1. Fetch source quote (need embedding, category, tags) ────────────────
+    const { data: source, error: srcErr } = await supabase
+      .from("quotes")
+      .select("id, category, tags, embedding")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (srcErr) {
+      fastify.log.error({ err: srcErr }, "similar: DB error fetching source quote");
+      return reply.status(500).send({ error: "Failed to fetch quote", code: "INTERNAL_ERROR" });
+    }
+
+    if (!source) {
+      return reply.status(404).send({ error: "Quote not found", code: "NOT_FOUND" });
+    }
+
+    const hasEmbedding = Array.isArray(source.embedding) && source.embedding.length > 0;
+    const poolSize     = take * 3;
+
+    // ── 2a. Semantic path ─────────────────────────────────────────────────────
+    if (hasEmbedding) {
+      const { data: pool, error: rpcErr } = await supabase.rpc("match_quotes", {
+        query_embedding: source.embedding,
+        p_device_id:     deviceId,
+        p_lang:          effectiveLang,
+        p_is_premium:    true,
+        p_pool_size:     poolSize + 1,   // +1 because we filter out the source
+      });
+
+      if (!rpcErr && pool?.length > 0) {
+        const similar = pool
+          .filter(q => q.id !== id)
+          .slice(0, take)
+          .map(({ similarity, ...q }) => ({
+            ...q,
+            author_slug:  authorSlug(q.author),
+            content_type: q.content_type ?? "philosophical",
+            tags:         q.tags ?? [],
+          }));
+
+        return reply.send({ source_id: id, data: similar, algorithm: "semantic" });
+      }
+    }
+
+    // ── 2b. Fallback: same category + overlapping tags ────────────────────────
+    const sourceTags = source.tags ?? [];
+
+    let fallbackQuery = supabase
+      .from("quotes")
+      .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
+      .eq("lang", effectiveLang)
+      .eq("is_hidden_mode", false)
+      .eq("category", source.category)
+      .neq("id", id)
+      .limit(poolSize);
+
+    // Narrow to overlapping tags only when the source quote has tags
+    if (sourceTags.length > 0) {
+      fallbackQuery = fallbackQuery.overlaps("tags", sourceTags);
+    }
+
+    const { data: fallbackPool, error: fallErr } = await fallbackQuery;
+
+    if (fallErr) {
+      fastify.log.error({ err: fallErr }, "similar: DB error in fallback query");
+      return reply.status(500).send({ error: "Failed to fetch similar quotes", code: "INTERNAL_ERROR" });
+    }
+
+    // Shuffle for variety and trim to requested limit
+    const shuffled = (fallbackPool ?? []).sort(() => Math.random() - 0.5).slice(0, take);
+
+    return reply.send({
+      source_id: id,
+      data: shuffled.map(q => ({
+        ...q,
+        author_slug:  authorSlug(q.author),
+        content_type: q.content_type ?? "philosophical",
+        tags:         q.tags ?? [],
+      })),
+      algorithm: "category_tags",
     });
   });
 }

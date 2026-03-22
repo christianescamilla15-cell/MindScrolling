@@ -1,9 +1,33 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../data/models/quote_model.dart';
+import '../ambient/ambient_tracks.dart';
 import '../hidden_modes/hidden_mode_detector.dart';
 import '../settings/settings_controller.dart';
+import 'emotional_theme.dart';
+
+// ---------------------------------------------------------------------------
+// Mood history entry
+// ---------------------------------------------------------------------------
+
+/// One persisted mood submission: the detected tags and the ISO date string.
+class MoodEntry {
+  final List<String> tags;
+  final String date;
+
+  const MoodEntry({required this.tags, required this.date});
+
+  factory MoodEntry.fromJson(Map<String, dynamic> json) => MoodEntry(
+        tags: (json['tags'] as List?)?.whereType<String>().toList() ?? [],
+        date: json['date'] as String? ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {'tags': tags, 'date': date};
+}
 
 // ---------------------------------------------------------------------------
 // State
@@ -21,6 +45,15 @@ class InsightState {
   /// Detected hidden mode intent: 'science', 'coding', or null.
   final String? detectedHiddenMode;
 
+  /// Theme derived from [detectedTags] after a successful submission.
+  final EmotionalTheme emotionalTheme;
+
+  /// Last 30 mood submissions for the mood streak row (Feature 5).
+  final List<MoodEntry> moodHistory;
+
+  /// Suggested ambient track ID based on detected emotion (null = no suggestion).
+  final String? suggestedTrackId;
+
   const InsightState({
     this.isLoading = false,
     this.inputText,
@@ -30,6 +63,9 @@ class InsightState {
     this.error,
     this.hasSubmitted = false,
     this.detectedHiddenMode,
+    this.emotionalTheme = EmotionalTheme.defaultTheme,
+    this.moodHistory = const [],
+    this.suggestedTrackId,
   });
 
   InsightState copyWith({
@@ -41,6 +77,9 @@ class InsightState {
     String? error,
     bool? hasSubmitted,
     String? detectedHiddenMode,
+    EmotionalTheme? emotionalTheme,
+    List<MoodEntry>? moodHistory,
+    String? suggestedTrackId,
   }) {
     return InsightState(
       isLoading: isLoading ?? this.isLoading,
@@ -51,6 +90,9 @@ class InsightState {
       error: error,
       hasSubmitted: hasSubmitted ?? this.hasSubmitted,
       detectedHiddenMode: detectedHiddenMode ?? this.detectedHiddenMode,
+      emotionalTheme: emotionalTheme ?? this.emotionalTheme,
+      moodHistory: moodHistory ?? this.moodHistory,
+      suggestedTrackId: suggestedTrackId ?? this.suggestedTrackId,
     );
   }
 }
@@ -102,6 +144,26 @@ class InsightController extends StateNotifier<InsightState> {
       // Detect hidden mode intent from user text
       final hiddenModeIntent = HiddenModeDetector.detectIntent(text.trim());
 
+      // Suggest ambient track based on emotion
+      final suggestedTrack = trackForEmotion(detectedTags);
+
+      // Derive emotional theme from tags
+      final theme = EmotionalTheme.fromTags(detectedTags);
+
+      // Persist mood entry locally for mood streak
+      await _persistMoodEntry(detectedTags);
+
+      // Fire-and-forget: save mood to backend
+      try {
+        final api = ref.read(apiClientProvider);
+        final lang = ref.read(settingsStateProvider).lang;
+        api.post('/insight/mood', body: {
+          'text': text.trim(),
+          'tags': detectedTags,
+          'lang': lang,
+        }).catchError((_) => <String, dynamic>{});
+      } catch (_) {}
+
       state = state.copyWith(
         isLoading: false,
         quoteOfDay: quoteOfDay,
@@ -109,6 +171,9 @@ class InsightController extends StateNotifier<InsightState> {
         detectedTags: detectedTags,
         hasSubmitted: true,
         detectedHiddenMode: hiddenModeIntent,
+        emotionalTheme: theme,
+        suggestedTrackId: suggestedTrack?.id,
+        moodHistory: await _loadMoodHistory(),
       );
     } catch (e) {
       state = state.copyWith(
@@ -116,6 +181,36 @@ class InsightController extends StateNotifier<InsightState> {
         error: e.toString(),
       );
     }
+  }
+
+  // ── Mood history persistence ────────────────────────────────────────────
+
+  static const _kMoodHistoryKey = 'mindscroll_mood_history';
+  static const _maxMoodEntries = 30;
+
+  Future<void> _persistMoodEntry(List<String> tags) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kMoodHistoryKey);
+    final List<dynamic> existing = raw != null ? jsonDecode(raw) as List : [];
+    existing.insert(0, MoodEntry(
+      tags: tags,
+      date: DateTime.now().toIso8601String(),
+    ).toJson());
+    if (existing.length > _maxMoodEntries) {
+      existing.removeRange(_maxMoodEntries, existing.length);
+    }
+    await prefs.setString(_kMoodHistoryKey, jsonEncode(existing));
+  }
+
+  Future<List<MoodEntry>> _loadMoodHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kMoodHistoryKey);
+    if (raw == null) return [];
+    final List<dynamic> list = jsonDecode(raw) as List;
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map((e) => MoodEntry.fromJson(e))
+        .toList();
   }
 
   /// Clear the current insight and reset to input state.

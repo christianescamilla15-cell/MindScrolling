@@ -49,7 +49,7 @@ export default async function insightsRoutes(fastify) {
     }
 
     // ── Parallel fetch (each query is safe — missing tables don't crash) ──
-    const [prefsResult, snapResult, likedResult, userResult] = await Promise.all([
+    const [prefsResult, snapResult, likedResult, userResult, moodResult] = await Promise.all([
       safeQuery(() =>
         supabase
           .from("user_preferences")
@@ -83,6 +83,18 @@ export default async function insightsRoutes(fastify) {
           .select("streak, total_reflections")
           .eq("device_id", deviceId)
           .maybeSingle()
+      ),
+
+      // Mood entries from the last 7 days (for emotional journey in the prompt)
+      safeQuery(() =>
+        supabase
+          .from("analytics_events")
+          .select("properties, created_at")
+          .eq("device_id", deviceId)
+          .eq("event_type", "mood_entry")
+          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+          .order("created_at", { ascending: true })
+          .limit(20)
       ),
     ]);
 
@@ -124,6 +136,18 @@ export default async function insightsRoutes(fastify) {
       .map(r => r.quotes)
       .filter(Boolean);
 
+    // ── Build emotional journey summary from mood entries ────────────────────
+    const moodEntries = moodResult.data ?? [];
+    let moodJourney = null;
+    if (moodEntries.length > 0) {
+      const moodLines = moodEntries.map(row => {
+        const tags = (row.properties?.tags ?? []).join(", ");
+        const day = new Date(row.created_at).toLocaleDateString("en", { weekday: "short" });
+        return `${day}: ${row.properties?.text ?? ""} (${tags})`;
+      });
+      moodJourney = moodLines.join("\n");
+    }
+
     // ── Generate or return cached insight ─────────────────────────────────────
     let insight = null;
     try {
@@ -134,6 +158,7 @@ export default async function insightsRoutes(fastify) {
         streak:           user?.streak            ?? 0,
         totalReflections: user?.total_reflections  ?? 0,
         lang,
+        moodJourney,
       });
     } catch (err) {
       fastify.log.warn({ err }, "Failed to generate AI insight");

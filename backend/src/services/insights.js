@@ -20,7 +20,7 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
-function buildPrompt({ topCategory, scores, recentQuotes, streak, totalReflections, lang }) {
+function buildPrompt({ topCategory, scores, recentQuotes, streak, totalReflections, lang, moodJourney }) {
   const isSpanish = lang === "es";
 
   const catLabelsEn = {
@@ -63,15 +63,18 @@ Total reflections: ${totalReflections}
 Quotes they saved or liked this week:
 ${quoteSamples}
 
+${ moodJourney ? `Emotional journey this week:
+${moodJourney}
+` : '' }
 Write a personalised philosophical insight (2–3 sentences) that:
 1. Acknowledges the specific philosophical path visible in their data
-2. Offers one concrete, actionable reflection or question to sit with
+2. ${moodJourney ? 'Weaves in their emotional journey — acknowledge how their moods shifted' : 'Offers one concrete, actionable reflection or question to sit with'}
 3. Feels like it comes from a wise human voice, not an AI
 
 Rules:
 - No hashtags, no emojis, no lists
 - Reference their dominant theme naturally
-- Be direct and grounded — avoid vague inspiration-speak
+- ${moodJourney ? 'Mention specific emotions they explored (e.g., "your move from anxiety toward calm suggests...")' : 'Be direct and grounded — avoid vague inspiration-speak'}
 - Maximum 3 sentences`;
 }
 

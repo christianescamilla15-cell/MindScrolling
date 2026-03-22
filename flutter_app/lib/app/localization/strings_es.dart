@@ -699,6 +699,26 @@ class StringsEs implements AppStrings {
   @override String get packComingSoon          => 'Compra próximamente';
   @override String get trialSoftPaywall        => '¿Disfrutas MindScrolling? Pásate a Inside por \$4.99';
 
+  // Feature 1: Similar quotes
+  @override String get similarQuotesTitle  => 'Frases similares';
+  @override String get similarQuotesEmpty  => 'No se encontraron frases similares';
+  @override String get moreLikeThis        => 'Más como esta';
+
+  // Feature 2: Author affinity
+  @override String get topAuthors          => 'Tus autores favoritos';
+  @override String get authorAffinityEmpty => 'Da me gusta o guarda frases para descubrir tus autores favoritos';
+
+  // Feature 4: Refinement card
+  @override String get refinementCardTitle => 'Vemos un patrón';
+  @override String refinementCardBody(String topCategory) =>
+      'Te atraen las frases de $topCategory. ¿Quieres refinar tu experiencia?';
+  @override String get refinementCardYes   => 'Sí, actualizar';
+  @override String get refinementCardNo    => 'Estoy bien';
+
+  // Feature 5: Mood journey
+  @override String get moodJourney         => 'Tu viaje emocional';
+  @override String get moodJourneyEmpty    => 'Envía una emoción para comenzar tu viaje';
+
   // API Contract keys
   @override String get packIncludedInInside    => 'Incluido en Inside';
   @override String get packGetFor              => 'Obtener por \$2.99';

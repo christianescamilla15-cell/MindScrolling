@@ -22,6 +22,7 @@ class QuoteCard extends StatelessWidget {
     required this.onSave,
     required this.onShare,
     this.onExport,
+    this.onMoreLikeThis,
   });
 
   final QuoteModel quote;
@@ -31,6 +32,7 @@ class QuoteCard extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onShare;
   final VoidCallback? onExport;
+  final VoidCallback? onMoreLikeThis;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,7 @@ class QuoteCard extends StatelessWidget {
           border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withOpacity(0.10),
+              color: accentColor.withValues(alpha: 0.10),
               blurRadius: 40,
               spreadRadius: -8,
               offset: const Offset(0, 12),
@@ -73,8 +75,8 @@ class QuoteCard extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        accentColor.withOpacity(0.8),
-                        accentColor.withOpacity(0.2),
+                        accentColor.withValues(alpha: 0.8),
+                        accentColor.withValues(alpha: 0.2),
                       ],
                     ),
                   ),
@@ -92,7 +94,7 @@ class QuoteCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        accentColor.withOpacity(0.06),
+                        accentColor.withValues(alpha: 0.06),
                         Colors.transparent,
                       ],
                     ),
@@ -154,7 +156,7 @@ class QuoteCard extends StatelessWidget {
                     Container(
                       width: 40,
                       height: 1,
-                      color: accentColor.withOpacity(0.2),
+                      color: accentColor.withValues(alpha: 0.2),
                     ),
 
                     const SizedBox(height: 20),
@@ -171,6 +173,21 @@ class QuoteCard extends StatelessWidget {
                             onShare: onShare,
                           ),
                         ),
+                        if (onMoreLikeThis != null) ...[
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: onMoreLikeThis,
+                            behavior: HitTestBehavior.opaque,
+                            child: const Padding(
+                              padding: EdgeInsets.all(6),
+                              child: Icon(
+                                Icons.auto_awesome_mosaic,
+                                size: 20,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ),
+                        ],
                         if (onExport != null) ...[
                           const SizedBox(width: 4),
                           GestureDetector(

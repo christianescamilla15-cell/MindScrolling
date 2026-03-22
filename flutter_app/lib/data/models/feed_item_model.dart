@@ -1,6 +1,6 @@
 import 'quote_model.dart';
 
-enum FeedItemType { quote, reflectionCard, challengeCard, evolutionCard, softPaywallCard }
+enum FeedItemType { quote, reflectionCard, challengeCard, evolutionCard, softPaywallCard, refinementCard }
 
 class FeedItemModel {
   final FeedItemType type;
@@ -40,11 +40,19 @@ class FeedItemModel {
         quote = null,
         extra = null;
 
+  /// Refinement card injected at swipe 50.
+  /// [extra] must contain {'topCategory': String}.
+  const FeedItemModel.refinement(Map<String, dynamic> data)
+      : type = FeedItemType.refinementCard,
+        quote = null,
+        extra = data;
+
   bool get isQuote => type == FeedItemType.quote;
   bool get isReflectionCard => type == FeedItemType.reflectionCard;
   bool get isChallengeCard => type == FeedItemType.challengeCard;
   bool get isEvolutionCard => type == FeedItemType.evolutionCard;
   bool get isSoftPaywallCard => type == FeedItemType.softPaywallCard;
+  bool get isRefinementCard => type == FeedItemType.refinementCard;
 
   @override
   String toString() => 'FeedItemModel(type: $type, quoteId: ${quote?.id})';

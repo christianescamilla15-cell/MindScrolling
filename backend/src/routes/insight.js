@@ -347,4 +347,109 @@ export default async function insightRoutes(fastify) {
       data: selected.map(({ _score, ...q }) => ({ ...q, author_slug: authorSlug(q.author) })),
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * POST /insight/mood
+   *
+   * Save a mood entry for the authenticated device.
+   * Stored as an analytics_events row with event_type='mood_entry'.
+   *
+   * Body: { text: string, tags?: string[], lang?: string }
+   * Response: { ok: true, entry_id: string }
+   */
+  fastify.post("/mood", async (request, reply) => {
+    const { deviceId } = request;
+    const { text, tags = [], lang = "en" } = request.body ?? {};
+
+    if (!text || typeof text !== "string" || text.trim().length === 0) {
+      return reply.status(400).send({ error: "text is required", code: "MISSING_FIELD" });
+    }
+
+    if (!Array.isArray(tags)) {
+      return reply.status(400).send({ error: "tags must be an array", code: "INVALID_FIELD" });
+    }
+
+    const effectiveLang = normalizeLang(lang);
+
+    const { data: inserted, error: insertErr } = await supabase
+      .from("analytics_events")
+      .insert({
+        device_id:  deviceId,
+        event_type: "mood_entry",
+        properties: {
+          text:  text.trim(),
+          tags:  tags.map(t => String(t).trim()).filter(Boolean),
+          lang:  effectiveLang,
+        },
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (insertErr) {
+      fastify.log.error({ err: insertErr }, "insight/mood: DB error on insert");
+      return reply.status(500).send({ error: "Failed to save mood entry", code: "INTERNAL_ERROR" });
+    }
+
+    return reply.status(201).send({ ok: true, entry_id: inserted?.id ?? null });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * GET /insight/mood-history?days=30
+   *
+   * Returns mood entries for the last N calendar days (default 30, max 90).
+   * Also computes a mood_summary containing the top 5 most-used tags.
+   *
+   * Response: {
+   *   entries: [{ id, text, tags, lang, created_at }],
+   *   mood_summary: { top_tags: string[] }
+   * }
+   */
+  fastify.get("/mood-history", async (request, reply) => {
+    const { deviceId } = request;
+    const { days = 30 } = request.query;
+    const dayCount = Math.min(Math.max(Number(days) || 30, 1), 90);
+
+    const since = new Date(Date.now() - dayCount * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: rows, error: fetchErr } = await supabase
+      .from("analytics_events")
+      .select("id, properties, created_at")
+      .eq("device_id", deviceId)
+      .eq("event_type", "mood_entry")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false });
+
+    if (fetchErr) {
+      fastify.log.error({ err: fetchErr }, "insight/mood-history: DB error");
+      return reply.status(500).send({ error: "Failed to fetch mood history", code: "INTERNAL_ERROR" });
+    }
+
+    const entries = (rows ?? []).map(row => ({
+      id:         row.id,
+      text:       row.properties?.text  ?? "",
+      tags:       row.properties?.tags  ?? [],
+      lang:       row.properties?.lang  ?? "en",
+      created_at: row.created_at,
+    }));
+
+    // Compute top_tags: tally all tags across entries, return up to 5
+    const tagTally = {};
+    for (const entry of entries) {
+      for (const tag of entry.tags) {
+        tagTally[tag] = (tagTally[tag] ?? 0) + 1;
+      }
+    }
+
+    const top_tags = Object.entries(tagTally)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([tag]) => tag);
+
+    return reply.send({
+      entries,
+      mood_summary: { top_tags },
+    });
+  });
 }

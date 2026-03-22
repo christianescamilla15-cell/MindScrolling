@@ -58,3 +58,42 @@ AmbientTrack? trackById(String id) {
     return null;
   }
 }
+
+/// Maps emotional tags to the most fitting ambient track.
+/// Used by the Insight panel to adapt audio to the user's emotional state.
+///
+/// Mapping:
+///   calm, mindfulness, gratitude, self_love → 'relax'
+///   focus, discipline, motivation, learning → 'deep_focus'
+///   reflection, sadness, existence, meaning → 'night_reflection'
+AmbientTrack? trackForEmotion(List<String> tags) {
+  const emotionToTrack = {
+    'calm': 'relax',
+    'mindfulness': 'relax',
+    'gratitude': 'relax',
+    'self_love': 'relax',
+    'peace': 'relax',
+    'focus': 'deep_focus',
+    'discipline': 'deep_focus',
+    'motivation': 'deep_focus',
+    'learning': 'deep_focus',
+    'curiosity': 'deep_focus',
+    'courage': 'deep_focus',
+    'self_improvement': 'deep_focus',
+    'reflection': 'night_reflection',
+    'sadness': 'night_reflection',
+    'existence': 'night_reflection',
+    'meaning': 'night_reflection',
+    'wisdom': 'night_reflection',
+    'anxiety': 'relax',
+    'inner_strength': 'deep_focus',
+    'resilience': 'deep_focus',
+    'creativity': 'night_reflection',
+  };
+
+  for (final tag in tags) {
+    final trackId = emotionToTrack[tag];
+    if (trackId != null) return trackById(trackId);
+  }
+  return null;
+}
