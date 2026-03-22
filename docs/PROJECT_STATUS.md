@@ -1,18 +1,18 @@
 # MindScrolling — Project Status
 
-> Auto-generated on 2026-03-20
+> Auto-generated on 2026-03-22
 
 ## Overview
 
 | Metric | Value |
 |--------|-------|
 | App Version | `1.2.1+8` |
-| Total Commits | 89 |
-| Last Commit | `ba3187e fix(ci): resolve all CI failures + add self-healing ci-doctor workflow` |
-| Backend Files (JS) | 33 |
-| Flutter Files (Dart) | 127 |
-| API Route Files | 16 |
-| DB Migrations | 20 |
+| Total Commits | 106 |
+| Last Commit | `b30f032 feat: hybrid semantic matching for Insight + idempotent migration v2` |
+| Backend Files (JS) | 35 |
+| Flutter Files (Dart) | 141 |
+| API Route Files | 18 |
+| DB Migrations | 25 |
 
 ## Architecture
 
@@ -22,7 +22,7 @@
 - **AI**: Claude API for weekly insights
 - **Payments**: RevenueCat + Google Play Billing
 
-## API Endpoints: 16 route files
+## API Endpoints: 18 route files
 
 See [API_REFERENCE.md](API_REFERENCE.md) for full details.
 
