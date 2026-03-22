@@ -718,6 +718,28 @@ class StringsEn implements AppStrings {
   @override String get moodJourney         => 'Your Mood Journey';
   @override String get moodJourneyEmpty    => 'Submit a feeling to start your mood journey';
 
+  // Practice Console
+  @override String get practiceConsole         => 'Practice Console';
+  @override String get practiceConsoleSubtitle => 'Sharpen your coding skills';
+  @override String get selectLanguage          => 'Language';
+  @override String get selectDifficulty        => 'Difficulty';
+  @override String get exercisePoints          => 'Points';
+  @override String get exerciseTime            => 'Est. time';
+  @override String get exerciseHint            => 'Hint';
+  @override String get submitCode              => 'Submit Code';
+  @override String get skipExercise            => 'Skip';
+  @override String get correct                 => 'Correct!';
+  @override String get incorrect               => 'Incorrect';
+  @override String get noExercises             => 'No exercises found';
+  @override String get beginner                => 'Beginner';
+  @override String get easy                    => 'Easy';
+  @override String get medium                  => 'Medium';
+  @override String get hard                    => 'Hard';
+  @override String get advanced                => 'Advanced';
+  @override String get allLanguages            => 'All';
+  @override String get loadMore                => 'Load more';
+  @override String get practiceStats           => 'Your Stats';
+
   // API Contract keys
   @override String get packIncludedInInside    => 'Included in Inside';
   @override String get packGetFor              => 'Get for \$2.99';

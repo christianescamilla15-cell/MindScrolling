@@ -495,6 +495,30 @@ abstract class AppStrings {
   String get onboardingHero2;
   String get onboardingBrand;
 
+  // ------------------------------------------------------------------
+  // Practice Console
+  // ------------------------------------------------------------------
+  String get practiceConsole;
+  String get practiceConsoleSubtitle;
+  String get selectLanguage;
+  String get selectDifficulty;
+  String get exercisePoints;
+  String get exerciseTime;
+  String get exerciseHint;
+  String get submitCode;
+  String get skipExercise;
+  String get correct;
+  String get incorrect;
+  String get noExercises;
+  String get beginner;
+  String get easy;
+  String get medium;
+  String get hard;
+  String get advanced;
+  String get allLanguages;
+  String get loadMore;
+  String get practiceStats;
+
   // API Contract keys (from contract section 7)
   String get packIncludedInInside;
   String get packGetFor;

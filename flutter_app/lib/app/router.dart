@@ -23,6 +23,9 @@ import '../features/hidden_modes/coding_mode_screen.dart';
 import '../features/hidden_modes/science_mode_screen.dart';
 import '../features/feed/similar_quotes_screen.dart';
 import '../features/vault/vault_screen.dart';
+import '../features/practice/practice_console_screen.dart';
+import '../features/practice/exercise_detail_screen.dart';
+import '../features/practice/exercise_model.dart';
 
 // ---------------------------------------------------------------------------
 // Router provider
@@ -146,6 +149,36 @@ final routerProvider = Provider<GoRouter>((ref) {
           fullscreenDialog: true,
           child: DonationsScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/practice',
+        builder: (context, state) => const PracticeConsoleScreen(),
+      ),
+      GoRoute(
+        path: '/exercise/:id',
+        builder: (context, state) {
+          final exercise = state.extra as ExerciseModel?;
+          if (exercise != null) {
+            return ExerciseDetailScreen(exercise: exercise);
+          }
+          // Fallback: build a minimal placeholder from the path param only.
+          final id = state.pathParameters['id'] ?? '';
+          return ExerciseDetailScreen(
+            exercise: ExerciseModel(
+              id: id,
+              title: '',
+              description: '',
+              language: 'javascript',
+              difficulty: 1,
+              category: '',
+              points: 10,
+              estimatedTime: 5,
+              status: 'not_started',
+              hintsUsed: 0,
+              attempts: 0,
+            ),
+          );
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

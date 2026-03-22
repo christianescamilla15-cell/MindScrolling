@@ -719,6 +719,28 @@ class StringsEs implements AppStrings {
   @override String get moodJourney         => 'Tu viaje emocional';
   @override String get moodJourneyEmpty    => 'Envía una emoción para comenzar tu viaje';
 
+  // Practice Console
+  @override String get practiceConsole         => 'Consola de Pr\u00e1ctica';
+  @override String get practiceConsoleSubtitle => 'Afina tus habilidades de programaci\u00f3n';
+  @override String get selectLanguage          => 'Lenguaje';
+  @override String get selectDifficulty        => 'Dificultad';
+  @override String get exercisePoints          => 'Puntos';
+  @override String get exerciseTime            => 'Tiempo est.';
+  @override String get exerciseHint            => 'Pista';
+  @override String get submitCode              => 'Enviar c\u00f3digo';
+  @override String get skipExercise            => 'Saltar';
+  @override String get correct                 => '\u00a1Correcto!';
+  @override String get incorrect               => 'Incorrecto';
+  @override String get noExercises             => 'No se encontraron ejercicios';
+  @override String get beginner                => 'Principiante';
+  @override String get easy                    => 'F\u00e1cil';
+  @override String get medium                  => 'Medio';
+  @override String get hard                    => 'Dif\u00edcil';
+  @override String get advanced                => 'Avanzado';
+  @override String get allLanguages            => 'Todos';
+  @override String get loadMore                => 'Cargar m\u00e1s';
+  @override String get practiceStats           => 'Tus estad\u00edsticas';
+
   // API Contract keys
   @override String get packIncludedInInside    => 'Incluido en Inside';
   @override String get packGetFor              => 'Obtener por \$2.99';

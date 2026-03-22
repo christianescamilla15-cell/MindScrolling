@@ -9,7 +9,6 @@ import '../../shared/extensions/context_extensions.dart';
 import '../settings/settings_controller.dart';
 import 'hidden_mode_controller.dart';
 import 'hidden_mode_feed.dart';
-import 'practice_console.dart';
 
 /// Coding mode screen — 4 branches + practice console.
 class CodingModeScreen extends ConsumerStatefulWidget {
@@ -23,8 +22,6 @@ class _CodingModeScreenState extends ConsumerState<CodingModeScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _selectedBranch = ContentConstants.frontend;
-  bool _showPractice = false;
-
   static const _branchMeta = <String, _BranchInfo>{
     ContentConstants.frontend: _BranchInfo(
       icon: Icons.web,
@@ -56,9 +53,6 @@ class _CodingModeScreenState extends ConsumerState<CodingModeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      setState(() => _showPractice = _tabController.index == 1);
-    });
   }
 
   @override
@@ -175,8 +169,8 @@ class _CodingModeScreenState extends ConsumerState<CodingModeScreen>
             ],
           ),
 
-          // Practice tab
-          const PracticeConsole(),
+          // Practice tab — launches the full Practice Console screen
+          _PracticeTabEntry(lang: lang),
         ],
       ),
     );
@@ -195,4 +189,82 @@ class _BranchInfo {
     required this.labelEn,
     required this.labelEs,
   });
+}
+
+/// Entry point shown in the Practice tab — navigates to the full
+/// Practice Console screen at /practice.
+class _PracticeTabEntry extends StatelessWidget {
+  const _PracticeTabEntry({required this.lang});
+
+  final String lang;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEs = lang == 'es';
+
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.terminal,
+              color: Color(0xFF10B981),
+              size: 40,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            isEs ? 'Consola de Práctica' : 'Practice Console',
+            style: AppTypography.displaySmall.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isEs
+                ? 'Resuelve ejercicios de programación con pistas y retroalimentación en tiempo real.'
+                : 'Solve coding exercises with hints and real-time feedback.',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textMuted,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          GestureDetector(
+            onTap: () => context.go('/practice'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.play_arrow_rounded,
+                      color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    isEs ? 'Abrir consola' : 'Open Console',
+                    style: AppTypography.buttonLabel.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
