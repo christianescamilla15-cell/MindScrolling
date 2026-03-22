@@ -5,6 +5,8 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../data/models/quote_model.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../hidden_modes/hidden_mode_controller.dart';
+import '../hidden_modes/unlock_suggestion.dart';
 import 'insight_controller.dart';
 
 /// Collapsible Insight panel shown at the top of the feed for Inside users.
@@ -233,6 +235,19 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                           ],
                         ),
                       ),
+                    ),
+                  ],
+
+                  // Hidden mode unlock suggestion
+                  if (insightState.detectedHiddenMode != null &&
+                      !ref.watch(hiddenModeControllerProvider)
+                          .isModeUnlocked(insightState.detectedHiddenMode!)) ...[
+                    const SizedBox(height: 10),
+                    UnlockSuggestion(
+                      mode: insightState.detectedHiddenMode!,
+                      onDismiss: () {
+                        // Just dismiss — user can trigger again later
+                      },
                     ),
                   ],
 

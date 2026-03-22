@@ -719,4 +719,20 @@ class StringsEs implements AppStrings {
   @override String get insightRefine       => 'Probar algo diferente';
   @override String get insightWelcomeTitle => 'Bienvenido a Insight';
   @override String get insightWelcomeBody  => 'Ahora puedes personalizar tu experiencia. Cuéntanos cómo te sientes y recibe una frase alineada con tus emociones.';
+
+  // Hidden modes
+  @override String get hiddenScienceTitle     => 'Modo Ciencia Detectado';
+  @override String get hiddenScienceSubtitle  => 'Desbloquea un mundo de conocimiento y descubrimiento.';
+  @override String get hiddenCodingTitle      => 'Modo Programación Detectado';
+  @override String get hiddenCodingSubtitle   => 'Desbloquea tips, conceptos y práctica de programación.';
+  @override String get hiddenUnlockCta        => 'Desbloquear';
+  @override String get hiddenDismiss          => 'Ahora no';
+  @override String get quizTitle              => 'Quiz de Acceso';
+  @override String get quizPassedTitle        => '¡Felicidades!';
+  @override String get quizPassedBody         => 'Se nota que ya tienes una base sólida. Has desbloqueado este modo especial.';
+  @override String get quizFailedTitle        => '¡Casi lo logras!';
+  @override String get quizFailedBody         => 'Necesitas 8/10 para desbloquear. Sigue aprendiendo e intenta de nuevo.';
+  @override String get quizRetry              => 'Intentar después';
+  @override String get quizStart              => 'Comenzar Quiz';
+  @override String quizScore(int score, int total) => '$score / $total';
 }

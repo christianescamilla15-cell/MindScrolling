@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../data/models/quote_model.dart';
+import '../hidden_modes/hidden_mode_detector.dart';
 import '../settings/settings_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -17,6 +18,9 @@ class InsightState {
   final String? error;
   final bool hasSubmitted;
 
+  /// Detected hidden mode intent: 'science', 'coding', or null.
+  final String? detectedHiddenMode;
+
   const InsightState({
     this.isLoading = false,
     this.inputText,
@@ -25,6 +29,7 @@ class InsightState {
     this.detectedTags = const [],
     this.error,
     this.hasSubmitted = false,
+    this.detectedHiddenMode,
   });
 
   InsightState copyWith({
@@ -35,6 +40,7 @@ class InsightState {
     List<String>? detectedTags,
     String? error,
     bool? hasSubmitted,
+    String? detectedHiddenMode,
   }) {
     return InsightState(
       isLoading: isLoading ?? this.isLoading,
@@ -44,6 +50,7 @@ class InsightState {
       detectedTags: detectedTags ?? this.detectedTags,
       error: error,
       hasSubmitted: hasSubmitted ?? this.hasSubmitted,
+      detectedHiddenMode: detectedHiddenMode ?? this.detectedHiddenMode,
     );
   }
 }
@@ -92,12 +99,16 @@ class InsightController extends StateNotifier<InsightState> {
 
       final detectedTags = rawTags.whereType<String>().toList();
 
+      // Detect hidden mode intent from user text
+      final hiddenModeIntent = HiddenModeDetector.detectIntent(text.trim());
+
       state = state.copyWith(
         isLoading: false,
         quoteOfDay: quoteOfDay,
         matchedQuotes: matchedQuotes,
         detectedTags: detectedTags,
         hasSubmitted: true,
+        detectedHiddenMode: hiddenModeIntent,
       );
     } catch (e) {
       state = state.copyWith(

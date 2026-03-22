@@ -406,6 +406,24 @@ abstract class AppStrings {
   String get insightWelcomeTitle;
   String get insightWelcomeBody;
 
+  // ------------------------------------------------------------------
+  // Hidden modes (Phase 5-8)
+  // ------------------------------------------------------------------
+  String get hiddenScienceTitle;
+  String get hiddenScienceSubtitle;
+  String get hiddenCodingTitle;
+  String get hiddenCodingSubtitle;
+  String get hiddenUnlockCta;
+  String get hiddenDismiss;
+  String get quizTitle;
+  String get quizPassedTitle;
+  String get quizPassedBody;
+  String get quizFailedTitle;
+  String get quizFailedBody;
+  String get quizRetry;
+  String get quizStart;
+  String quizScore(int score, int total);
+
   // API Contract keys (from contract section 7)
   String get packIncludedInInside;
   String get packGetFor;

@@ -718,4 +718,20 @@ class StringsEn implements AppStrings {
   @override String get insightRefine       => 'Try something different';
   @override String get insightWelcomeTitle => 'Welcome to Insight';
   @override String get insightWelcomeBody  => 'You can now personalize your experience. Tell us how you feel and receive a quote aligned with your emotions.';
+
+  // Hidden modes
+  @override String get hiddenScienceTitle     => 'Science Mode Detected';
+  @override String get hiddenScienceSubtitle  => 'Unlock a world of scientific knowledge and discovery.';
+  @override String get hiddenCodingTitle      => 'Coding Mode Detected';
+  @override String get hiddenCodingSubtitle   => 'Unlock programming tips, concepts, and practice.';
+  @override String get hiddenUnlockCta        => 'Unlock';
+  @override String get hiddenDismiss          => 'Not now';
+  @override String get quizTitle              => 'Access Quiz';
+  @override String get quizPassedTitle        => 'Congratulations!';
+  @override String get quizPassedBody         => 'You have a solid foundation. This special mode is now unlocked.';
+  @override String get quizFailedTitle        => 'Almost there!';
+  @override String get quizFailedBody         => 'You need 8/10 to unlock. Keep learning and try again.';
+  @override String get quizRetry              => 'Try again later';
+  @override String get quizStart              => 'Start Quiz';
+  @override String quizScore(int score, int total) => '$score / $total';
 }
