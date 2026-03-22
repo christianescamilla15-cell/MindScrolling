@@ -19,6 +19,7 @@ import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/insights/insights_screen.dart';
 import '../features/hidden_modes/quiz_screen.dart';
+import '../features/hidden_modes/science_mode_screen.dart';
 import '../features/vault/vault_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -115,6 +116,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             packColor: extra['packColor'] as String? ?? '#14B8A6',
           );
         },
+      ),
+      GoRoute(
+        path: '/hidden/science',
+        builder: (context, state) => const ScienceModeScreen(),
       ),
       GoRoute(
         path: '/quiz/:mode',
