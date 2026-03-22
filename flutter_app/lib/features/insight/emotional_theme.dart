@@ -98,6 +98,7 @@ class EmotionalTheme {
     'resilience':       motivation,
     'creativity':       reflection,
     'self_improvement': wisdom,
+    'curiosity':        wisdom,
   };
 
   /// Returns the dominant [EmotionalTheme] for the given list of tags.

@@ -250,6 +250,23 @@ export default async function insightRoutes(fastify) {
         p_pool_size: poolSize,
       });
 
+      // If user has a preference vector, also fetch their top matches for affinity scoring
+      let prefSimilarityMap = {};
+      if (!error && data?.length > 0 && prefVector) {
+        const { data: prefData } = await supabase.rpc("match_quotes", {
+          query_embedding: prefVector,
+          p_device_id: deviceId,
+          p_lang: effectiveLang,
+          p_is_premium: matchIsPremium,
+          p_pool_size: poolSize,
+        });
+        if (prefData) {
+          for (const q of prefData) {
+            prefSimilarityMap[q.id] = q.similarity ?? 0;
+          }
+        }
+      }
+
       if (!error && data?.length > 0) {
         semanticCandidates = data;
       }
@@ -274,17 +291,13 @@ export default async function insightRoutes(fastify) {
         }
         const normalizedTagScore = tagScore / maxTagScore;
 
-        // 3. User preference affinity (cosine similarity to their vector)
-        //    This is approximated: if the quote is similar to what they usually like
-        //    Note: match_quotes already sorts by similarity to the query, so we use
-        //    a secondary signal — does this quote's tags match their historical interests?
+        // 3. User preference affinity — actual cosine similarity to preference vector
+        //    Uses a second match_quotes call with the user's pref vector.
+        //    Quotes that are similar to BOTH the user's input AND their historical taste
+        //    score highest — this is the real personalization signal.
         let prefAffinity = 0;
-        if (prefVector) {
-          // Simple heuristic: quotes that match both input AND user history score higher
-          // The preference vector influence comes from the fact that match_quotes
-          // can be called with the user's pref vector too, but here we use the input text.
-          // So we add a small boost based on tag diversity to favor "on-brand" content.
-          prefAffinity = semantic * 0.5 + normalizedTagScore * 0.5;
+        if (prefVector && prefSimilarityMap[q.id] !== undefined) {
+          prefAffinity = prefSimilarityMap[q.id];
         }
 
         // 4. Noise for variety
