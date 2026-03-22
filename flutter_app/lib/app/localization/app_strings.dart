@@ -478,6 +478,23 @@ abstract class AppStrings {
   String get moodJourney;
   String get moodJourneyEmpty;
 
+  // ------------------------------------------------------------------
+  // Unlocked modes (Settings screen)
+  // ------------------------------------------------------------------
+  String get unlockedModes;
+
+  // ------------------------------------------------------------------
+  // Vault undo
+  // ------------------------------------------------------------------
+  String get undo;
+
+  // ------------------------------------------------------------------
+  // Onboarding hero strings
+  // ------------------------------------------------------------------
+  String get onboardingHero1;
+  String get onboardingHero2;
+  String get onboardingBrand;
+
   // API Contract keys (from contract section 7)
   String get packIncludedInInside;
   String get packGetFor;

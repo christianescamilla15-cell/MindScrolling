@@ -732,6 +732,17 @@ class StringsEs implements AppStrings {
   @override String get insideValuePropOwn1     => 'Ya tienes 1 pack. Obtén los otros 2 + funciones premium por \$4.99.';
   @override String get insideValuePropOwn2     => 'Tienes 2 packs. Completa tu biblioteca + funciones premium por \$4.99.';
 
+  // Unlocked modes
+  @override String get unlockedModes      => 'Modos Desbloqueados';
+
+  // Vault undo
+  @override String get undo              => 'Deshacer';
+
+  // Onboarding hero strings
+  @override String get onboardingHero1   => 'Deja el Doom-Scrolling.';
+  @override String get onboardingHero2   => 'Empieza a Pensar.';
+  @override String get onboardingBrand   => 'MindScrolling';
+
   // Feature tour
   @override String get tourSwipeTitle      => 'Desliza para Explorar';
   @override String get tourSwipeBody       => 'Desliza en cualquier dirección para descubrir frases. Cada dirección revela una categoría filosófica diferente.';

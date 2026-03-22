@@ -12,6 +12,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/services/notification_service.dart';
 import '../../data/datasources/local/settings_local_ds.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../hidden_modes/hidden_mode_controller.dart';
 import '../premium/premium_controller.dart';
 import '../premium/simulated_purchase_service.dart';
 import 'settings_controller.dart';
@@ -25,6 +26,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsStateProvider);
+    final hiddenModes = ref.watch(hiddenModeControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -102,6 +104,30 @@ class SettingsScreen extends ConsumerWidget {
                 _NotificationTile(),
               ],
             ),
+            // ── Section: Unlocked Modes ───────────────────────────────────
+            if (hiddenModes.scienceUnlocked || hiddenModes.codingUnlocked) ...[
+              const SizedBox(height: 24),
+              _SectionHeader(title: context.tr.unlockedModes),
+              _SettingsCard(
+                children: [
+                  if (hiddenModes.scienceUnlocked)
+                    _NavTile(
+                      icon: Icons.science_outlined,
+                      label: context.tr.quizEnterScience,
+                      onTap: () => context.push('/hidden/science'),
+                    ),
+                  if (hiddenModes.scienceUnlocked && hiddenModes.codingUnlocked)
+                    _Divider(),
+                  if (hiddenModes.codingUnlocked)
+                    _NavTile(
+                      icon: Icons.code_outlined,
+                      label: context.tr.quizEnterCoding,
+                      onTap: () => context.push('/hidden/coding'),
+                    ),
+                ],
+              ),
+            ],
+
             const SizedBox(height: 24),
 
             // ── Section: About ─────────────────────────────────────────────

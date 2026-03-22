@@ -731,6 +731,17 @@ class StringsEn implements AppStrings {
   @override String get insideValuePropOwn1     => 'You already own 1 pack. Get the other 2 + premium features for \$4.99.';
   @override String get insideValuePropOwn2     => 'You own 2 packs. Complete your library + premium features for \$4.99.';
 
+  // Unlocked modes
+  @override String get unlockedModes      => 'Unlocked Modes';
+
+  // Vault undo
+  @override String get undo              => 'Undo';
+
+  // Onboarding hero strings
+  @override String get onboardingHero1   => 'Stop Doom-Scrolling.';
+  @override String get onboardingHero2   => 'Start Thinking.';
+  @override String get onboardingBrand   => 'MindScrolling';
+
   // Feature tour
   @override String get tourSwipeTitle      => 'Swipe to Explore';
   @override String get tourSwipeBody       => 'Swipe in any direction to discover quotes. Each direction reveals a different philosophical category.';

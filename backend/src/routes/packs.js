@@ -18,6 +18,7 @@ import {
   resolveUserState,
 } from "../services/packEntitlement.js";
 import { UUID_RE, authorSlug, normalizeLang } from "../utils/validation.js";
+import { validateReceiptWithRevenueCat } from "../services/receiptValidation.js";
 
 // ─── Pack catalog metadata ───────────────────────────────────────────────────
 const PACK_META = {
@@ -708,6 +709,31 @@ export default async function packsRoutes(fastify) {
           pack_id: id,
           pack_name: packName,
           access_granted: true,
+        });
+      }
+
+      // ── Validate receipt with RevenueCat before recording entitlement ─────────
+      const rcResult = await validateReceiptWithRevenueCat(
+        deviceId,
+        store,
+        purchase_token,
+        transaction_id
+      );
+      if (!rcResult.valid) {
+        request.log.warn(
+          { deviceId, store, pack_id: id, reason: rcResult.reason },
+          "packs/purchase/verify: RC validation failed"
+        );
+        logAuditEvent(deviceId, "pack_purchase_verify_failed", {
+          pack_id: id,
+          store,
+          reason: rcResult.reason,
+          product_id,
+        });
+        return reply.status(403).send({
+          error: "Purchase could not be verified",
+          code: "VERIFICATION_FAILED",
+          reason: rcResult.reason,
         });
       }
 

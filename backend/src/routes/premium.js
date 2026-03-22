@@ -15,79 +15,11 @@ import {
   resolveUserState,
   KNOWN_PACK_IDS,
 } from "../services/packEntitlement.js";
+import { validateReceiptWithRevenueCat } from "../services/receiptValidation.js";
 
 // ─── Legacy constants ────────────────────────────────────────────────────────
 const VALID_PURCHASE_TYPES = ["premium_unlock", "pack_purchase"];
 const VALID_CURRENCIES     = ["USD", "EUR", "GBP", "ARS", "BRL"];
-
-// ─── RevenueCat REST API (receipt validation) ─────────────────────────────────
-const RC_API_KEY = process.env.REVENUECAT_API_KEY;   // Secret API key from RevenueCat dashboard
-const RC_API_URL = "https://api.revenuecat.com/v1";
-
-// MED-01: Loud warning if RC key is missing in production
-if (!RC_API_KEY && process.env.NODE_ENV === "production") {
-  console.error("⚠️  CRITICAL: REVENUECAT_API_KEY not set in production — purchase verification DISABLED");
-}
-
-/**
- * Validate a purchase receipt with RevenueCat.
- * Returns { valid: true, entitlement } on success, { valid: false, reason } on failure.
- * Falls through gracefully if REVENUECAT_API_KEY is not set (dev mode).
- */
-async function validateReceiptWithRevenueCat(deviceId, store, purchaseToken, transactionId) {
-  if (!RC_API_KEY) {
-    // Dev mode — skip validation, log warning
-    return { valid: true, reason: "rc_not_configured", dev: true };
-  }
-
-  try {
-    // POST receipt to RevenueCat to validate and record
-    const body = {
-      app_user_id: deviceId,
-      fetch_token: store === "android" ? purchaseToken : transactionId,
-    };
-
-    const endpoint = store === "android"
-      ? `${RC_API_URL}/receipts`
-      : `${RC_API_URL}/receipts`;
-
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${RC_API_KEY}`,
-        "Content-Type": "application/json",
-        "X-Platform": store === "android" ? "android" : "ios",
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errBody = await response.text().catch(() => "");
-      return { valid: false, reason: `rc_error_${response.status}`, detail: errBody.slice(0, 200) };
-    }
-
-    const data = await response.json();
-    const subscriber = data?.subscriber;
-    const entitlements = subscriber?.entitlements;
-
-    // Check for active "premium" or "inside" entitlement
-    const premiumEntitlement = entitlements?.premium ?? entitlements?.inside ?? entitlements?.pro;
-    if (premiumEntitlement && premiumEntitlement.expires_date === null) {
-      // Lifetime / non-consumable — valid
-      return { valid: true, reason: "rc_verified", entitlement: premiumEntitlement };
-    }
-    if (premiumEntitlement && new Date(premiumEntitlement.expires_date) > new Date()) {
-      return { valid: true, reason: "rc_verified", entitlement: premiumEntitlement };
-    }
-
-    // No active entitlement found — purchase may be fraudulent
-    return { valid: false, reason: "no_active_entitlement" };
-  } catch (err) {
-    // CRIT-01 fix: Fail CLOSED on network error — IAP system will re-deliver
-    // the unfinished transaction on next app launch for retry.
-    return { valid: false, reason: "rc_network_error" };
-  }
-}
 
 // ─── MindScrolling Inside plan constants ─────────────────────────────────────
 const PLAN_NAME          = process.env.PREMIUM_PLAN_NAME          ?? "MindScrolling Inside";
@@ -484,6 +416,34 @@ export default async function premiumRoutes(fastify) {
       });
     }
 
+    // ── Re-validate receipt with RevenueCat before granting to new device ─────
+    // A purchase row existing in our DB is not sufficient proof — the token/
+    // transaction_id supplied by the new device must also pass RC validation.
+    // This prevents purchase-token sharing across unrelated devices.
+    const rcResult = await validateReceiptWithRevenueCat(
+      deviceId,
+      store,
+      purchase_token,
+      transaction_id
+    );
+    if (!rcResult.valid) {
+      request.log.warn(
+        { deviceId, store, reason: rcResult.reason },
+        "premium/restore: RC re-validation failed"
+      );
+      supabase.from("premium_audit_log").insert({
+        device_id: deviceId,
+        event_type: "restore_verify_failed",
+        source: store,
+        metadata: { reason: rcResult.reason },
+      }).then(() => {}).catch(() => {});
+      return reply.status(403).send({
+        error: "Purchase could not be verified",
+        code: "VERIFICATION_FAILED",
+        reason: rcResult.reason,
+      });
+    }
+
     const now = new Date().toISOString();
 
     // ── Ensure user row exists for restoring device ───────────────────────────
@@ -656,11 +616,29 @@ export default async function premiumRoutes(fastify) {
 
     const now = new Date().toISOString();
 
-    // TOCTOU fix: grant premium FIRST, then mark code as redeemed.
-    // If the mark-as-redeemed step fails, the code is still technically valid but the user
-    // already has premium — a safe-to-retry outcome vs. the previous order where the code
-    // was consumed with no premium granted.
+    // ── TOCTOU atomic guard ────────────────────────────────────────────────────
+    // Atomically mark the code as redeemed only if it is still unredeemed.
+    // The extra .eq("is_redeemed", false) predicate means only one concurrent
+    // request can win — all others get 0 rows back and receive a 409 conflict.
+    const { data: redeemed, error: redeemErr } = await supabase
+      .from("premium_activation_codes")
+      .update({ is_redeemed: true, redeemed_by: deviceId, redeemed_at: now })
+      .eq("id", codeRow.id)
+      .eq("is_redeemed", false)   // atomic guard: only updates if still unredeemed
+      .select("id")
+      .maybeSingle();
 
+    if (redeemErr) {
+      request.log.error({ err: redeemErr }, "premium/redeem: atomic redeem update failed");
+      return reply.status(500).send({ error: "Failed to validate code", code: "INTERNAL_ERROR" });
+    }
+
+    if (!redeemed) {
+      // Another concurrent request already redeemed this code
+      return reply.status(409).send({ error: "Code already redeemed", code: "CODE_ALREADY_USED" });
+    }
+
+    // ── Grant premium only after exclusive ownership of the code is confirmed ──
     const { error: userUpsertErr } = await supabase
       .from("users")
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
@@ -684,18 +662,6 @@ export default async function premiumRoutes(fastify) {
     if (upgradeErr) {
       request.log.error({ err: upgradeErr }, "premium/redeem: failed to upgrade user");
       return reply.status(500).send({ error: "Failed to activate premium", code: "INTERNAL_ERROR" });
-    }
-
-    // Mark code as redeemed only after premium is confirmed granted
-    const { error: redeemErr } = await supabase
-      .from("premium_activation_codes")
-      .update({ is_redeemed: true, redeemed_by: deviceId, redeemed_at: now })
-      .eq("id", codeRow.id);
-
-    if (redeemErr) {
-      // Premium was already granted above — log but don't fail the response.
-      // The code will be redeemable again but the user already has premium.
-      request.log.error({ err: redeemErr }, "premium/redeem: failed to mark code as redeemed — user already has premium");
     }
 
     supabase.from("premium_audit_log").insert({
