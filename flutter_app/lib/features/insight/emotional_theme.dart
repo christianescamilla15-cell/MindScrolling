@@ -86,10 +86,18 @@ class EmotionalTheme {
     'meaning':     existence,
     'purpose':     existence,
     'philosophy':  existence,
-    'self_love':   gratitude,
-    'gratitude':   gratitude,
-    'love':        gratitude,
-    'joy':         gratitude,
+    'self_love':        gratitude,
+    'gratitude':        gratitude,
+    'love':             gratitude,
+    'joy':              gratitude,
+    // MED-04: Missing tags that trackForEmotion maps but _tagMap didn't
+    'anxiety':          calm,
+    'focus':            wisdom,
+    'discipline':       motivation,
+    'inner_strength':   motivation,
+    'resilience':       motivation,
+    'creativity':       reflection,
+    'self_improvement': wisdom,
   };
 
   /// Returns the dominant [EmotionalTheme] for the given list of tags.

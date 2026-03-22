@@ -71,17 +71,22 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
     final insightState = ref.watch(insightControllerProvider);
     final tr = context.tr;
 
+    // HIGH-02: Use emotional theme for dynamic tinting after submission
+    final theme = insightState.emotionalTheme;
+    final accentColor = insightState.hasSubmitted ? theme.accent : const Color(0xFF8B5CF6);
+    final bgColor = insightState.hasSubmitted ? theme.background : const Color(0xFF1A1A2E);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
+        gradient: LinearGradient(
+          colors: [bgColor, const Color(0xFF16213E)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
+          color: accentColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -95,7 +100,7 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
               padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
               child: Row(
                 children: [
-                  const Icon(Icons.auto_awesome, color: Color(0xFF8B5CF6), size: 20),
+                  Icon(Icons.auto_awesome, color: accentColor, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -103,7 +108,7 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                           ? tr.insightYourQuote
                           : tr.insightTitle,
                       style: AppTypography.labelSmall.copyWith(
-                        color: const Color(0xFF8B5CF6),
+                        color: accentColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -161,7 +166,7 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                               )
                             : IconButton(
                                 icon: const Icon(Icons.send_rounded, size: 20),
-                                color: const Color(0xFF8B5CF6),
+                                color: accentColor,
                                 onPressed: _submit,
                               ),
                       ),
@@ -179,13 +184,13 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
+                            color: accentColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             tag.replaceAll('_', ' '),
                             style: AppTypography.labelSmall.copyWith(
-                              color: const Color(0xFF8B5CF6),
+                              color: accentColor,
                               fontSize: 10,
                             ),
                           ),
@@ -204,13 +209,13 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              const Color(0xFF8B5CF6).withValues(alpha: 0.15),
+                              accentColor.withValues(alpha: 0.15),
                               const Color(0xFF6366F1).withValues(alpha: 0.08),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: const Color(0xFF8B5CF6).withValues(alpha: 0.25),
+                            color: accentColor.withValues(alpha: 0.25),
                           ),
                         ),
                         child: Column(
@@ -229,7 +234,7 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                             Text(
                               '— ${insightState.quoteOfDay!.author}',
                               style: AppTypography.labelSmall.copyWith(
-                                color: const Color(0xFF8B5CF6),
+                                color: accentColor,
                               ),
                             ),
                           ],

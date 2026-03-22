@@ -442,7 +442,8 @@ export default async function insightRoutes(fastify) {
       .eq("device_id", deviceId)
       .eq("event_type", "mood_entry")
       .gte("created_at", since)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(200);
 
     if (fetchErr) {
       fastify.log.error({ err: fetchErr }, "insight/mood-history: DB error");

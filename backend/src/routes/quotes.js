@@ -359,6 +359,16 @@ export default async function quotesRoutes(fastify) {
     const { deviceId }    = request;
     const effectiveLang   = normalizeLang(lang);
     const today           = new Date().toISOString().slice(0, 10);   // "YYYY-MM-DD"
+    const nextDay         = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
+    // CRIT-02 fix: resolve premium status for entitlement gating
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("is_premium, trial_end_date")
+      .eq("device_id", deviceId)
+      .maybeSingle();
+    const isTrialActive = userRow?.trial_end_date && Date.now() < new Date(userRow.trial_end_date).getTime();
+    const isPremium     = userRow?.is_premium === true || isTrialActive;
 
     // ── 1. Check cache: has a pick already been made today? ──────────────────
     const { data: cached, error: cacheErr } = await supabase
@@ -367,7 +377,7 @@ export default async function quotesRoutes(fastify) {
       .eq("device_id", deviceId)
       .eq("event_type", "daily_pick")
       .gte("created_at", `${today}T00:00:00.000Z`)
-      .lt("created_at",  `${today}T23:59:59.999Z`)
+      .lt("created_at",  `${nextDay}T00:00:00.000Z`)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -412,7 +422,7 @@ export default async function quotesRoutes(fastify) {
         query_embedding: prefVector,
         p_device_id:     deviceId,
         p_lang:          effectiveLang,
-        p_is_premium:    true,
+        p_is_premium:    isPremium,
         p_pool_size:     5,
       });
 
@@ -441,19 +451,19 @@ export default async function quotesRoutes(fastify) {
       pickedQuote = randomPool[Math.floor(Math.random() * randomPool.length)];
     }
 
-    // ── 3. Cache the pick as an analytics event ───────────────────────────────
+    // ── 3. Cache the pick as an analytics event (awaited to prevent race) ─────
     const pickedAt = new Date().toISOString();
-    supabase
-      .from("analytics_events")
-      .insert({
-        device_id:  deviceId,
-        event_type: "daily_pick",
-        properties: { quote_id: pickedQuote.id, algorithm, lang: effectiveLang },
-      })
-      .then(() => {})
-      .catch((err) => {
-        fastify.log.warn({ err }, "daily-pick: failed to persist pick cache");
-      });
+    try {
+      await supabase
+        .from("analytics_events")
+        .insert({
+          device_id:  deviceId,
+          event_type: "daily_pick",
+          properties: { quote_id: pickedQuote.id, algorithm, lang: effectiveLang },
+        });
+    } catch (cacheWriteErr) {
+      fastify.log.warn({ err: cacheWriteErr }, "daily-pick: failed to persist pick cache");
+    }
 
     return reply.send({
       quote: {
@@ -495,6 +505,15 @@ export default async function quotesRoutes(fastify) {
       return reply.status(400).send({ error: "Invalid quote id", code: "INVALID_ID" });
     }
 
+    // CRIT-02 fix: resolve premium status
+    const { data: simUserRow } = await supabase
+      .from("users")
+      .select("is_premium, trial_end_date")
+      .eq("device_id", deviceId)
+      .maybeSingle();
+    const simTrialActive = simUserRow?.trial_end_date && Date.now() < new Date(simUserRow.trial_end_date).getTime();
+    const simIsPremium   = simUserRow?.is_premium === true || simTrialActive;
+
     // ── 1. Fetch source quote (need embedding, category, tags) ────────────────
     const { data: source, error: srcErr } = await supabase
       .from("quotes")
@@ -522,7 +541,7 @@ export default async function quotesRoutes(fastify) {
         query_embedding: sourceEmbedding,
         p_device_id:     deviceId,
         p_lang:          effectiveLang,
-        p_is_premium:    true,
+        p_is_premium:    simIsPremium,
         p_pool_size:     poolSize + 1,   // +1 because we filter out the source
       });
 

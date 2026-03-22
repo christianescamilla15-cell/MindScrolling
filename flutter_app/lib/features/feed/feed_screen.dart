@@ -22,6 +22,7 @@ import '../../shared/widgets/streak_milestone_dialog.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
 import '../settings/settings_controller.dart';
+import '../../data/providers/author_affinity_provider.dart';
 import '../insight/insight_panel.dart';
 import 'feed_controller.dart';
 import 'feed_state.dart';
@@ -239,6 +240,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       // Fix 1 — Reflection / evolution card: advance without incrementing
       // the daily swipe counter.
       ref.read(feedControllerProvider.notifier).advanceReflectionCard();
+    } else if (swipedItem != null && swipedItem.isRefinementCard) {
+      // MED-07: Refinement card — dismiss without counting as quote swipe
+      ref.read(feedControllerProvider.notifier).advanceIndex();
     } else {
       ref.read(feedControllerProvider.notifier).onSwipe(dirStr);
     }
@@ -492,8 +496,20 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         quote: quote,
         isLiked: state.likedIds.contains(quote.id),
         isSaved: state.vault.any((q) => q.id == quote.id),
-        onLike: () => controller.onLike(quote.id),
-        onSave: () => controller.onVaultSave(quote, isPremium: isPremium),
+        onLike: () {
+          final wasLiked = state.likedIds.contains(quote.id);
+          controller.onLike(quote.id);
+          if (!wasLiked) {
+            ref.read(authorAffinityProvider.notifier).recordLike(quote.author);
+          }
+        },
+        onSave: () {
+          final alreadySaved = state.vault.any((q) => q.id == quote.id);
+          controller.onVaultSave(quote, isPremium: isPremium);
+          if (!alreadySaved) {
+            ref.read(authorAffinityProvider.notifier).recordVaultSave(quote.author);
+          }
+        },
         onShare: () => ShareExportService.exportQuoteAsImage(context, quote),
         onExport: null,
         onMoreLikeThis: () => context.push('/similar/${quote.id}'),

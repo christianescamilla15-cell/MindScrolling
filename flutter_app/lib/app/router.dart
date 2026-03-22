@@ -21,6 +21,7 @@ import '../features/insights/insights_screen.dart';
 import '../features/hidden_modes/quiz_screen.dart';
 import '../features/hidden_modes/coding_mode_screen.dart';
 import '../features/hidden_modes/science_mode_screen.dart';
+import '../features/feed/similar_quotes_screen.dart';
 import '../features/vault/vault_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -132,6 +133,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           final mode = state.pathParameters['mode'] ?? 'science';
           return QuizScreen(mode: mode);
         },
+      ),
+      GoRoute(
+        path: '/similar/:id',
+        builder: (context, state) => SimilarQuotesScreen(
+          quoteId: state.pathParameters['id'] ?? '',
+        ),
       ),
       GoRoute(
         path: '/donations',

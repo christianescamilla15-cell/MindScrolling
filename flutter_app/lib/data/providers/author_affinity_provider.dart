@@ -43,7 +43,7 @@ class AuthorAffinityNotifier extends StateNotifier<AuthorAffinityState> {
     if (raw == null) return;
     try {
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      final scores = decoded.map((k, v) => MapEntry(k, v as int));
+      final scores = decoded.map((k, v) => MapEntry(k, (v as num).toInt()));
       state = AuthorAffinityState(scores: scores);
     } catch (_) {}
   }

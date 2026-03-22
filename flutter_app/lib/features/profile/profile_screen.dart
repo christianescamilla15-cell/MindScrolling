@@ -7,6 +7,7 @@ import '../../app/theme/typography.dart';
 import '../../data/models/user_profile_model.dart';
 import '../../features/philosophy_map/philosophy_map_controller.dart';
 import '../../shared/extensions/context_extensions.dart';
+import 'author_affinity_widget.dart';
 import 'profile_controller.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -80,6 +81,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     reflections: ps.totalReflections,
                     profile: ps.profile,
                   ),
+
+                  const SizedBox(height: 20),
+                  const AuthorAffinityWidget(),
 
                   const SizedBox(height: 28),
                   _SectionTitle(context.tr.profileInfo),
