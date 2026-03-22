@@ -51,6 +51,36 @@ const PACK_META = {
     icon: "self_improvement",
     color: "#22C55E",
   },
+  renaissance_mind: {
+    nameEn: "Renaissance Mind",
+    nameEs: "Mente Renacentista",
+    descEn:
+      "Humanism, reason, and transformation. Leonardo da Vinci, Erasmus, Montaigne, Machiavelli, and more.",
+    descEs:
+      "Humanismo, razón y transformación. Leonardo da Vinci, Erasmo, Montaigne, Maquiavelo y más.",
+    icon: "palette",
+    color: "#F59E0B",
+  },
+  classical_foundations: {
+    nameEn: "Classical Foundations",
+    nameEs: "Fundamentos Clásicos",
+    descEn:
+      "The roots of Western thought. Socrates, Plato, Aristotle, Cicero, Plutarch, and the ancient sages.",
+    descEs:
+      "Las raíces del pensamiento occidental. Sócrates, Platón, Aristóteles, Cicerón, Plutarco y los sabios antiguos.",
+    icon: "account_balance",
+    color: "#3B82F6",
+  },
+  modern_human_condition: {
+    nameEn: "Modern Human Condition",
+    nameEs: "Condición Humana Moderna",
+    descEn:
+      "Absurdity, freedom, identity. Hannah Arendt, Simone de Beauvoir, Viktor Frankl, Albert Camus, and modern voices.",
+    descEs:
+      "Absurdo, libertad, identidad. Hannah Arendt, Simone de Beauvoir, Viktor Frankl, Albert Camus y voces modernas.",
+    icon: "psychology_alt",
+    color: "#EC4899",
+  },
 };
 
 // ─── Paywall copy ─────────────────────────────────────────────────────────────
@@ -58,12 +88,12 @@ const PAYWALL_COPY = {
   en: {
     ctaPack: (packName) => `Get ${packName} — $2.99`,
     ctaInside: "Or unlock everything with Inside — $4.99",
-    insideValueProp: "3 packs ($8.97 value) + premium features — $4.99",
+    insideValueProp: "6 packs ($17.94 value) + premium features — $4.99",
   },
   es: {
     ctaPack: (packName) => `Obtener ${packName} — $2.99`,
     ctaInside: "O desbloquea todo con Inside — $4.99",
-    insideValueProp: "3 packs (valor $8.97) + funciones premium — $4.99",
+    insideValueProp: "6 packs (valor $17.94) + funciones premium — $4.99",
   },
 };
 

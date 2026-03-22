@@ -18,11 +18,14 @@ import { supabase } from "../db/client.js";
 /** ISO date string — packs released before this are grandfathered for Inside users. */
 export const GRANDFATHERING_CUTOFF = "2026-06-01T00:00:00Z";
 
-/** Canonical pack IDs in scope for Block B. */
+/** Canonical pack IDs — original 3 grandfathered + 3 new expansion packs. */
 export const KNOWN_PACK_IDS = new Set([
   "stoicism_deep",
   "existentialism",
   "zen_mindfulness",
+  "renaissance_mind",
+  "classical_foundations",
+  "modern_human_condition",
 ]);
 
 /**
