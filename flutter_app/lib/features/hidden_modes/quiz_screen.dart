@@ -35,9 +35,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   @override
   void initState() {
     super.initState();
-    _questions = widget.mode == 'science'
-        ? scienceQuizQuestions
-        : codingQuizQuestions;
+    _questions = pickRandomQuestions(
+      widget.mode == 'science' ? scienceQuizQuestions : codingQuizQuestions,
+      count: ContentConstants.quizQuestionCount,
+    );
   }
 
   void _selectOption(int index) {
