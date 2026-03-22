@@ -495,7 +495,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (item.isChallengeCard) {
       final extra = item.extra ?? {};
       return ChallengeCard(
-        title: extra['title'] as String? ?? 'Daily Challenge',
+        title: extra['title'] as String? ?? context.tr.challengeTitle,
         description: extra['description'] as String? ?? '',
         progressRatio: (extra['progress'] as num?)?.toDouble() ?? 0.0,
         onTrack: () {},

@@ -34,9 +34,12 @@ class PhilosophyScores {
         'philosophy': philosophy,
       };
 
-  Map<String, dynamic> toJson() => toMap().map(
-        (key, value) => MapEntry(key, value),
-      );
+  Map<String, dynamic> toJson() => {
+        'wisdom_score': wisdom,
+        'discipline_score': discipline,
+        'reflection_score': reflection,
+        'philosophy_score': philosophy,
+      };
 
   double get total => wisdom + discipline + reflection + philosophy;
 

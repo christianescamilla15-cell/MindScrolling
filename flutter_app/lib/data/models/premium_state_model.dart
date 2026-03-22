@@ -48,7 +48,7 @@ class PremiumStateModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'is_premium': isPremium,
+      'is_paid_premium': isPremium,
       if (purchaseType != null) 'purchase_type': purchaseType,
       if (purchasedAt != null) 'purchased_at': purchasedAt!.toIso8601String(),
       'owned_packs': ownedPacks,
