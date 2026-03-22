@@ -233,6 +233,8 @@ export default async function insightRoutes(fastify) {
     let inputEmbedding = null;
     let semanticCandidates = null;
     let prefVector = null;
+    // HIGH-02: Declare in outer scope so scoring block can access it safely
+    let prefSimilarityMap = {};
 
     try {
       // Generate embedding for user's emotional text + fetch their preference vector
@@ -251,7 +253,6 @@ export default async function insightRoutes(fastify) {
       });
 
       // If user has a preference vector, also fetch their top matches for affinity scoring
-      let prefSimilarityMap = {};
       if (!error && data?.length > 0 && prefVector) {
         const { data: prefData } = await supabase.rpc("match_quotes", {
           query_embedding: prefVector,
