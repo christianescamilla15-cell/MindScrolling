@@ -323,7 +323,7 @@ export default async function packsRoutes(fastify) {
       supabase
         .from("quotes")
         .select(
-          "id, text, author, category, lang, swipe_dir, pack_preview_rank, is_premium"
+          "id, text, author, category, lang, swipe_dir, pack_name, pack_preview_rank, is_premium, content_type, tags"
         )
         .eq("pack_name", id)
         .eq("lang", lang)
@@ -353,9 +353,12 @@ export default async function packsRoutes(fastify) {
       });
     }
 
-    // Add is_locked: false for all returned quotes (they are all readable)
+    // Add author_slug + is_locked for all returned quotes
     const quotesWithLock = previewQuotes.map((q) => ({
       ...q,
+      author_slug: authorSlug(q.author),
+      content_type: q.content_type ?? "philosophical",
+      tags: q.tags ?? [],
       is_locked: false,
     }));
 

@@ -245,6 +245,12 @@ class _PackCard extends StatelessWidget {
         return Icons.psychology_outlined;
       case 'self_improvement':
         return Icons.self_improvement_outlined;
+      case 'palette':
+        return Icons.palette_outlined;
+      case 'account_balance':
+        return Icons.account_balance_outlined;
+      case 'psychology_alt':
+        return Icons.psychology_alt_outlined;
       default:
         return Icons.auto_awesome_outlined;
     }

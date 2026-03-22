@@ -164,6 +164,20 @@ export default async function insightsRoutes(fastify) {
       fastify.log.warn({ err }, "Failed to generate AI insight");
     }
 
-    return reply.send({ insight });
+    // Include generated_at for the Flutter InsightModel
+    let generatedAt = null;
+    if (insight) {
+      const { data: cachedRow } = await safeQuery(() =>
+        supabase
+          .from("ai_insights")
+          .select("generated_at")
+          .eq("device_id", deviceId)
+          .eq("lang", lang)
+          .maybeSingle()
+      );
+      generatedAt = cachedRow?.data?.generated_at ?? new Date().toISOString();
+    }
+
+    return reply.send({ insight, generated_at: generatedAt });
   });
 }
