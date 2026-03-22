@@ -10,8 +10,10 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/notification_service.dart';
+import '../../data/datasources/local/settings_local_ds.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../premium/premium_controller.dart';
+import '../premium/simulated_purchase_service.dart';
 import 'settings_controller.dart';
 
 // Teal accent used throughout the settings screen.
@@ -707,6 +709,15 @@ class _DevPremiumSheet extends ConsumerWidget {
             color: Colors.redAccent,
             onTap: () { Navigator.pop(context); controller.devSetState('reset'); },
           ),
+          const SizedBox(height: 16),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          Text(
+            'Simulated Pack Purchases',
+            style: AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
+          ),
+          const SizedBox(height: 8),
+          const _DevPackSimulator(),
           const SizedBox(height: 4),
         ],
       ),
@@ -757,6 +768,147 @@ class _DevStateButton extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dev pack simulator — simulated purchases for all 6 packs
+// ---------------------------------------------------------------------------
+
+class _DevPackSimulator extends ConsumerStatefulWidget {
+  const _DevPackSimulator();
+
+  @override
+  ConsumerState<_DevPackSimulator> createState() => _DevPackSimulatorState();
+}
+
+class _DevPackSimulatorState extends ConsumerState<_DevPackSimulator> {
+  static const _allPacks = [
+    ('stoicism_deep', 'Stoicism Deep Dive'),
+    ('existentialism', 'Existentialism'),
+    ('zen_mindfulness', 'Zen & Mindfulness'),
+    ('renaissance_mind', 'Renaissance Mind'),
+    ('classical_foundations', 'Classical Foundations'),
+    ('modern_human_condition', 'Modern Human Condition'),
+  ];
+
+  Set<String> _simulatedPacks = {};
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+  }
+
+  Future<void> _loadState() async {
+    final service = ref.read(simulatedPurchaseServiceProvider);
+    final packs = await service.getSimulatedPacks();
+    if (mounted) {
+      setState(() {
+        _simulatedPacks = packs.toSet();
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _togglePack(String packId) async {
+    final service = ref.read(simulatedPurchaseServiceProvider);
+    if (_simulatedPacks.contains(packId)) {
+      // Remove by resetting all and re-adding the rest
+      final remaining = _simulatedPacks.where((p) => p != packId).toList();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('mindscroll_dev_simulated_packs', remaining);
+      await const SettingsLocalDataSource().setOwnedPacks(remaining);
+      if (mounted) setState(() => _simulatedPacks.remove(packId));
+    } else {
+      await service.simulatePackPurchase(packId);
+      if (mounted) setState(() => _simulatedPacks.add(packId));
+    }
+  }
+
+  Future<void> _resetAll() async {
+    final service = ref.read(simulatedPurchaseServiceProvider);
+    await service.resetAll();
+    if (mounted) setState(() => _simulatedPacks.clear());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const SizedBox(height: 40, child: Center(child: CircularProgressIndicator(strokeWidth: 2)));
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ..._allPacks.map((pack) {
+          final isOwned = _simulatedPacks.contains(pack.$1);
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: GestureDetector(
+              onTap: () => _togglePack(pack.$1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isOwned ? const Color(0xFF22C55E).withValues(alpha: 0.1) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isOwned ? const Color(0xFF22C55E).withValues(alpha: 0.4) : AppColors.border,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isOwned ? Icons.check_circle : Icons.circle_outlined,
+                      size: 18,
+                      color: isOwned ? const Color(0xFF22C55E) : AppColors.textMuted,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        pack.$2,
+                        style: AppTypography.bodySmall.copyWith(
+                          fontWeight: isOwned ? FontWeight.w600 : FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      isOwned ? 'OWNED' : r'$2.99',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: isOwned ? const Color(0xFF22C55E) : AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 6),
+        GestureDetector(
+          onTap: _resetAll,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.refresh, size: 16, color: Colors.redAccent),
+                const SizedBox(width: 6),
+                Text(
+                  'Reset all simulated purchases',
+                  style: AppTypography.labelSmall.copyWith(color: Colors.redAccent),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
