@@ -95,7 +95,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       // Show the feature tour once, the first time the user enters the feed.
       // Runs after the hint so the two overlays never stack.
       if (mounted) {
-        await maybeShowFeatureTour(context);
+        try {
+          await maybeShowFeatureTour(context);
+        } catch (_) {
+          // CRIT-02: Swallow SharedPreferences or context errors gracefully
+        }
       }
 
       // Auto-start ambient audio:

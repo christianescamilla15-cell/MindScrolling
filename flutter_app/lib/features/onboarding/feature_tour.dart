@@ -21,6 +21,12 @@ Future<void> maybeShowFeatureTour(BuildContext context) async {
   if (done) return;
   if (!context.mounted) return;
 
+  // CRIT-01: Mark tour as done BEFORE showing, so a kill mid-tour
+  // doesn't cause infinite re-show on next launch.
+  await prefs.setBool(kFeatureTourDoneKey, true);
+
+  if (!context.mounted) return;
+
   await showGeneralDialog(
     context: context,
     barrierDismissible: false,
@@ -31,8 +37,6 @@ Future<void> maybeShowFeatureTour(BuildContext context) async {
     },
     pageBuilder: (ctx, _, __) => const FeatureTour(),
   );
-
-  await prefs.setBool(kFeatureTourDoneKey, true);
 }
 
 // ─── Tour data model ──────────────────────────────────────────────────────────
@@ -202,7 +206,16 @@ class _FeatureTourState extends State<FeatureTour>
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 
-    return Material(
+    // CRIT-03: Intercept hardware back — go to previous page instead of exiting
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_currentPage > 0) {
+          _goToPage(_currentPage - 1);
+        }
+      },
+      child: Material(
       color: Colors.transparent,
       child: Container(
         width: size.width,
@@ -253,6 +266,7 @@ class _FeatureTourState extends State<FeatureTour>
             ],
           ),
         ),
+      ),
       ),
     );
   }
