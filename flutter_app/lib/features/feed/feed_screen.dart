@@ -12,6 +12,7 @@ import '../../app/theme/typography.dart';
 import '../../data/models/feed_item_model.dart';
 import '../../app/localization/app_strings.dart';
 import '../ambient/ambient_audio_button.dart';
+import '../onboarding/feature_tour.dart';
 import '../ambient/ambient_audio_controller.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/app_bottom_nav.dart';
@@ -89,6 +90,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (!hintShown && mounted) {
         setState(() => _showHint = true);
         await prefs.setBool('mindscroll_hint_shown', true);
+      }
+
+      // Show the feature tour once, the first time the user enters the feed.
+      // Runs after the hint so the two overlays never stack.
+      if (mounted) {
+        await maybeShowFeatureTour(context);
       }
 
       // Auto-start ambient audio:

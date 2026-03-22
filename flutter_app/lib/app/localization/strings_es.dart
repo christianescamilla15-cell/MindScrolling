@@ -732,6 +732,27 @@ class StringsEs implements AppStrings {
   @override String get insideValuePropOwn1     => 'Ya tienes 1 pack. Obtén los otros 2 + funciones premium por \$4.99.';
   @override String get insideValuePropOwn2     => 'Tienes 2 packs. Completa tu biblioteca + funciones premium por \$4.99.';
 
+  // Feature tour
+  @override String get tourSwipeTitle      => 'Desliza para Explorar';
+  @override String get tourSwipeBody       => 'Desliza en cualquier dirección para descubrir frases. Cada dirección revela una categoría filosófica diferente.';
+  @override String get tourLikeTitle       => 'Doble Toque para Gustar';
+  @override String get tourLikeBody        => '¿Algo te resonó? Toca dos veces cualquier frase para darle me gusta.';
+  @override String get tourVaultTitle      => 'Guarda en tu Bóveda';
+  @override String get tourVaultBody       => 'Guarda tus frases favoritas para revisitarlas cuando quieras.';
+  @override String get tourMapTitle        => 'Tu Mapa Filosófico';
+  @override String get tourMapBody         => 'Observa cómo evoluciona tu viaje filosófico con el tiempo.';
+  @override String get tourChallengeTitle  => 'Desafíos Diarios';
+  @override String get tourChallengeBody   => 'Completa desafíos de reflexión diaria para crear rachas y profundizar tu práctica.';
+  @override String get tourAudioTitle      => 'Paisajes Sonoros';
+  @override String get tourAudioBody       => 'Mejora tu experiencia con audio meditativo mientras navegas.';
+  @override String get tourPremiumTitle    => 'MindScrolling Inside';
+  @override String get tourPremiumBody     => 'Desbloquea 6 packs premium, insights de IA y recomendaciones personalizadas.';
+  @override String get tourReadyTitle      => 'Comienza tu Viaje';
+  @override String get tourReadyBody       => 'Tu viaje filosófico comienza ahora.';
+  @override String get tourNext            => 'Siguiente';
+  @override String get tourSkip           => 'Saltar';
+  @override String get tourStart           => 'Empezar';
+
   // Insight panel
   @override String get insightTitle        => '¿Cómo te sientes hoy?';
   @override String get insightYourQuote    => 'Tu frase del día';

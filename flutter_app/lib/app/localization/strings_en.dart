@@ -731,6 +731,27 @@ class StringsEn implements AppStrings {
   @override String get insideValuePropOwn1     => 'You already own 1 pack. Get the other 2 + premium features for \$4.99.';
   @override String get insideValuePropOwn2     => 'You own 2 packs. Complete your library + premium features for \$4.99.';
 
+  // Feature tour
+  @override String get tourSwipeTitle      => 'Swipe to Explore';
+  @override String get tourSwipeBody       => 'Swipe in any direction to discover quotes. Each direction reveals a different philosophical category.';
+  @override String get tourLikeTitle       => 'Double Tap to Like';
+  @override String get tourLikeBody        => 'Found something that resonates? Double tap any quote to like it.';
+  @override String get tourVaultTitle      => 'Save to Vault';
+  @override String get tourVaultBody       => 'Save your favorite quotes to revisit anytime in your personal vault.';
+  @override String get tourMapTitle        => 'Your Philosophy Map';
+  @override String get tourMapBody         => 'Watch how your philosophical journey evolves over time.';
+  @override String get tourChallengeTitle  => 'Daily Challenges';
+  @override String get tourChallengeBody   => 'Complete daily reflection challenges to build streaks and deepen your practice.';
+  @override String get tourAudioTitle      => 'Ambient Soundscapes';
+  @override String get tourAudioBody       => 'Enhance your experience with meditative audio while you scroll.';
+  @override String get tourPremiumTitle    => 'MindScrolling Inside';
+  @override String get tourPremiumBody     => 'Unlock 6 premium packs, AI insights, and personalized recommendations.';
+  @override String get tourReadyTitle      => 'Begin Your Journey';
+  @override String get tourReadyBody       => 'Your philosophical journey starts now.';
+  @override String get tourNext            => 'Next';
+  @override String get tourSkip           => 'Skip';
+  @override String get tourStart           => 'Start Scrolling';
+
   // Insight panel
   @override String get insightTitle        => 'How are you feeling today?';
   @override String get insightYourQuote    => 'Your quote of the day';

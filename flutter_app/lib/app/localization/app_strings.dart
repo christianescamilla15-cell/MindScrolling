@@ -397,6 +397,29 @@ abstract class AppStrings {
   String get trialSoftPaywall;
 
   // ------------------------------------------------------------------
+  // Feature tour (post-onboarding, shown once on first feed visit)
+  // ------------------------------------------------------------------
+  String get tourSwipeTitle;
+  String get tourSwipeBody;
+  String get tourLikeTitle;
+  String get tourLikeBody;
+  String get tourVaultTitle;
+  String get tourVaultBody;
+  String get tourMapTitle;
+  String get tourMapBody;
+  String get tourChallengeTitle;
+  String get tourChallengeBody;
+  String get tourAudioTitle;
+  String get tourAudioBody;
+  String get tourPremiumTitle;
+  String get tourPremiumBody;
+  String get tourReadyTitle;
+  String get tourReadyBody;
+  String get tourNext;
+  String get tourSkip;
+  String get tourStart;
+
+  // ------------------------------------------------------------------
   // Insight panel (Phase 4 — emotional matching inside Inside)
   // ------------------------------------------------------------------
   String get insightTitle;
