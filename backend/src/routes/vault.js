@@ -7,7 +7,7 @@ export default async function vaultRoutes(fastify) {
   fastify.get("/", async (request, reply) => {
     const { data, error } = await supabase
       .from("vault")
-      .select("saved_at, quotes(*)")
+      .select("saved_at, quotes(id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags)")
       .eq("device_id", request.deviceId)
       .order("saved_at", { ascending: false });
 

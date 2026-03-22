@@ -6,16 +6,43 @@
  * and persisted to the analytics_events table (migration 021).
  *
  * Payload: { event_type: string, app_version?: string, properties?: object }
- *
- * Key events:
- *   app_opened         — fires on every cold launch with app_version
- *   onboarding_completed — fires when the user finishes the 3-screen onboarding
  */
 
 import { supabase } from "../db/client.js";
 
+// HIGH-04: Allowlist of valid event types to prevent cache poisoning
+const VALID_EVENT_TYPES = new Set([
+  "app_opened",
+  "onboarding_completed",
+  "feed_loaded",
+  "quote_shared",
+  "pack_catalog_viewed",
+  "pack_preview_started",
+  "pack_preview_completed",
+  "pack_paywall_shown",
+  "pack_purchased",
+  "pack_feed_entered",
+  "premium_screen_viewed",
+  "premium_purchase_started",
+  "premium_trial_started",
+  "daily_pick",
+  "mood_entry",
+]);
+
+// Max JSON size for properties (4KB)
+const MAX_PROPERTIES_SIZE = 4096;
+
 export default async function analyticsRoutes(fastify) {
-  fastify.post("/event", async (request, reply) => {
+  fastify.post("/event", {
+    config: {
+      // MED-07: Per-device rate limit for analytics
+      rateLimit: {
+        max: 30,
+        timeWindow: 60_000,
+        keyGenerator: (req) => req.deviceId ?? req.ip,
+      },
+    },
+  }, async (request, reply) => {
     const { deviceId } = request;
     const { event_type, app_version, properties } = request.body ?? {};
 
@@ -23,27 +50,37 @@ export default async function analyticsRoutes(fastify) {
       return reply.status(400).send({ error: "event_type required", code: "MISSING_FIELD" });
     }
 
+    // HIGH-04: Validate event_type against allowlist
+    if (!VALID_EVENT_TYPES.has(event_type)) {
+      return reply.status(400).send({ error: "Unknown event_type", code: "INVALID_FIELD" });
+    }
+
+    // HIGH-04: Cap properties size
+    const propsObj = properties && typeof properties === "object" ? properties : {};
+    const propsJson = JSON.stringify(propsObj);
+    if (propsJson.length > MAX_PROPERTIES_SIZE) {
+      return reply.status(400).send({ error: "properties too large (max 4KB)", code: "INVALID_FIELD" });
+    }
+
     // Structured log — visible in Render Log Stream dashboard
     fastify.log.info(
       {
         analytics: true,
         event_type,
-        device_id: deviceId ? deviceId.slice(0, 8) + "…" : "unknown", // partial for privacy
+        device_id: deviceId ? deviceId.slice(0, 8) + "…" : "unknown",
         app_version: app_version ?? "unknown",
-        properties: properties ?? {},
       },
       `[analytics] ${event_type}`
     );
 
-    // Persist to analytics_events table — fire-and-forget so DB latency never
-    // blocks the 202 response. Errors are logged but not surfaced to the client.
+    // Persist to analytics_events table — fire-and-forget
     supabase
       .from("analytics_events")
       .insert({
         device_id: deviceId,
         event_type,
         properties: {
-          ...(properties ?? {}),
+          ...propsObj,
           ...(app_version ? { app_version } : {}),
         },
       })

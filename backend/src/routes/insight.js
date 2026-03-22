@@ -168,6 +168,15 @@ export default async function insightRoutes(fastify) {
     const effectiveLang = normalizeLang(lang);
     const take = Math.min(Math.max(Number(limit) || 10, 1), 20);
 
+    // MED-01: Resolve premium status for all code paths
+    const { data: matchUserRow } = await supabase
+      .from("users")
+      .select("is_premium, trial_end_date")
+      .eq("device_id", deviceId)
+      .maybeSingle();
+    const matchTrialActive = matchUserRow?.trial_end_date && Date.now() < new Date(matchUserRow.trial_end_date).getTime();
+    const matchIsPremium   = matchUserRow?.is_premium === true || matchTrialActive;
+
     // M-01: Cap text length before embedding generation (don't trust client maxLength)
     const trimmedText = (typeof text === "string" ? text.trim() : "").slice(0, 500);
 
@@ -181,7 +190,7 @@ export default async function insightRoutes(fastify) {
           query_embedding: prefVector,
           p_device_id: deviceId,
           p_lang: effectiveLang,
-          p_is_premium: true,
+          p_is_premium: matchIsPremium,
           p_pool_size: take,
         });
 
@@ -196,12 +205,13 @@ export default async function insightRoutes(fastify) {
       }
 
       // Fallback: random premium quotes
-      const { data: randomQuotes } = await supabase
+      let rndQ = supabase
         .from("quotes")
         .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
         .eq("lang", effectiveLang)
-        .eq("is_hidden_mode", false)
-        .limit(take);
+        .eq("is_hidden_mode", false);
+      if (!matchIsPremium) rndQ = rndQ.eq("is_premium", false);
+      const { data: randomQuotes } = await rndQ.limit(take);
 
       return reply.send({
         quote_of_day: randomQuotes?.[0] ? { ...randomQuotes[0], author_slug: authorSlug(randomQuotes[0].author) } : null,
@@ -236,7 +246,7 @@ export default async function insightRoutes(fastify) {
         query_embedding: inputEmbedding,
         p_device_id: deviceId,
         p_lang: effectiveLang,
-        p_is_premium: true,
+        p_is_premium: matchIsPremium,
         p_pool_size: poolSize,
       });
 
@@ -305,12 +315,13 @@ export default async function insightRoutes(fastify) {
 
     // ── Fallback: tag-only matching ────────────────────────────────────────
     if (detectedTags.length === 0) {
-      const { data: randomQuotes } = await supabase
+      let rndQ = supabase
         .from("quotes")
         .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
         .eq("lang", effectiveLang)
-        .eq("is_hidden_mode", false)
-        .limit(take);
+        .eq("is_hidden_mode", false);
+      if (!matchIsPremium) rndQ = rndQ.eq("is_premium", false);
+      const { data: randomQuotes } = await rndQ.limit(take);
 
       return reply.send({
         quote_of_day: randomQuotes?.[0] ? { ...randomQuotes[0], author_slug: authorSlug(randomQuotes[0].author) } : null,
@@ -320,13 +331,14 @@ export default async function insightRoutes(fastify) {
       });
     }
 
-    const { data: candidates, error: queryErr } = await supabase
+    let tagQuery = supabase
       .from("quotes")
       .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
       .eq("lang", effectiveLang)
       .eq("is_hidden_mode", false)
-      .overlaps("tags", topTags)
-      .limit(poolSize);
+      .overlaps("tags", topTags);
+    if (!matchIsPremium) tagQuery = tagQuery.eq("is_premium", false);
+    const { data: candidates, error: queryErr } = await tagQuery.limit(poolSize);
 
     if (queryErr) {
       fastify.log.error({ err: queryErr }, "insight/match: DB error");

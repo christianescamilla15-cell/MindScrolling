@@ -505,58 +505,15 @@ export default async function premiumRoutes(fastify) {
     });
   });
 
-  // ── POST /premium/unlock (legacy — backward compatibility) ────────────────
-  fastify.post("/unlock", async (request, reply) => {
-    const deviceId = request.deviceId;
-    const {
-      purchase_type = "premium_unlock",
-      amount        = null,
-      currency      = "USD",
-    } = request.body ?? {};
-
-    if (!VALID_PURCHASE_TYPES.includes(purchase_type)) {
-      return reply.status(400).send({ error: `purchase_type must be one of: ${VALID_PURCHASE_TYPES.join(", ")}`, code: "INVALID_FIELD" });
-    }
-    if (currency && !VALID_CURRENCIES.includes(currency)) {
-      return reply.status(400).send({ error: `currency must be one of: ${VALID_CURRENCIES.join(", ")}`, code: "INVALID_FIELD" });
-    }
-
-    const { error: userUpsertErr } = await supabase
-      .from("users")
-      .upsert({ device_id: deviceId }, { onConflict: "device_id" });
-
-    if (userUpsertErr) {
-      return reply.status(500).send({ error: "Failed to initialise user", code: "INTERNAL_ERROR" });
-    }
-
-    const { error: purchaseErr } = await supabase
-      .from("purchases")
-      .insert({
-        device_id:     deviceId,
-        purchase_type,
-        amount:        amount !== null ? Number(amount) : null,
-        currency,
-      });
-
-    if (purchaseErr) {
-      return reply.status(500).send({ error: "Failed to record purchase", code: "INTERNAL_ERROR" });
-    }
-
-    const { error: upgradeErr } = await supabase
-      .from("users")
-      .update({
-        is_premium: true,
-        premium_status: "premium_onetime",
-        premium_source: "legacy_unlock",
-        premium_since: new Date().toISOString(),
-      })
-      .eq("device_id", deviceId);
-
-    if (upgradeErr) {
-      return reply.status(500).send({ error: "Failed to activate premium", code: "INTERNAL_ERROR" });
-    }
-
-    return reply.status(200).send({ ok: true, is_premium: true, unlocked: true });
+  // ── POST /premium/unlock — DISABLED (CRIT-02: zero-verification premium bypass)
+  // This legacy endpoint granted premium with no receipt validation.
+  // Replaced with a 410 Gone response. All premium unlocks must go through
+  // real IAP (purchase/verify) or activation codes (redeem).
+  fastify.post("/unlock", async (_request, reply) => {
+    return reply.status(410).send({
+      error: "This endpoint has been retired. Use IAP or activation codes.",
+      code: "ENDPOINT_RETIRED",
+    });
   });
 
   // ── POST /premium/redeem ──────────────────────────────────────────────────
