@@ -564,7 +564,7 @@ class _PageDots extends StatelessWidget {
           width: active ? 24 : 6,
           height: 6,
           decoration: BoxDecoration(
-            color: active ? AppColors.stoicism : AppColors.border,
+            color: active ? AppColors.stoicism : AppColors.textMuted,
             borderRadius: BorderRadius.circular(3),
           ),
         );

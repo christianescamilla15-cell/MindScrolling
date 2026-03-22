@@ -316,7 +316,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     border: Border.all(color: passed ? color : AppColors.border),
                   ),
                   child: Text(
-                    passed ? (widget.mode == 'science' ? 'Enter Science Mode' : 'Enter Coding Mode') : tr.quizRetry,
+                    passed ? (widget.mode == 'science' ? tr.quizEnterScience : tr.quizEnterCoding) : tr.quizRetry,
                     style: AppTypography.bodyMedium.copyWith(
                       color: passed ? Colors.white : AppColors.textMuted,
                       fontWeight: FontWeight.w600,

@@ -409,6 +409,8 @@ abstract class AppStrings {
   // ------------------------------------------------------------------
   // Hidden modes (Phase 5-8)
   // ------------------------------------------------------------------
+  String get hiddenModeComingSoon;
+  String get hiddenModeCurating;
   String get hiddenScienceTitle;
   String get hiddenScienceSubtitle;
   String get hiddenCodingTitle;
@@ -421,6 +423,8 @@ abstract class AppStrings {
   String get quizFailedTitle;
   String get quizFailedBody;
   String get quizRetry;
+  String get quizEnterScience;
+  String get quizEnterCoding;
   String get quizStart;
   String quizScore(int score, int total);
 

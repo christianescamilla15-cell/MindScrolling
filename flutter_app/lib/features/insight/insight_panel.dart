@@ -80,7 +80,7 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [bgColor, const Color(0xFF16213E)],
+          colors: [bgColor, bgColor.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -153,14 +153,14 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                         border: InputBorder.none,
                         counterText: '',
                         suffixIcon: insightState.isLoading
-                            ? const Padding(
-                                padding: EdgeInsets.all(12),
+                            ? Padding(
+                                padding: const EdgeInsets.all(12),
                                 child: SizedBox(
                                   width: 18,
                                   height: 18,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: Color(0xFF8B5CF6),
+                                    color: accentColor,
                                   ),
                                 ),
                               )

@@ -508,13 +508,13 @@ class _ScoreBar extends StatelessWidget {
                   Icon(
                     diff > 0 ? Icons.arrow_upward : Icons.arrow_downward,
                     size: 12,
-                    color: diff > 0 ? Colors.greenAccent : Colors.redAccent,
+                    color: diff > 0 ? const Color(0xFF4ADE80) : const Color(0xFFFF6B6B),
                   ),
                   const SizedBox(width: 2),
                   Text(
                     '${diff.abs()}',
                     style: AppTypography.caption.copyWith(
-                      color: diff > 0 ? Colors.greenAccent : Colors.redAccent,
+                      color: diff > 0 ? const Color(0xFF4ADE80) : const Color(0xFFFF6B6B),
                     ),
                   ),
                   const SizedBox(width: 6),

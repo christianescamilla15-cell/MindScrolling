@@ -5,6 +5,7 @@ import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/providers/core_providers.dart';
 import '../../data/models/quote_model.dart';
+import '../../shared/extensions/context_extensions.dart';
 import '../settings/settings_controller.dart';
 
 /// Reusable feed widget for hidden modes (science, coding).
@@ -96,12 +97,12 @@ class _HiddenModeFeedState extends ConsumerState<HiddenModeFeed> {
             Icon(Icons.cloud_off, color: AppColors.textMuted, size: 40),
             const SizedBox(height: 12),
             Text(
-              'Coming soon',
+              context.tr.hiddenModeComingSoon,
               style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
             ),
             const SizedBox(height: 8),
             Text(
-              'Science content is being curated.',
+              context.tr.hiddenModeCurating,
               style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
             ),
             const SizedBox(height: 16),
@@ -114,7 +115,7 @@ class _HiddenModeFeedState extends ConsumerState<HiddenModeFeed> {
                   border: Border.all(color: widget.accentColor),
                 ),
                 child: Text(
-                  'Retry',
+                  context.tr.retry,
                   style: AppTypography.labelSmall.copyWith(color: widget.accentColor),
                 ),
               ),
@@ -132,12 +133,12 @@ class _HiddenModeFeedState extends ConsumerState<HiddenModeFeed> {
             Icon(Icons.auto_awesome, color: widget.accentColor, size: 40),
             const SizedBox(height: 12),
             Text(
-              'Content coming soon',
+              context.tr.hiddenModeComingSoon,
               style: AppTypography.bodyMedium.copyWith(color: widget.accentColor),
             ),
             const SizedBox(height: 8),
             Text(
-              'This branch is being prepared.',
+              context.tr.hiddenModeCurating,
               style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
             ),
           ],

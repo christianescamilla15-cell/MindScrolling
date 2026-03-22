@@ -33,9 +33,9 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     final ps = ref.watch(premiumStateProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D0D1A),
+        backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: false,
         title: Text(context.tr.premium, style: AppTypography.displaySmall),

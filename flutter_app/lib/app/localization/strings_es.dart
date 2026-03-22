@@ -741,6 +741,8 @@ class StringsEs implements AppStrings {
   @override String get insightWelcomeBody  => 'Ahora puedes personalizar tu experiencia. Cuéntanos cómo te sientes y recibe una frase alineada con tus emociones.';
 
   // Hidden modes
+  @override String get hiddenModeComingSoon   => 'Próximamente';
+  @override String get hiddenModeCurating     => 'El contenido está siendo curado para este modo.';
   @override String get hiddenScienceTitle     => 'Modo Ciencia Detectado';
   @override String get hiddenScienceSubtitle  => 'Desbloquea un mundo de conocimiento y descubrimiento.';
   @override String get hiddenCodingTitle      => 'Modo Programación Detectado';
@@ -753,6 +755,8 @@ class StringsEs implements AppStrings {
   @override String get quizFailedTitle        => '¡Casi lo logras!';
   @override String get quizFailedBody         => 'Necesitas 8/10 para desbloquear. Sigue aprendiendo e intenta de nuevo.';
   @override String get quizRetry              => 'Intentar después';
+  @override String get quizEnterScience       => 'Entrar al Modo Ciencia';
+  @override String get quizEnterCoding        => 'Entrar al Modo Programación';
   @override String get quizStart              => 'Comenzar Quiz';
   @override String quizScore(int score, int total) => '$score / $total';
 }

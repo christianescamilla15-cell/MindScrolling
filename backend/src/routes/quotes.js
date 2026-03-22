@@ -168,7 +168,7 @@ export default async function quotesRoutes(fastify) {
    *   cursor — opaque string     (kept for client compatibility; not used server-side)
    */
   fastify.get("/feed", async (request, reply) => {
-    const { lang = "en", limit = 20 } = request.query;
+    const { lang = "en", limit = 20, content_type = null, sub_category = null } = request.query;
     const { deviceId }  = request;
     const take          = Math.min(Math.max(Number(limit) || 20, 1), 20);
     const poolSize      = take * POOL_MULTIPLIER;
@@ -254,6 +254,9 @@ export default async function quotesRoutes(fastify) {
           .eq("is_hidden_mode", false)
           .limit(perCategory);
         if (!isPremium) q = q.eq("is_premium", false);
+        // HIGH-05: Support content_type filter for hidden mode feeds
+        if (content_type) q = q.eq("content_type", content_type);
+        if (sub_category) q = q.eq("sub_category", sub_category);
         return q;
       });
 

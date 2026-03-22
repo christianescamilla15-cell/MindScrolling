@@ -120,7 +120,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   void _showTrialExpiredDialog(BuildContext ctx) {
     showDialog(
       context: ctx,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (c) => AlertDialog(
         backgroundColor: const Color(0xFF1C1C28),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

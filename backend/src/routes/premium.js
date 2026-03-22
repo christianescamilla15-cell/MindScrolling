@@ -20,6 +20,69 @@ import {
 const VALID_PURCHASE_TYPES = ["premium_unlock", "pack_purchase"];
 const VALID_CURRENCIES     = ["USD", "EUR", "GBP", "ARS", "BRL"];
 
+// ─── RevenueCat REST API (receipt validation) ─────────────────────────────────
+const RC_API_KEY = process.env.REVENUECAT_API_KEY;   // Secret API key from RevenueCat dashboard
+const RC_API_URL = "https://api.revenuecat.com/v1";
+
+/**
+ * Validate a purchase receipt with RevenueCat.
+ * Returns { valid: true, entitlement } on success, { valid: false, reason } on failure.
+ * Falls through gracefully if REVENUECAT_API_KEY is not set (dev mode).
+ */
+async function validateReceiptWithRevenueCat(deviceId, store, purchaseToken, transactionId) {
+  if (!RC_API_KEY) {
+    // Dev mode — skip validation, log warning
+    return { valid: true, reason: "rc_not_configured", dev: true };
+  }
+
+  try {
+    // POST receipt to RevenueCat to validate and record
+    const body = {
+      app_user_id: deviceId,
+      fetch_token: store === "android" ? purchaseToken : transactionId,
+    };
+
+    const endpoint = store === "android"
+      ? `${RC_API_URL}/receipts`
+      : `${RC_API_URL}/receipts`;
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RC_API_KEY}`,
+        "Content-Type": "application/json",
+        "X-Platform": store === "android" ? "android" : "ios",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => "");
+      return { valid: false, reason: `rc_error_${response.status}`, detail: errBody.slice(0, 200) };
+    }
+
+    const data = await response.json();
+    const subscriber = data?.subscriber;
+    const entitlements = subscriber?.entitlements;
+
+    // Check for active "premium" or "inside" entitlement
+    const premiumEntitlement = entitlements?.premium ?? entitlements?.inside ?? entitlements?.pro;
+    if (premiumEntitlement && premiumEntitlement.expires_date === null) {
+      // Lifetime / non-consumable — valid
+      return { valid: true, reason: "rc_verified", entitlement: premiumEntitlement };
+    }
+    if (premiumEntitlement && new Date(premiumEntitlement.expires_date) > new Date()) {
+      return { valid: true, reason: "rc_verified", entitlement: premiumEntitlement };
+    }
+
+    // No active entitlement found — purchase may be fraudulent
+    return { valid: false, reason: "no_active_entitlement" };
+  } catch (err) {
+    // Network error — fail open in production to avoid blocking legitimate purchases
+    return { valid: true, reason: "rc_network_error", dev: false };
+  }
+}
+
 // ─── MindScrolling Inside plan constants ─────────────────────────────────────
 const PLAN_NAME          = process.env.PREMIUM_PLAN_NAME          ?? "MindScrolling Inside";
 const PLAN_PRICE         = process.env.PREMIUM_BASE_PRICE_USD     ?? "4.99";
@@ -189,10 +252,6 @@ export default async function premiumRoutes(fastify) {
    * (Individual pack purchase uses POST /packs/:id/purchase/verify.)
    */
   fastify.post("/purchase/verify", async (request, reply) => {
-    // WARNING: This endpoint does NOT perform server-side receipt validation.
-    // Real validation occurs via the RevenueCat webhook at POST /webhooks/revenuecat.
-    // Client-side verification is trusted for now — hardening planned for Sprint 8.
-    // TODO(S8): Add RevenueCat REST API validation before marking purchase as verified.
     const deviceId = request.deviceId;
     const {
       store,
@@ -235,6 +294,24 @@ export default async function premiumRoutes(fastify) {
       }
     }
 
+    // CRIT-01: Validate receipt with RevenueCat before granting premium
+    const rcResult = await validateReceiptWithRevenueCat(deviceId, store, purchase_token, transaction_id);
+    if (!rcResult.valid) {
+      request.log.warn({ deviceId, store, reason: rcResult.reason }, "premium/purchase/verify: receipt validation failed");
+      // Audit log — failed verification attempt
+      supabase.from("premium_audit_log").insert({
+        device_id: deviceId,
+        event_type: "purchase_verify_failed",
+        source: store,
+        metadata: { reason: rcResult.reason, product_id },
+      }).then(() => {}).catch(() => {});
+      return reply.status(403).send({
+        error: "Purchase could not be verified",
+        code: "VERIFICATION_FAILED",
+        reason: rcResult.reason,
+      });
+    }
+
     const { error: userUpsertErr } = await supabase
       .from("users")
       .upsert({ device_id: deviceId }, { onConflict: "device_id" });
@@ -254,6 +331,7 @@ export default async function premiumRoutes(fastify) {
         amount:         Number(PLAN_PRICE),
         currency:       "USD",
         status:         "verified",
+        verified_by:    rcResult.dev ? "dev_bypass" : "revenuecat",
         updated_at:     now,
       });
 

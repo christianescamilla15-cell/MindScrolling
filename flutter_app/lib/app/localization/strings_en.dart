@@ -740,6 +740,8 @@ class StringsEn implements AppStrings {
   @override String get insightWelcomeBody  => 'You can now personalize your experience. Tell us how you feel and receive a quote aligned with your emotions.';
 
   // Hidden modes
+  @override String get hiddenModeComingSoon   => 'Coming soon';
+  @override String get hiddenModeCurating     => 'Content is being curated for this mode.';
   @override String get hiddenScienceTitle     => 'Science Mode Detected';
   @override String get hiddenScienceSubtitle  => 'Unlock a world of scientific knowledge and discovery.';
   @override String get hiddenCodingTitle      => 'Coding Mode Detected';
@@ -752,6 +754,8 @@ class StringsEn implements AppStrings {
   @override String get quizFailedTitle        => 'Almost there!';
   @override String get quizFailedBody         => 'You need 8/10 to unlock. Keep learning and try again.';
   @override String get quizRetry              => 'Try again later';
+  @override String get quizEnterScience       => 'Enter Science Mode';
+  @override String get quizEnterCoding        => 'Enter Coding Mode';
   @override String get quizStart              => 'Start Quiz';
   @override String quizScore(int score, int total) => '$score / $total';
 }
