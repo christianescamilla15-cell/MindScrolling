@@ -423,13 +423,16 @@ export default async function quotesRoutes(fastify) {
     }
 
     if (!pickedQuote) {
-      // Random fallback: a single premium quote in the requested language
-      const { data: randomPool, error: randErr } = await supabase
+      // L-05: Random fallback respects premium entitlement
+      let randomQuery = supabase
         .from("quotes")
         .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
         .eq("lang", effectiveLang)
         .eq("is_hidden_mode", false)
+        .or("pack_name.eq.free,pack_name.is.null")
         .limit(50);
+      if (!isPremium) randomQuery = randomQuery.eq("is_premium", false);
+      const { data: randomPool, error: randErr } = await randomQuery;
 
       if (randErr || !randomPool?.length) {
         return reply.status(500).send({ error: "Failed to fetch daily pick", code: "INTERNAL_ERROR" });
@@ -508,13 +511,15 @@ export default async function quotesRoutes(fastify) {
       return reply.status(404).send({ error: "Quote not found", code: "NOT_FOUND" });
     }
 
-    const hasEmbedding = Array.isArray(source.embedding) && source.embedding.length > 0;
+    // M-03: Extract embedding for RPC, discard from object to prevent accidental logging
+    const { embedding: sourceEmbedding, ...sourcePublic } = source;
+    const hasEmbedding = Array.isArray(sourceEmbedding) && sourceEmbedding.length > 0;
     const poolSize     = take * 3;
 
     // ── 2a. Semantic path ─────────────────────────────────────────────────────
     if (hasEmbedding) {
       const { data: pool, error: rpcErr } = await supabase.rpc("match_quotes", {
-        query_embedding: source.embedding,
+        query_embedding: sourceEmbedding,
         p_device_id:     deviceId,
         p_lang:          effectiveLang,
         p_is_premium:    true,
@@ -537,14 +542,14 @@ export default async function quotesRoutes(fastify) {
     }
 
     // ── 2b. Fallback: same category + overlapping tags ────────────────────────
-    const sourceTags = source.tags ?? [];
+    const sourceTags = sourcePublic.tags ?? [];
 
     let fallbackQuery = supabase
       .from("quotes")
       .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, content_type, tags")
       .eq("lang", effectiveLang)
       .eq("is_hidden_mode", false)
-      .eq("category", source.category)
+      .eq("category", sourcePublic.category)
       .neq("id", id)
       .limit(poolSize);
 

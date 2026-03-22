@@ -153,13 +153,25 @@ export default async function insightRoutes(fastify) {
    *   data: QuoteModel[]
    * }
    */
-  fastify.post("/match", async (request, reply) => {
+  fastify.post("/match", {
+    config: {
+      // L-04: Tighter rate limit — each call may invoke Voyage AI embedding API
+      rateLimit: {
+        max: 15,
+        timeWindow: 60_000,
+        keyGenerator: (req) => req.deviceId ?? req.ip,
+      },
+    },
+  }, async (request, reply) => {
     const { deviceId } = request;
     const { text = "", lang = "en", limit = 10 } = request.body ?? {};
     const effectiveLang = normalizeLang(lang);
     const take = Math.min(Math.max(Number(limit) || 10, 1), 20);
 
-    if (!text || typeof text !== "string" || text.trim().length === 0) {
+    // M-01: Cap text length before embedding generation (don't trust client maxLength)
+    const trimmedText = (typeof text === "string" ? text.trim() : "").slice(0, 500);
+
+    if (!trimmedText) {
       // Empty input — use user's preference vector for personalized suggestions
       const prefVector = await getPreferenceVector(deviceId);
 
@@ -200,7 +212,7 @@ export default async function insightRoutes(fastify) {
     }
 
     // ── Extract emotional tags from input ──────────────────────────────────
-    const tagScores = extractEmotionalTags(text.trim());
+    const tagScores = extractEmotionalTags(trimmedText);
     const detectedTags = Object.entries(tagScores)
       .sort((a, b) => b[1] - a[1])
       .map(([tag]) => tag);
@@ -215,7 +227,7 @@ export default async function insightRoutes(fastify) {
     try {
       // Generate embedding for user's emotional text + fetch their preference vector
       [inputEmbedding, prefVector] = await Promise.all([
-        generateEmbedding(text.trim()),
+        generateEmbedding(trimmedText),
         getPreferenceVector(deviceId),
       ]);
 
@@ -366,11 +378,22 @@ export default async function insightRoutes(fastify) {
       return reply.status(400).send({ error: "text is required", code: "MISSING_FIELD" });
     }
 
+    // H-02: Enforce maximum text length (server-side — don't trust client maxLength)
+    if (text.trim().length > 1000) {
+      return reply.status(400).send({ error: "text must be 1000 characters or fewer", code: "INVALID_FIELD" });
+    }
+
     if (!Array.isArray(tags)) {
       return reply.status(400).send({ error: "tags must be an array", code: "INVALID_FIELD" });
     }
 
+    // H-03: Enforce maximum tag count and per-tag length
+    if (tags.length > 30) {
+      return reply.status(400).send({ error: "tags array must have 30 elements or fewer", code: "INVALID_FIELD" });
+    }
+
     const effectiveLang = normalizeLang(lang);
+    const sanitizedTags = tags.map(t => String(t).trim().slice(0, 50)).filter(Boolean);
 
     const { data: inserted, error: insertErr } = await supabase
       .from("analytics_events")
@@ -378,8 +401,8 @@ export default async function insightRoutes(fastify) {
         device_id:  deviceId,
         event_type: "mood_entry",
         properties: {
-          text:  text.trim(),
-          tags:  tags.map(t => String(t).trim()).filter(Boolean),
+          text:  text.trim().slice(0, 1000),
+          tags:  sanitizedTags,
           lang:  effectiveLang,
         },
       })
