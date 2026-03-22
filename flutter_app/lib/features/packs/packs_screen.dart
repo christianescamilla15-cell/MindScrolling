@@ -233,8 +233,12 @@ class _PackCard extends StatelessWidget {
   }
 
   Color _parseColor(String hex) {
-    final h = hex.replaceFirst('#', '');
-    return Color(int.parse('FF$h', radix: 16));
+    try {
+      final h = hex.replaceFirst('#', '').substring(0, 6);
+      return Color(int.parse('FF$h', radix: 16));
+    } catch (_) {
+      return const Color(0xFF14B8A6); // fallback teal
+    }
   }
 
   IconData _mapIcon(String name) {

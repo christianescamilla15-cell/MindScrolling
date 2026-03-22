@@ -109,6 +109,8 @@ class InsightController extends StateNotifier<InsightState> {
   /// Submit emotional text and get personalized quote matches.
   Future<void> submitFeeling(String text) async {
     if (text.trim().isEmpty) return;
+    // CRIT-03: Prevent concurrent submissions (rapid double-tap)
+    if (state.isLoading) return;
 
     state = state.copyWith(
       isLoading: true,
@@ -164,6 +166,15 @@ class InsightController extends StateNotifier<InsightState> {
         }).catchError((_) => <String, dynamic>{});
       } catch (_) {}
 
+      // HIGH-03: Load mood history independently — don't let local storage errors
+      // discard successful API results
+      List<MoodEntry> moodHistory;
+      try {
+        moodHistory = await _loadMoodHistory();
+      } catch (_) {
+        moodHistory = state.moodHistory;
+      }
+
       state = state.copyWith(
         isLoading: false,
         quoteOfDay: quoteOfDay,
@@ -173,7 +184,7 @@ class InsightController extends StateNotifier<InsightState> {
         detectedHiddenMode: hiddenModeIntent,
         emotionalTheme: theme,
         suggestedTrackId: suggestedTrack?.id,
-        moodHistory: await _loadMoodHistory(),
+        moodHistory: moodHistory,
       );
     } catch (e) {
       state = state.copyWith(
@@ -206,11 +217,16 @@ class InsightController extends StateNotifier<InsightState> {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_kMoodHistoryKey);
     if (raw == null) return [];
-    final List<dynamic> list = jsonDecode(raw) as List;
-    return list
-        .whereType<Map<String, dynamic>>()
-        .map((e) => MoodEntry.fromJson(e))
-        .toList();
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return [];
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map((e) => MoodEntry.fromJson(e))
+          .toList();
+    } catch (_) {
+      return [];
+    }
   }
 
   /// Clear the current insight and reset to input state.

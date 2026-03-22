@@ -79,6 +79,9 @@ class FeedController extends StateNotifier<FeedState> {
   Future<void> loadInitialFeed(String lang) async {
     _lang = lang;
     _cursor = null;
+    // CRIT-02: Clear stale prefetch data to prevent language bleed
+    _queueManager.clear();
+    _prefetchService.cancel();
     // Preserve swipe count when reloading feed (language change, app resume)
     final currentReflections = state.reflections;
     final currentStreak = state.streak;
