@@ -711,4 +711,12 @@ class StringsEs implements AppStrings {
   @override String get insideValueProp         => '3 packs (valor \$8.97) + funciones premium — \$4.99';
   @override String get insideValuePropOwn1     => 'Ya tienes 1 pack. Obtén los otros 2 + funciones premium por \$4.99.';
   @override String get insideValuePropOwn2     => 'Tienes 2 packs. Completa tu biblioteca + funciones premium por \$4.99.';
+
+  // Insight panel
+  @override String get insightTitle        => '¿Cómo te sientes hoy?';
+  @override String get insightYourQuote    => 'Tu frase del día';
+  @override String get insightHint         => 'Cuéntame cómo te sientes o qué quieres explorar...';
+  @override String get insightRefine       => 'Probar algo diferente';
+  @override String get insightWelcomeTitle => 'Bienvenido a Insight';
+  @override String get insightWelcomeBody  => 'Ahora puedes personalizar tu experiencia. Cuéntanos cómo te sientes y recibe una frase alineada con tus emociones.';
 }

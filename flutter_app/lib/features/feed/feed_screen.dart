@@ -22,6 +22,7 @@ import '../../shared/widgets/streak_milestone_dialog.dart';
 import '../premium/premium_controller.dart';
 import '../share_export/share_export_service.dart';
 import '../settings/settings_controller.dart';
+import '../insight/insight_panel.dart';
 import 'feed_controller.dart';
 import 'feed_state.dart';
 import 'widgets/challenge_card.dart';
@@ -328,6 +329,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   reflections: state.reflections,
                   streakPulse: state.streakPulse,
                 ),
+                // Insight panel — visible only for Inside (premium) users
+                if (ref.watch(premiumStateProvider).premiumState.isPremium)
+                  const InsightPanel(),
                 Expanded(child: _buildBody(state)),
                 AppBottomNav(currentIndex: 0),
               ],

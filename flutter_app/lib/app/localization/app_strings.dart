@@ -396,6 +396,16 @@ abstract class AppStrings {
   String get packComingSoon;
   String get trialSoftPaywall;
 
+  // ------------------------------------------------------------------
+  // Insight panel (Phase 4 — emotional matching inside Inside)
+  // ------------------------------------------------------------------
+  String get insightTitle;
+  String get insightYourQuote;
+  String get insightHint;
+  String get insightRefine;
+  String get insightWelcomeTitle;
+  String get insightWelcomeBody;
+
   // API Contract keys (from contract section 7)
   String get packIncludedInInside;
   String get packGetFor;
