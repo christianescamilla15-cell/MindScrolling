@@ -580,7 +580,8 @@ class _DevVersionTileState extends State<_DevVersionTile> {
   }
 
   void _showDevPanel() {
-    if (!kDebugMode) return;
+    // Dev panel accessible in both debug and release builds
+    // (needed for QA testers using release APKs)
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

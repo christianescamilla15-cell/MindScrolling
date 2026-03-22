@@ -226,7 +226,7 @@ class FeedController extends StateNotifier<FeedState> {
     _swipeStartTime = DateTime.now();
 
     // Trigger prefetch when approaching end of buffer.
-    if (newIndex >= state.items.length - AppConstants.feedPageSize ~/ 4) {
+    if (newIndex >= state.items.length - AppConstants.feedPageSize ~/ 2) {
       loadMore().ignore();
     }
   }
@@ -404,7 +404,7 @@ class FeedController extends StateNotifier<FeedState> {
     _swipeStartTime = DateTime.now();
 
     // Trigger prefetch when approaching end of buffer.
-    if (newIndex >= state.items.length - AppConstants.feedPageSize ~/ 4) {
+    if (newIndex >= state.items.length - AppConstants.feedPageSize ~/ 2) {
       loadMore().ignore();
     }
   }

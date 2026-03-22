@@ -390,12 +390,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
     if (state.items.isNotEmpty && state.currentIndex >= state.items.length) {
-      return _ErrorView(
-        message: context.tr.noMoreQuotes,
-        onRetry: () {
+      // R8: Auto-retry instead of dead-end error screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
           final lang = ref.read(settingsStateProvider).lang;
           ref.read(feedControllerProvider.notifier).loadInitialFeed(lang);
-        },
+        }
+      });
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.stoicism),
       );
     }
 
@@ -415,9 +418,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       initialIndex: state.currentIndex,
       onSwipe: _onSwipe,
       allowedSwipeDirection: const AllowedSwipeDirection.all(),
-      numberOfCardsDisplayed: 1,
-      backCardOffset: const Offset(0, 0),
-      scale: 1.0,
+      numberOfCardsDisplayed: state.items.length >= 3 ? 3 : state.items.length.clamp(1, 3),
+      backCardOffset: const Offset(0, -6),
+      scale: 0.96,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       cardBuilder: (context, index, horizontalOffsetPercentage, verticalOffsetPercentage) {
         // Guard against CardSwiper pre-rendering beyond the list end

@@ -4,7 +4,7 @@ import '../../data/repositories/feed_repository.dart';
 /// Handles background prefetching of feed pages.
 ///
 /// Tracks a single in-flight request to avoid double-fetching.
-/// Notifies the caller via [onPrefetchComplete] when data arrives.
+/// Uses a generation counter to invalidate stale callbacks after cancel().
 class FeedPrefetchService {
   FeedPrefetchService({required FeedRepository repository})
       : _repository = repository;
@@ -14,9 +14,9 @@ class FeedPrefetchService {
   bool _inFlight = false;
   bool get isInFlight => _inFlight;
 
-  // -------------------------------------------------------------------------
-  // Prefetch
-  // -------------------------------------------------------------------------
+  /// Generation counter — incremented on every cancel().
+  /// Callbacks from a previous generation are silently discarded.
+  int _generation = 0;
 
   /// Fetches the next page of feed items.
   ///
@@ -32,28 +32,34 @@ class FeedPrefetchService {
     if (_inFlight) return;
     _inFlight = true;
 
+    final myGeneration = _generation;
+
     try {
       final result = await _repository.getFeed(lang: lang, cursor: cursor);
+
+      // R3: Check generation — if cancel() was called while we were in-flight,
+      // discard the result to prevent language bleed or stale data injection.
+      if (_generation != myGeneration) return;
+
       result.when(
         success: (items) {
-          if (items.isNotEmpty) {
+          if (items.isNotEmpty && _generation == myGeneration) {
             onPrefetchComplete(items);
           }
         },
-        failure: (_, __) {
-          // Prefetch errors are non-fatal; the caller will retry when
-          // shouldPrefetch is re-evaluated on the next swipe.
-        },
+        failure: (_, __) {},
       );
     } catch (_) {
-      // Belt-and-suspenders: swallow all errors from background work.
+      // Swallow all errors from background work.
     } finally {
       _inFlight = false;
     }
   }
 
-  /// Resets the in-flight flag — used on dispose or feed reset.
+  /// Cancels any in-flight prefetch by incrementing the generation counter.
+  /// The in-flight request continues but its callback will be discarded.
   void cancel() {
+    _generation++;
     _inFlight = false;
   }
 }
