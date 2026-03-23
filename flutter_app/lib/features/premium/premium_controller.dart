@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -106,18 +105,14 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
   // ── Trial system (backend-driven) ─────────────────────────────────────
 
   Future<void> _initTrial() async {
-    // ── Dev override (hidden dev panel in Settings) ──────────────────────────
-    // HIGH-02: Only read dev override in debug builds to prevent production corruption
+    // ── Dev override (hidden dev panel in Settings — tap version 5x) ────────
+    // Accessible in both debug and release builds for QA testing.
+    // The override key is only written by the dev panel (requires 5 taps).
     final prefs = await SharedPreferences.getInstance();
-    if (kDebugMode) {
-      final devOverride = prefs.getString(_kDevOverrideKey);
-      if (devOverride != null) {
-        _applyDevOverride(devOverride);
-        return;
-      }
-    } else {
-      // In release builds, purge any stale dev override key
-      await prefs.remove(_kDevOverrideKey);
+    final devOverride = prefs.getString(_kDevOverrideKey);
+    if (devOverride != null) {
+      _applyDevOverride(devOverride);
+      return;
     }
 
     try {
