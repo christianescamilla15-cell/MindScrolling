@@ -167,7 +167,7 @@ class _Page0State extends State<_Page0> with TickerProviderStateMixin {
             child: FadeTransition(
               opacity: _titleFade,
               child: Text(
-                'Stop Doom-Scrolling.',
+                context.tr.onboardingHero1,
                 style: AppTypography.displayLarge.copyWith(
                   fontSize: 32,
                   fontStyle: FontStyle.italic,
@@ -184,7 +184,7 @@ class _Page0State extends State<_Page0> with TickerProviderStateMixin {
             child: FadeTransition(
               opacity: _subtitleFade,
               child: Text(
-                'Start Thinking.',
+                context.tr.onboardingHero2,
                 style: AppTypography.displayLarge.copyWith(
                   fontSize: 32,
                   fontStyle: FontStyle.italic,
@@ -204,7 +204,7 @@ class _Page0State extends State<_Page0> with TickerProviderStateMixin {
                 Container(width: 24, height: 1, color: AppColors.textMuted),
                 const SizedBox(width: 12),
                 Text(
-                  'MindScrolling',
+                  context.tr.onboardingBrand,
                   style: AppTypography.labelSmall.copyWith(
                     color: AppColors.textMuted,
                     letterSpacing: 3,
