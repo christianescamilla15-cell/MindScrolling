@@ -157,8 +157,6 @@ class InsightController extends StateNotifier<InsightState> {
 
       // Fire-and-forget: save mood to backend
       try {
-        final api = ref.read(apiClientProvider);
-        final lang = ref.read(settingsStateProvider).lang;
         api.post('/insight/mood', body: {
           'text': text.trim(),
           'tags': detectedTags,

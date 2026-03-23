@@ -312,7 +312,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 onTap: () {
                   if (passed) {
                     // Navigate to the unlocked mode
-                    context.go('/hidden/${widget.mode}');
+                    context.pushReplacement('/hidden/${widget.mode}');
                   } else {
                     context.pop();
                   }

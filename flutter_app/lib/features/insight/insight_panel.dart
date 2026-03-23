@@ -243,6 +243,29 @@ class _InsightPanelState extends ConsumerState<InsightPanel>
                     ),
                   ],
 
+                  // Error state
+                  if (insightState.error != null && !insightState.hasSubmitted) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF6B6B).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFFF6B6B).withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: Color(0xFFFF6B6B), size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(
+                            tr.couldNotLoadQuotes,
+                            style: AppTypography.bodySmall.copyWith(color: const Color(0xFFFF6B6B)),
+                          )),
+                        ],
+                      ),
+                    ),
+                  ],
+
                   // Hidden mode unlock suggestion
                   if (insightState.detectedHiddenMode != null &&
                       !ref.watch(hiddenModeControllerProvider)

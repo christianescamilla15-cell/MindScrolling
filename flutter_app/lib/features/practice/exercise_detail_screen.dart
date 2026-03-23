@@ -22,7 +22,6 @@ class _ExerciseDetailState {
     this.isLoadingHint = false,
     this.submitResult,
     this.isSubmitting = false,
-    this.isSkipping = false,
     this.exercise,
   });
 
@@ -33,7 +32,6 @@ class _ExerciseDetailState {
   /// null = not yet submitted, true = correct, false = incorrect.
   final bool? submitResult;
   final bool isSubmitting;
-  final bool isSkipping;
   final ExerciseModel? exercise;
 
   _ExerciseDetailState copyWith({
@@ -41,7 +39,6 @@ class _ExerciseDetailState {
     bool? isLoadingHint,
     bool? submitResult,
     bool? isSubmitting,
-    bool? isSkipping,
     ExerciseModel? exercise,
   }) {
     return _ExerciseDetailState(
@@ -49,7 +46,6 @@ class _ExerciseDetailState {
       isLoadingHint: isLoadingHint ?? this.isLoadingHint,
       submitResult: submitResult,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      isSkipping: isSkipping ?? this.isSkipping,
       exercise: exercise ?? this.exercise,
     );
   }
@@ -170,11 +166,13 @@ class _ExerciseDetailScreenState
       if (!mounted) return;
 
       final correct = (result['correct'] as bool?) ?? false;
+      final earnedPoints = (result['points_earned'] as int?) ?? _state.exercise!.points;
       final newAttempts = _state.exercise!.attempts + 1;
       final newStatus = correct ? 'completed' : 'in_progress';
       final updatedExercise = _state.exercise!.copyWith(
         status: newStatus,
         attempts: newAttempts,
+        pointsEarned: correct ? earnedPoints : null,
       );
 
       setState(() {
@@ -202,39 +200,6 @@ class _ExerciseDetailScreenState
       if (!mounted) return;
       setState(() {
         _state = _state.copyWith(isSubmitting: false);
-      });
-    }
-  }
-
-  Future<void> _skip() async {
-    if (_state.isSkipping) return;
-    setState(() {
-      _state = _state.copyWith(isSkipping: true);
-    });
-
-    final api = ref.read(apiClientProvider);
-    final lang = ref.read(settingsStateProvider).lang;
-    final exerciseId = _state.exercise!.id;
-
-    try {
-      await api.post(
-        '/exercises/$exerciseId/skip',
-        body: {'lang': lang},
-      );
-      if (!mounted) return;
-      final updatedExercise = _state.exercise!.copyWith(status: 'skipped');
-      ref.read(practiceControllerProvider.notifier).updateExercise(updatedExercise);
-      if (mounted) context.pop();
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _state = _state.copyWith(isSkipping: false);
-      });
-      _showError(e.message);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _state = _state.copyWith(isSkipping: false);
       });
     }
   }
@@ -296,18 +261,7 @@ class _ExerciseDetailScreenState
             ),
           ],
         ),
-        actions: [
-          if (_state.exercise!.status != 'completed')
-            TextButton(
-              onPressed: _state.isSkipping ? null : _skip,
-              child: Text(
-                tr.skipExercise,
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ),
-        ],
+        actions: const [],
       ),
       body: SingleChildScrollView(
         controller: _scrollController,
@@ -318,7 +272,7 @@ class _ExerciseDetailScreenState
             _MetaRow(exercise: exercise),
             const SizedBox(height: 16),
             if (_state.exercise!.status == 'completed')
-              _CompletedBanner(points: exercise.points, tr: tr),
+              _CompletedBanner(points: exercise.pointsEarned ?? exercise.points, tr: tr),
             const SizedBox(height: 16),
             _DescriptionCard(description: exercise.description),
             const SizedBox(height: 16),
@@ -345,7 +299,7 @@ class _ExerciseDetailScreenState
               const SizedBox(height: 16),
               _SubmitResultBanner(
                 correct: _state.submitResult!,
-                points: exercise.points,
+                points: exercise.pointsEarned ?? exercise.points,
                 tr: tr,
               ),
             ],
@@ -669,7 +623,7 @@ class _HintsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        for (int i = 1; i <= 3; i++) ...[
+        for (int i = 1; i <= exercise.hintCount; i++) ...[
           _HintTile(
             hintNumber: i,
             revealedText: hints[i],
@@ -679,7 +633,7 @@ class _HintsSection extends StatelessWidget {
             onReveal: () => onFetchHint(i),
             tr: tr,
           ),
-          if (i < 3) const SizedBox(height: 8),
+          if (i < exercise.hintCount) const SizedBox(height: 8),
         ],
       ],
     );
