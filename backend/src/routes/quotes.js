@@ -240,6 +240,16 @@ export default async function quotesRoutes(fastify) {
       }));
     }
 
+    // CRIT-03: Post-RPC content_type filter for hidden mode feeds
+    // RPCs don't accept content_type param — filter in application layer
+    if (candidates && (content_type || sub_category)) {
+      candidates = candidates.filter(q => {
+        if (content_type && q.content_type !== content_type) return false;
+        if (sub_category && q.sub_category !== sub_category) return false;
+        return true;
+      });
+    }
+
     // Fallback: if RPC not yet deployed, fetch balanced by category
     if (rpcErr) {
       const perCategory = Math.ceil(poolSize / CATEGORIES.length);
@@ -289,6 +299,15 @@ export default async function quotesRoutes(fastify) {
         return reply.status(500).send({ error: "Failed to fetch quotes", code: "INTERNAL_ERROR" });
       }
       candidates = fresh || [];
+
+      // HIGH-04: Apply content_type filter on retry too
+      if (candidates.length > 0 && (content_type || sub_category)) {
+        candidates = candidates.filter(q => {
+          if (content_type && q.content_type !== content_type) return false;
+          if (sub_category && q.sub_category !== sub_category) return false;
+          return true;
+        });
+      }
     }
 
     if (candidates.length === 0) {

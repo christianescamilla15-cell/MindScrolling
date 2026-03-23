@@ -58,8 +58,9 @@ class FeedPrefetchService {
 
   /// Cancels any in-flight prefetch by incrementing the generation counter.
   /// The in-flight request continues but its callback will be discarded.
+  /// HIGH-03: Do NOT reset _inFlight here — let the finally block handle it
+  /// to prevent concurrent HTTP requests after rapid cancel+loadMore cycles.
   void cancel() {
     _generation++;
-    _inFlight = false;
   }
 }
