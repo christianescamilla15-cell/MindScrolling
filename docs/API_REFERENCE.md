@@ -1,6 +1,6 @@
 # MindScrolling API Reference
 
-> Auto-generated on 2026-03-20
+> Auto-generated on 2026-03-23
 
 Base URL: `https://mindscrolling.onrender.com/api`
 
@@ -19,7 +19,7 @@ Base URL: `https://mindscrolling.onrender.com/api`
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/analytics/event` | Create/update event |
+| `POST` | `/api/analytics/event` | Max JSON size for properties (4KB) |
 
 ### Authors (`/api/authors`)
 
@@ -35,17 +35,42 @@ Base URL: `https://mindscrolling.onrender.com/api`
 | `GET` | `/api/challenges/today` | Retrieve today |
 | `POST` | `/api/challenges/:id/progress` | Create/update {id}/progress |
 
+### Device Lock (`/api/device-lock`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/device-lock/register` | Create/update register |
+
+### Exercises (`/api/exercises`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/exercises/list` | Retrieve list |
+| `GET` | `/api/exercises/stats` | Retrieve stats |
+| `GET` | `/api/exercises/languages` | Retrieve languages |
+| `GET` | `/api/exercises/:id` | Retrieve {id} |
+| `POST` | `/api/exercises/:id/hint` | Create/update {id}/hint |
+| `POST` | `/api/exercises/:id/submit` | Create/update {id}/submit |
+
+### Insight (`/api/insight`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/insight/match` | Create/update match |
+| `POST` | `/api/insight/mood` | Create/update mood |
+| `GET` | `/api/insight/mood-history` | Retrieve mood-history |
+
 ### Insights (`/api/insights`)
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/insights/weekly` | Retrieve weekly |
 
-### Likes (registered under `/api/quotes`)
+### Likes (`/api/likes`)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/quotes/:id/like` | Like or unlike a quote. Body: `{ action: "like" \| "unlike" }` |
+| `POST` | `/api/likes/:id/like` | POST /quotes/:id/like  body: { action: "like" | "unlike" } |
 
 ### Map (`/api/map`)
 
@@ -77,7 +102,7 @@ Base URL: `https://mindscrolling.onrender.com/api`
 | `POST` | `/api/premium/start-trial` | ── POST /premium/start-trial ───────────────────────────────────────────── |
 | `POST` | `/api/premium/purchase/verify` | Create/update purchase/verify |
 | `POST` | `/api/premium/restore` | Create/update restore |
-| `POST` | `/api/premium/unlock` | ── POST /premium/unlock (legacy — backward compatibility) ──────────────── |
+| `POST` | `/api/premium/unlock` | Replaced with a 410 Gone response. All premium unlocks must go through |
 | `POST` | `/api/premium/redeem` | ── POST /premium/redeem ────────────────────────────────────────────────── |
 
 ### Profile (`/api/profile`)
@@ -92,6 +117,8 @@ Base URL: `https://mindscrolling.onrender.com/api`
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/quotes/feed` | Retrieve feed |
+| `GET` | `/api/quotes/daily-pick` | Retrieve daily-pick |
+| `GET` | `/api/quotes/:id/similar` | Retrieve {id}/similar |
 
 ### Stats (`/api/stats`)
 
@@ -121,11 +148,7 @@ Base URL: `https://mindscrolling.onrender.com/api`
 
 ## Authentication
 
-All endpoints require `x-device-id` header (UUID v4), except:
-- `/health` — public health check
-- `/admin/*` — uses `X-Admin-Secret` header instead
-- `/webhooks/*` — uses `Authorization` header instead
-
+All endpoints require `x-device-id` header (UUID v4).
 Premium endpoints additionally check entitlement status.
 
 ## Rate Limits
