@@ -11,32 +11,34 @@ class ExerciseModel {
     this.expectedOutput,
     required this.points,
     required this.estimatedTime,
+    required this.hintCount,
     required this.status,
     required this.hintsUsed,
     required this.attempts,
+    this.pointsEarned,
   });
 
   final String id;
   final String title;
   final String description;
   final String language;
-
-  /// Difficulty level 1–5.
   final int difficulty;
   final String category;
   final String? starterCode;
   final String? expectedOutput;
   final int points;
-
-  /// Estimated completion time in minutes.
   final int estimatedTime;
-
-  /// One of: not_started, in_progress, completed, skipped.
+  final int hintCount;
   final String status;
   final int hintsUsed;
   final int attempts;
+  final int? pointsEarned;
 
   factory ExerciseModel.fromJson(Map<String, dynamic> json) {
+    // MED-01: Progress may be nested under 'progress' (list endpoint)
+    // or flat at top level (detail endpoint). Handle both.
+    final progress = json['progress'] as Map<String, dynamic>?;
+
     return ExerciseModel(
       id: (json['id'] as String?) ?? '',
       title: (json['title'] as String?) ?? '',
@@ -48,9 +50,15 @@ class ExerciseModel {
       expectedOutput: json['expected_output'] as String?,
       points: (json['points'] as int?) ?? 10,
       estimatedTime: (json['estimated_time'] as int?) ?? 5,
-      status: (json['status'] as String?) ?? 'not_started',
-      hintsUsed: (json['hints_used'] as int?) ?? 0,
-      attempts: (json['attempts'] as int?) ?? 0,
+      hintCount: (json['hint_count'] as int?) ?? 3,
+      status: (progress?['status'] as String?) ??
+              (json['status'] as String?) ?? 'not_started',
+      hintsUsed: (progress?['hints_used'] as int?) ??
+                 (json['hints_used'] as int?) ?? 0,
+      attempts: (progress?['attempts'] as int?) ??
+                (json['attempts'] as int?) ?? 0,
+      pointsEarned: (progress?['points_earned'] as int?) ??
+                    (json['points_earned'] as int?),
     );
   }
 
@@ -66,9 +74,11 @@ class ExerciseModel {
       'expected_output': expectedOutput,
       'points': points,
       'estimated_time': estimatedTime,
+      'hint_count': hintCount,
       'status': status,
       'hints_used': hintsUsed,
       'attempts': attempts,
+      if (pointsEarned != null) 'points_earned': pointsEarned,
     };
   }
 
@@ -83,9 +93,11 @@ class ExerciseModel {
     String? expectedOutput,
     int? points,
     int? estimatedTime,
+    int? hintCount,
     String? status,
     int? hintsUsed,
     int? attempts,
+    int? pointsEarned,
   }) {
     return ExerciseModel(
       id: id ?? this.id,
@@ -98,9 +110,11 @@ class ExerciseModel {
       expectedOutput: expectedOutput ?? this.expectedOutput,
       points: points ?? this.points,
       estimatedTime: estimatedTime ?? this.estimatedTime,
+      hintCount: hintCount ?? this.hintCount,
       status: status ?? this.status,
       hintsUsed: hintsUsed ?? this.hintsUsed,
       attempts: attempts ?? this.attempts,
+      pointsEarned: pointsEarned ?? this.pointsEarned,
     );
   }
 }

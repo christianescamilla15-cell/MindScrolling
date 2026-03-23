@@ -20,24 +20,19 @@ class PracticeState {
     this.totalCompleted = 0,
     this.totalPoints = 0,
     this.hasMore = true,
+    this.nextCursor,
   });
 
   final List<ExerciseModel> exercises;
-
-  /// Currently selected language filter. 'all' means no filter.
   final String selectedLanguage;
-
-  /// Currently selected difficulty filter. 0 means no filter.
   final int selectedDifficulty;
-
   final bool isLoading;
   final bool isLoadingMore;
   final String? error;
   final int totalCompleted;
   final int totalPoints;
-
-  /// Whether there are more exercises to load from the server.
   final bool hasMore;
+  final String? nextCursor;
 
   PracticeState copyWith({
     List<ExerciseModel>? exercises,
@@ -49,6 +44,7 @@ class PracticeState {
     int? totalCompleted,
     int? totalPoints,
     bool? hasMore,
+    String? nextCursor,
   }) {
     return PracticeState(
       exercises: exercises ?? this.exercises,
@@ -60,6 +56,7 @@ class PracticeState {
       totalCompleted: totalCompleted ?? this.totalCompleted,
       totalPoints: totalPoints ?? this.totalPoints,
       hasMore: hasMore ?? this.hasMore,
+      nextCursor: nextCursor ?? this.nextCursor,
     );
   }
 }
@@ -76,27 +73,41 @@ class PracticeController extends StateNotifier<PracticeState> {
 
   static const int _pageSize = 20;
 
-  /// Initial load — clears previous list and applies current filters.
+  /// Initial load — clears previous list, fetches exercises + stats in parallel.
   Future<void> load() async {
-    state = state.copyWith(isLoading: true, error: null, exercises: []);
+    state = state.copyWith(isLoading: true, error: null, exercises: [], nextCursor: null);
 
     try {
       final params = _buildParams(limit: _pageSize);
-      final data = await _api.get('/exercises/list', queryParams: params);
 
-      final rawList = data['exercises'] as List<dynamic>? ?? [];
+      // CRIT-03 fix: Fetch exercises list AND stats in parallel
+      final results = await Future.wait([
+        _api.get('/exercises/list', queryParams: params),
+        _api.get('/exercises/stats'),
+      ]);
+
+      final listData = results[0];
+      final statsData = results[1];
+
+      // CRIT-01 fix: Backend returns 'data', not 'exercises'
+      final rawList = listData['data'] as List<dynamic>? ?? [];
       final list = rawList
           .whereType<Map<String, dynamic>>()
           .map(ExerciseModel.fromJson)
           .toList();
 
-      final stats = data['stats'] as Map<String, dynamic>? ?? {};
+      // CRIT-02 fix: Use cursor-based pagination from backend
+      final nextCursor = listData['next_cursor'] as String?;
+      final hasMore = listData['has_more'] as bool? ?? false;
+
+      // CRIT-03 fix: Read correct stat field names
       state = state.copyWith(
         exercises: list,
         isLoading: false,
-        hasMore: list.length >= _pageSize,
-        totalCompleted: (stats['completed'] as int?) ?? 0,
-        totalPoints: (stats['points'] as int?) ?? 0,
+        hasMore: hasMore,
+        nextCursor: nextCursor,
+        totalCompleted: (statsData['total_completed'] as int?) ?? 0,
+        totalPoints: (statsData['total_points'] as int?) ?? 0,
         error: null,
       );
     } on ApiException catch (e) {
@@ -106,29 +117,34 @@ class PracticeController extends StateNotifier<PracticeState> {
     }
   }
 
-  /// Load next page — appends to existing list.
+  /// Load next page — appends to existing list using cursor pagination.
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
+    if (state.nextCursor == null) return;
 
     state = state.copyWith(isLoadingMore: true);
 
     try {
-      final params = _buildParams(
-        limit: _pageSize,
-        offset: state.exercises.length,
-      );
+      // CRIT-02 fix: Use cursor, not offset
+      final params = _buildParams(limit: _pageSize);
+      params['cursor'] = state.nextCursor!;
+
       final data = await _api.get('/exercises/list', queryParams: params);
 
-      final rawList = data['exercises'] as List<dynamic>? ?? [];
+      final rawList = data['data'] as List<dynamic>? ?? [];
       final list = rawList
           .whereType<Map<String, dynamic>>()
           .map(ExerciseModel.fromJson)
           .toList();
 
+      final nextCursor = data['next_cursor'] as String?;
+      final hasMore = data['has_more'] as bool? ?? false;
+
       state = state.copyWith(
         exercises: [...state.exercises, ...list],
         isLoadingMore: false,
-        hasMore: list.length >= _pageSize,
+        hasMore: hasMore,
+        nextCursor: nextCursor,
       );
     } on ApiException catch (e) {
       state = state.copyWith(isLoadingMore: false, error: e.message);
@@ -151,8 +167,9 @@ class PracticeController extends StateNotifier<PracticeState> {
     await load();
   }
 
-  /// Update a single exercise in the local list after a submit or skip.
-  void updateExercise(ExerciseModel updated) {
+  /// Update a single exercise in the local list after a submit.
+  /// HIGH-02 fix: Uses pointsEarned (actual) instead of base points.
+  void updateExercise(ExerciseModel updated, {int? pointsEarned}) {
     final idx = state.exercises.indexWhere((e) => e.id == updated.id);
     if (idx == -1) return;
     final newList = List<ExerciseModel>.from(state.exercises);
@@ -163,7 +180,7 @@ class PracticeController extends StateNotifier<PracticeState> {
     final prev = state.exercises[idx];
     if (prev.status != 'completed' && updated.status == 'completed') {
       completedDelta = 1;
-      pointsDelta = updated.points;
+      pointsDelta = pointsEarned ?? updated.points;
     }
 
     state = state.copyWith(
@@ -173,12 +190,11 @@ class PracticeController extends StateNotifier<PracticeState> {
     );
   }
 
-  Map<String, String> _buildParams({required int limit, int offset = 0}) {
+  Map<String, String> _buildParams({required int limit}) {
     final params = <String, String>{
       'lang': _lang,
       'limit': limit.toString(),
     };
-    if (offset > 0) params['offset'] = offset.toString();
     if (state.selectedLanguage != 'all') {
       params['language'] = state.selectedLanguage;
     }
