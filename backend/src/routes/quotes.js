@@ -216,12 +216,35 @@ export default async function quotesRoutes(fastify) {
     const { normalised, raw: rawWeights } = buildWeights(prefs, profile);
     const dwellSignals                    = buildDwellSignals(prefs);
 
-    // ── Fetch candidates: semantic (with vector) or behavioural (without) ─────
+    // ── Fetch candidates ─────────────────────────────────────────────────────
+    // Hidden mode feeds (content_type = 'science' or 'coding') bypass the RPCs
+    // entirely because the RPCs filter is_hidden_mode = false by design.
+    const isHiddenModeFeed = content_type && content_type !== "philosophical";
     let candidates;
     let rpcErr;
     const hasVector = Array.isArray(prefVector) && prefVector.length > 0;
 
-    if (hasVector) {
+    if (isHiddenModeFeed) {
+      // ── Hidden mode: direct query for is_hidden_mode = true content ────────
+      let hmQuery = supabase
+        .from("quotes")
+        .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at, content_type, sub_category, tags")
+        .eq("lang", effectiveLang)
+        .eq("is_hidden_mode", true)
+        .eq("content_type", content_type);
+      if (sub_category) hmQuery = hmQuery.eq("sub_category", sub_category);
+      hmQuery = hmQuery.limit(poolSize);
+
+      const { data: hmData, error: hmErr } = await hmQuery;
+      if (hmErr) {
+        fastify.log.error({ err: hmErr }, "feed: hidden mode query failed");
+        return reply.status(500).send({ error: "Failed to fetch content", code: "INTERNAL_ERROR" });
+      }
+
+      // Shuffle for variety
+      candidates = (hmData ?? []).sort(() => Math.random() - 0.5);
+      rpcErr = null;
+    } else if (hasVector) {
       // Semantic retrieval: ANN search ordered by cosine similarity
       ({ data: candidates, error: rpcErr } = await supabase.rpc("match_quotes", {
         query_embedding: prefVector,
@@ -240,16 +263,6 @@ export default async function quotesRoutes(fastify) {
       }));
     }
 
-    // CRIT-03: Post-RPC content_type filter for hidden mode feeds
-    // RPCs don't accept content_type param — filter in application layer
-    if (candidates && (content_type || sub_category)) {
-      candidates = candidates.filter(q => {
-        if (content_type && q.content_type !== content_type) return false;
-        if (sub_category && q.sub_category !== sub_category) return false;
-        return true;
-      });
-    }
-
     // Fallback: if RPC not yet deployed, fetch balanced by category
     if (rpcErr) {
       const perCategory = Math.ceil(poolSize / CATEGORIES.length);
@@ -259,14 +272,10 @@ export default async function quotesRoutes(fastify) {
           .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at, content_type, tags")
           .eq("lang", effectiveLang)
           .eq("category", cat)
-          // Mirror the get_feed_candidates filter: pack quotes never appear in the free feed
           .or("pack_name.eq.free,pack_name.is.null")
           .eq("is_hidden_mode", false)
           .limit(perCategory);
         if (!isPremium) q = q.eq("is_premium", false);
-        // HIGH-05: Support content_type filter for hidden mode feeds
-        if (content_type) q = q.eq("content_type", content_type);
-        if (sub_category) q = q.eq("sub_category", sub_category);
         return q;
       });
 
