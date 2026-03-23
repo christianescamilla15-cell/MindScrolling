@@ -740,6 +740,16 @@ class StringsEn implements AppStrings {
   @override String get loadMore                => 'Load more';
   @override String get practiceStats           => 'Your Stats';
 
+  // Practice exercise detail
+  @override String get starterCodeLabel => 'STARTER CODE';
+  @override String get yourCodeLabel    => 'YOUR CODE';
+  @override String get hintsLabel       => 'HINTS';
+  @override String get reveal           => 'Reveal';
+  @override String get inProgressLabel  => 'In Progress';
+  @override String get skippedLabel     => 'Skipped';
+  @override String get notStartedLabel  => 'Not Started';
+  @override String get ptsEarned        => 'pts earned';
+
   // API Contract keys
   @override String get packIncludedInInside    => 'Included in Inside';
   @override String get packGetFor              => 'Get for \$2.99';

@@ -449,11 +449,12 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
     final (color, label) = switch (status) {
-      'completed' => (const Color(0xFF22C55E), context.tr.correct),
-      'in_progress' => (const Color(0xFFF59E0B), 'In Progress'),
-      'skipped' => (AppColors.textMuted, 'Skipped'),
-      _ => (AppColors.textMuted, 'Not Started'),
+      'completed'   => (const Color(0xFF22C55E), tr.correct),
+      'in_progress' => (const Color(0xFFF59E0B), tr.inProgressLabel),
+      'skipped'     => (AppColors.textMuted,     tr.skippedLabel),
+      _             => (AppColors.textMuted,     tr.notStartedLabel),
     };
 
     return Container(
@@ -549,7 +550,7 @@ class _StarterCodeBox extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'STARTER CODE',
+          context.tr.starterCodeLabel,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textMuted,
             letterSpacing: 1.2,
@@ -596,7 +597,7 @@ class _CodeInputArea extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'YOUR CODE',
+          context.tr.yourCodeLabel,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textMuted,
             letterSpacing: 1.2,
@@ -614,6 +615,9 @@ class _CodeInputArea extends StatelessWidget {
             enabled: enabled,
             maxLines: 10,
             keyboardType: TextInputType.multiline,
+            autocorrect: false,
+            enableSuggestions: false,
+            textCapitalization: TextCapitalization.none,
             style: const TextStyle(
               fontFamily: 'monospace',
               fontSize: 13,
@@ -658,7 +662,7 @@ class _HintsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'HINTS',
+          context.tr.hintsLabel,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textMuted,
             letterSpacing: 1.2,
@@ -671,6 +675,7 @@ class _HintsSection extends StatelessWidget {
             revealedText: hints[i],
             isLoading: isLoadingHint && !hints.containsKey(i),
             alreadyUsed: hints.containsKey(i),
+            revealEnabled: i == 1 || hints.containsKey(i - 1),
             onReveal: () => onFetchHint(i),
             tr: tr,
           ),
@@ -687,6 +692,7 @@ class _HintTile extends StatelessWidget {
     required this.revealedText,
     required this.isLoading,
     required this.alreadyUsed,
+    required this.revealEnabled,
     required this.onReveal,
     required this.tr,
   });
@@ -695,6 +701,7 @@ class _HintTile extends StatelessWidget {
   final String? revealedText;
   final bool isLoading;
   final bool alreadyUsed;
+  final bool revealEnabled;
   final VoidCallback onReveal;
   final dynamic tr;
 
@@ -750,11 +757,13 @@ class _HintTile extends StatelessWidget {
                           ),
                         )
                       : TextButton(
-                          onPressed: onReveal,
+                          onPressed: revealEnabled ? onReveal : null,
                           child: Text(
-                            'Reveal',
+                            context.tr.reveal,
                             style: AppTypography.labelSmall.copyWith(
-                              color: const Color(0xFF7B9FE0),
+                              color: revealEnabled
+                                  ? const Color(0xFF7B9FE0)
+                                  : AppColors.textMuted,
                             ),
                           ),
                         ),
@@ -796,7 +805,7 @@ class _SubmitResultBanner extends StatelessWidget {
         correct ? Icons.check_circle_rounded : Icons.cancel_rounded;
     final label = correct ? context.tr.correct : context.tr.incorrect;
     final sub = correct
-        ? '+$points pts earned'
+        ? '+$points ${context.tr.ptsEarned}'
         : context.tr.tryAgain;
 
     return AnimatedContainer(

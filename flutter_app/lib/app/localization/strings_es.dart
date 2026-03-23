@@ -741,6 +741,16 @@ class StringsEs implements AppStrings {
   @override String get loadMore                => 'Cargar m\u00e1s';
   @override String get practiceStats           => 'Tus estad\u00edsticas';
 
+  // Practice exercise detail
+  @override String get starterCodeLabel => 'CÓDIGO INICIAL';
+  @override String get yourCodeLabel    => 'TU CÓDIGO';
+  @override String get hintsLabel       => 'PISTAS';
+  @override String get reveal           => 'Revelar';
+  @override String get inProgressLabel  => 'En Progreso';
+  @override String get skippedLabel     => 'Omitido';
+  @override String get notStartedLabel  => 'Sin Iniciar';
+  @override String get ptsEarned        => 'pts ganados';
+
   // API Contract keys
   @override String get packIncludedInInside    => 'Incluido en Inside';
   @override String get packGetFor              => 'Obtener por \$2.99';

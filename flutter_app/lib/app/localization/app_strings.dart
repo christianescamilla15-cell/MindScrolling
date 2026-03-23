@@ -519,6 +519,18 @@ abstract class AppStrings {
   String get loadMore;
   String get practiceStats;
 
+  // ------------------------------------------------------------------
+  // Practice exercise detail
+  // ------------------------------------------------------------------
+  String get starterCodeLabel;
+  String get yourCodeLabel;
+  String get hintsLabel;
+  String get reveal;
+  String get inProgressLabel;
+  String get skippedLabel;
+  String get notStartedLabel;
+  String get ptsEarned;
+
   // API Contract keys (from contract section 7)
   String get packIncludedInInside;
   String get packGetFor;

@@ -240,7 +240,7 @@ class _PracticeTabEntry extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           GestureDetector(
-            onTap: () => context.go('/practice'),
+            onTap: () => context.push('/practice'),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 32),
               decoration: BoxDecoration(
