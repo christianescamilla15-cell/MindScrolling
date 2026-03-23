@@ -1801,7 +1801,7 @@ public class Solution {
  'A* uses a priority queue ordered by f = g + h where g is cost so far and h is heuristic.', 'A* usa una priority queue ordenada por f = g + h donde g es el costo acumulado y h es la heurística.',
  'Use Manhattan distance as the heuristic h(node) = |x-goalX| + |y-goalY|.', 'Usa la distancia Manhattan como heurística h(nodo) = |x-objetivoX| + |y-objetivoY|.',
  'Expand neighbors in 4 directions (up, down, left, right) checking bounds and walls.', 'Expande vecinos en 4 direcciones (arriba, abajo, izquierda, derecha) verificando límites y paredes.',
- 100, 10, now())
+ 100, 10, now()),
 
 (gen_random_uuid(),
  'Queue with LinkedList', 'Cola con LinkedList',

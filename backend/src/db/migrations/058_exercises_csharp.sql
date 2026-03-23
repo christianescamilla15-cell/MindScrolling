@@ -1290,7 +1290,7 @@ INSERT INTO exercises (
  3,
  'Parse left to right: read digit, then repeat reading operator and digit.', 'Analiza de izquierda a derecha: lee dígito, luego repite leyendo operador y dígito.',
  'Use an index variable to track the current position in the string.', 'Usa una variable de índice para rastrear la posición actual en la cadena.',
- 'int pos=0; int result=expr[pos++]-''0''; while(pos<expr.Length){char op=expr[pos++];int n=expr[pos++]-''0''; result = op==''+'? result+n : result-n;}', 'int pos=0; int result=expr[pos++]-''0''; while(pos<expr.Length){char op=expr[pos++];int n=expr[pos++]-''0''; result = op==''+'? result+n : result-n;}',
+ 'int pos=0; int result=expr[pos++]-''0''; while(pos<expr.Length){char op=expr[pos++];int n=expr[pos++]-''0''; result = op==''+'' ? result+n : result-n;}', 'int pos=0; int result=expr[pos++]-''0''; while(pos<expr.Length){char op=expr[pos++];int n=expr[pos++]-''0''; result = op==''+'' ? result+n : result-n;}',
  100, 10, now()),
 
 (gen_random_uuid(),
