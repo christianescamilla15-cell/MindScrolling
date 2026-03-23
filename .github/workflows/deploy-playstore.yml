@@ -112,7 +112,7 @@ jobs:
 
       - name: Upload AAB artifact (standalone build)
         if: ${{ inputs.skip_build == false || inputs.skip_build == 'false' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-release-aab
           path: flutter_app/build/app/outputs/bundle/release/app-release.aab
