@@ -313,7 +313,11 @@ export default async function exercisesRoutes(fastify) {
    * Body: { hint_number: 1|2|3 }
    * Response: { hint: string, hints_used: number }
    */
-  fastify.post("/:id/hint", async (request, reply) => {
+  fastify.post("/:id/hint", {
+    config: {
+      rateLimit: { max: 30, timeWindow: 60_000, keyGenerator: (req) => req.deviceId ?? req.ip },
+    },
+  }, async (request, reply) => {
     const { deviceId } = request;
     const { id }       = request.params;
     const lang         = normalizeLang(request.query?.lang ?? request.body?.lang);
@@ -412,7 +416,11 @@ export default async function exercisesRoutes(fastify) {
    * Body: { code: string }
    * Response: { correct: boolean, expected_output, points_earned, message }
    */
-  fastify.post("/:id/submit", async (request, reply) => {
+  fastify.post("/:id/submit", {
+    config: {
+      rateLimit: { max: 10, timeWindow: 60_000, keyGenerator: (req) => req.deviceId ?? req.ip },
+    },
+  }, async (request, reply) => {
     const { deviceId } = request;
     const { id }       = request.params;
     const lang         = normalizeLang(request.query?.lang ?? request.body?.lang);
@@ -422,6 +430,11 @@ export default async function exercisesRoutes(fastify) {
     }
 
     const { code } = request.body ?? {};
+
+    // M-01: Cap code length to prevent memory abuse
+    if (typeof code === "string" && code.length > 10_000) {
+      return reply.status(400).send({ error: "code must be 10,000 characters or fewer", code: "INVALID_FIELD" });
+    }
 
     if (!code && code !== "") {
       return reply.status(400).send({ error: "code is required", code: "MISSING_FIELD" });
@@ -519,9 +532,10 @@ export default async function exercisesRoutes(fastify) {
         : "Incorrect. Check your answer and try again.";
     }
 
+    // H-01: Only reveal expected_output after correct completion (not on wrong answers)
     return reply.send({
       correct,
-      expected_output: exercise.expected_output ?? null,
+      ...(correct ? { expected_output: exercise.expected_output ?? null } : {}),
       points_earned:   pointsEarned,
       message,
     });

@@ -35,7 +35,11 @@ export async function validateReceiptWithRevenueCat(
   transactionId
 ) {
   if (!RC_API_KEY) {
-    // Dev mode — skip validation, allow all purchases through
+    // M-04: In production, fail closed when RC key is missing
+    if (process.env.NODE_ENV === "production") {
+      return { valid: false, reason: "rc_not_configured" };
+    }
+    // Dev mode — skip validation
     return { valid: true, reason: "rc_not_configured", dev: true };
   }
 
