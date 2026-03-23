@@ -172,6 +172,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               difficulty: 1,
               category: '',
               points: 10,
+              hintCount: 3,
               estimatedTime: 5,
               status: 'not_started',
               hintsUsed: 0,
