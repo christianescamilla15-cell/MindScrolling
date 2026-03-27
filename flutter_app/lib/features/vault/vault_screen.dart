@@ -81,8 +81,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                 if (vaultState.items.isNotEmpty)
                   GestureDetector(
                     onTap: () => _exportVault(context, vaultState.items),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
                       child: Icon(Icons.file_download_outlined,
                           size: 22, color: AppColors.textSecondary),
                     ),
@@ -330,7 +330,7 @@ class _VaultQuoteItem extends StatelessWidget {
                         // Share button
                         GestureDetector(
                           onTap: () => ShareExportService.exportQuoteAsImage(context, quote),
-                          child: Icon(
+                          child: const Icon(
                             Icons.ios_share_rounded,
                             size: 16,
                             color: AppColors.textMuted,

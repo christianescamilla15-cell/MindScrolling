@@ -34,8 +34,7 @@ class SettingsScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              size: 18, color: AppColors.textSecondary),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppColors.textSecondary),
           onPressed: () => context.canPop() ? context.pop() : context.go('/feed'),
         ),
         title: Text(context.tr.settings, style: AppTypography.displaySmall),
@@ -51,8 +50,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 _LanguageToggle(
                   currentLang: settingsState.lang,
-                  onChanged: (lang) =>
-                      ref.read(settingsControllerProvider.notifier).setLang(lang),
+                  onChanged: (lang) => ref.read(settingsControllerProvider.notifier).setLang(lang),
                 ),
               ],
             ),
@@ -116,8 +114,7 @@ class SettingsScreen extends ConsumerWidget {
                       label: context.tr.quizEnterScience,
                       onTap: () => context.push('/hidden/science'),
                     ),
-                  if (hiddenModes.scienceUnlocked && hiddenModes.codingUnlocked)
-                    _Divider(),
+                  if (hiddenModes.scienceUnlocked && hiddenModes.codingUnlocked) _Divider(),
                   if (hiddenModes.codingUnlocked)
                     _NavTile(
                       icon: Icons.code_outlined,
@@ -183,8 +180,7 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _confirmResetOnboarding(
-      BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmResetOnboarding(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -201,14 +197,12 @@ class SettingsScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(context.tr.cancel,
-                style:
-                    AppTypography.buttonLabel.copyWith(color: AppColors.textSecondary)),
+                style: AppTypography.buttonLabel.copyWith(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(context.tr.reset,
-                style:
-                    AppTypography.buttonLabel.copyWith(color: Colors.redAccent)),
+                style: AppTypography.buttonLabel.copyWith(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -247,8 +241,7 @@ class _LanguageToggle extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: const Icon(Icons.language, color: _accent, size: 22),
-      title:
-          Text(context.tr.language, style: AppTypography.bodyMedium),
+      title: Text(context.tr.language, style: AppTypography.bodyMedium),
       trailing: _LangToggleButtons(
         currentLang: currentLang,
         onChanged: onChanged,
@@ -290,8 +283,7 @@ class _LangToggleButtons extends StatelessWidget {
               lang.toUpperCase(),
               style: AppTypography.labelSmall.copyWith(
                 color: isSelected ? _accent : AppColors.textSecondary,
-                fontWeight:
-                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ),
@@ -322,8 +314,7 @@ class _NavTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       leading: Icon(icon, color: _accent, size: 22),
       title: Text(label, style: AppTypography.bodyMedium),
-      trailing: const Icon(Icons.chevron_right,
-          color: AppColors.textMuted, size: 20),
+      trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20),
       onTap: onTap,
     );
   }
@@ -405,7 +396,11 @@ class _NotificationTileState extends State<_NotificationTile> {
   Future<void> _loadState() async {
     final enabled = await NotificationService.isEnabled();
     final time = await NotificationService.getScheduledTime();
-    if (mounted) setState(() { _enabled = enabled; _time = time; });
+    if (mounted)
+      setState(() {
+        _enabled = enabled;
+        _time = time;
+      });
   }
 
   Future<void> _toggle(bool value) async {
@@ -495,7 +490,7 @@ class _NotificationTileState extends State<_NotificationTile> {
           trailing: Switch(
             value: _enabled,
             onChanged: _toggle,
-            activeColor: AppColors.stoicism,
+            activeThumbColor: AppColors.stoicism,
           ),
         ),
         if (_enabled)
@@ -671,7 +666,8 @@ class _DevPremiumSheet extends ConsumerWidget {
         children: [
           Center(
             child: Container(
-              width: 36, height: 4,
+              width: 36,
+              height: 4,
               decoration: BoxDecoration(
                 color: AppColors.borderStrong,
                 borderRadius: BorderRadius.circular(2),
@@ -683,7 +679,7 @@ class _DevPremiumSheet extends ConsumerWidget {
             children: [
               const Text('🛠', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              Text('Dev Tools', style: AppTypography.displaySmall),
+              const Text('Dev Tools', style: AppTypography.displaySmall),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -694,7 +690,8 @@ class _DevPremiumSheet extends ConsumerWidget {
                 ),
                 child: Text(
                   currentLabel,
-                  style: AppTypography.labelSmall.copyWith(color: currentColor, fontWeight: FontWeight.w700),
+                  style: AppTypography.labelSmall
+                      .copyWith(color: currentColor, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -710,7 +707,10 @@ class _DevPremiumSheet extends ConsumerWidget {
             label: 'Free',
             subtitle: 'No premium, trial expired',
             color: Colors.grey,
-            onTap: () { Navigator.pop(context); controller.devSetState('free'); },
+            onTap: () {
+              Navigator.pop(context);
+              controller.devSetState('free');
+            },
           ),
           const SizedBox(height: 10),
           _DevStateButton(
@@ -718,7 +718,10 @@ class _DevPremiumSheet extends ConsumerWidget {
             label: 'Free Trial — 6 days',
             subtitle: 'Active trial, no payment',
             color: const Color(0xFFf59e0b),
-            onTap: () { Navigator.pop(context); controller.devSetState('trial'); },
+            onTap: () {
+              Navigator.pop(context);
+              controller.devSetState('trial');
+            },
           ),
           const SizedBox(height: 10),
           _DevStateButton(
@@ -726,7 +729,10 @@ class _DevPremiumSheet extends ConsumerWidget {
             label: 'MindScrolling Inside',
             subtitle: 'Full premium activated',
             color: const Color(0xFF8b5cf6),
-            onTap: () { Navigator.pop(context); controller.devSetState('premium'); },
+            onTap: () {
+              Navigator.pop(context);
+              controller.devSetState('premium');
+            },
           ),
           const SizedBox(height: 10),
           _DevStateButton(
@@ -734,7 +740,10 @@ class _DevPremiumSheet extends ConsumerWidget {
             label: 'Reset — use real backend',
             subtitle: 'Remove override and reload from server',
             color: Colors.redAccent,
-            onTap: () { Navigator.pop(context); controller.devSetState('reset'); },
+            onTap: () {
+              Navigator.pop(context);
+              controller.devSetState('reset');
+            },
           ),
           const SizedBox(height: 16),
           const Divider(height: 1),
@@ -786,8 +795,11 @@ class _DevStateButton extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: AppTypography.bodyMedium.copyWith(color: color, fontWeight: FontWeight.w700)),
-                  Text(subtitle, style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+                  Text(label,
+                      style: AppTypography.bodyMedium
+                          .copyWith(color: color, fontWeight: FontWeight.w700)),
+                  Text(subtitle,
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
                 ],
               ),
             ),
@@ -864,7 +876,8 @@ class _DevPackSimulatorState extends ConsumerState<_DevPackSimulator> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const SizedBox(height: 40, child: Center(child: CircularProgressIndicator(strokeWidth: 2)));
+      return const SizedBox(
+          height: 40, child: Center(child: CircularProgressIndicator(strokeWidth: 2)));
     }
 
     return Column(
@@ -879,10 +892,12 @@ class _DevPackSimulatorState extends ConsumerState<_DevPackSimulator> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isOwned ? const Color(0xFF22C55E).withValues(alpha: 0.1) : Colors.transparent,
+                  color:
+                      isOwned ? const Color(0xFF22C55E).withValues(alpha: 0.1) : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isOwned ? const Color(0xFF22C55E).withValues(alpha: 0.4) : AppColors.border,
+                    color:
+                        isOwned ? const Color(0xFF22C55E).withValues(alpha: 0.4) : AppColors.border,
                   ),
                 ),
                 child: Row(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import 'swipe_direction.dart';
 

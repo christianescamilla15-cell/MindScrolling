@@ -148,7 +148,7 @@ class _Labels extends StatelessWidget {
     return Stack(
       children: [
         // UP — stoicism
-        Positioned(
+        const Positioned(
           top: 2,
           left: 0,
           right: 0,
@@ -160,10 +160,10 @@ class _Labels extends StatelessWidget {
         Positioned(
           right: 2,
           top: half - 10,
-          child: _Label('Discipline', AppColors.discipline),
+          child: const _Label('Discipline', AppColors.discipline),
         ),
         // DOWN — philosophy
-        Positioned(
+        const Positioned(
           bottom: 2,
           left: 0,
           right: 0,
@@ -175,7 +175,7 @@ class _Labels extends StatelessWidget {
         Positioned(
           left: 2,
           top: half - 10,
-          child: _Label('Reflection', AppColors.reflection),
+          child: const _Label('Reflection', AppColors.reflection),
         ),
       ],
     );

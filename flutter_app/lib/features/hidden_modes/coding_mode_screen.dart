@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../core/constants/content_constants.dart';
-import '../../shared/extensions/context_extensions.dart';
 import '../settings/settings_controller.dart';
 import 'hidden_mode_controller.dart';
 import 'hidden_mode_feed.dart';

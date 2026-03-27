@@ -1,6 +1,13 @@
 import 'quote_model.dart';
 
-enum FeedItemType { quote, reflectionCard, challengeCard, evolutionCard, softPaywallCard, refinementCard }
+enum FeedItemType {
+  quote,
+  reflectionCard,
+  challengeCard,
+  evolutionCard,
+  softPaywallCard,
+  refinementCard
+}
 
 class FeedItemModel {
   final FeedItemType type;
@@ -9,8 +16,6 @@ class FeedItemModel {
 
   const FeedItemModel._({
     required this.type,
-    this.quote,
-    this.extra,
   });
 
   const FeedItemModel.quote(QuoteModel q)

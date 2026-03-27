@@ -80,7 +80,7 @@ class InsightsController extends AsyncNotifier<InsightsState> {
       },
       failure: (message, code) {
         if (code == 403 && message == 'premium_required') {
-          state = AsyncData(const InsightsState(premiumRequired: true));
+          state = const AsyncData(InsightsState(premiumRequired: true));
         } else {
           state = AsyncData(
             InsightsState(

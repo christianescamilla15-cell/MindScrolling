@@ -184,7 +184,7 @@ class _TodayTab extends StatelessWidget {
               context.tr.discipline,
               context.tr.reflection,
             ],
-            colors: [
+            colors: const [
               AppColors.stoicism,
               AppColors.philosophy,
               AppColors.discipline,

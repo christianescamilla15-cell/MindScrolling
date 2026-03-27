@@ -38,8 +38,10 @@ class AmbientAudioSheet extends ConsumerWidget {
         children: [
           Center(
             child: Container(
-              width: 36, height: 4,
-              decoration: BoxDecoration(color: AppColors.borderStrong, borderRadius: BorderRadius.circular(2)),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                  color: AppColors.borderStrong, borderRadius: BorderRadius.circular(2)),
             ),
           ),
           const SizedBox(height: 20),
@@ -52,7 +54,7 @@ class AmbientAudioSheet extends ConsumerWidget {
               Switch(
                 value: state.isEnabled,
                 onChanged: (v) => controller.setEnabled(v),
-                activeColor: AppColors.stoicism,
+                activeThumbColor: AppColors.stoicism,
                 inactiveTrackColor: AppColors.surface,
               ),
             ],
@@ -68,8 +70,11 @@ class AmbientAudioSheet extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: _TrackChip(
-                    label: label, icon: track.icon, accentColor: track.accentColor,
-                    isSelected: isSelected, onTap: () => controller.selectTrack(track.id),
+                    label: label,
+                    icon: track.icon,
+                    accentColor: track.accentColor,
+                    isSelected: isSelected,
+                    onTap: () => controller.selectTrack(track.id),
                   ),
                 ),
               );
@@ -91,7 +96,8 @@ class AmbientAudioSheet extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.surface, borderRadius: BorderRadius.circular(10),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppColors.border),
               ),
               child: Row(children: [
@@ -103,16 +109,24 @@ class AmbientAudioSheet extends ConsumerWidget {
             const SizedBox(height: 20),
           ],
           SizedBox(
-            width: double.infinity, height: 52,
+            width: double.infinity,
+            height: 52,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: state.isEnabled ? state.currentTrack.accentColor.withOpacity(0.15) : AppColors.surface,
-                foregroundColor: state.isEnabled ? state.currentTrack.accentColor : AppColors.textMuted,
+                backgroundColor: state.isEnabled
+                    ? state.currentTrack.accentColor.withOpacity(0.15)
+                    : AppColors.surface,
+                foregroundColor:
+                    state.isEnabled ? state.currentTrack.accentColor : AppColors.textMuted,
                 elevation: 0,
-                side: BorderSide(color: state.isEnabled ? state.currentTrack.accentColor.withOpacity(0.4) : AppColors.border),
+                side: BorderSide(
+                    color: state.isEnabled
+                        ? state.currentTrack.accentColor.withOpacity(0.4)
+                        : AppColors.border),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
-              icon: Icon(state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 26),
+              icon:
+                  Icon(state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 26),
               label: Text(
                 state.isPlaying ? tr.pause : tr.play,
                 style: AppTypography.buttonLabel.copyWith(
@@ -135,7 +149,11 @@ class AmbientAudioSheet extends ConsumerWidget {
                   trackHeight: 3.0,
                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
                 ),
-                child: Slider(value: state.volume, min: 0.0, max: 1.0, onChanged: (v) => controller.setVolume(v)),
+                child: Slider(
+                    value: state.volume,
+                    min: 0.0,
+                    max: 1.0,
+                    onChanged: (v) => controller.setVolume(v)),
               ),
             ),
             const Icon(Icons.volume_up_outlined, color: AppColors.textMuted, size: 18),
@@ -147,7 +165,12 @@ class AmbientAudioSheet extends ConsumerWidget {
 }
 
 class _TrackChip extends StatelessWidget {
-  const _TrackChip({required this.label, required this.icon, required this.accentColor, required this.isSelected, required this.onTap});
+  const _TrackChip(
+      {required this.label,
+      required this.icon,
+      required this.accentColor,
+      required this.isSelected,
+      required this.onTap});
   final String label;
   final IconData icon;
   final Color accentColor;
@@ -164,15 +187,20 @@ class _TrackChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? accentColor.withOpacity(0.12) : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? accentColor.withOpacity(0.5) : AppColors.border, width: isSelected ? 1.5 : 1.0),
+          border: Border.all(
+              color: isSelected ? accentColor.withOpacity(0.5) : AppColors.border,
+              width: isSelected ? 1.5 : 1.0),
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, size: 22, color: isSelected ? accentColor : AppColors.textMuted),
           const SizedBox(height: 6),
-          Text(label, textAlign: TextAlign.center, style: AppTypography.caption.copyWith(
-            color: isSelected ? accentColor : AppColors.textMuted,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal, fontSize: 10,
-          )),
+          Text(label,
+              textAlign: TextAlign.center,
+              style: AppTypography.caption.copyWith(
+                color: isSelected ? accentColor : AppColors.textMuted,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontSize: 10,
+              )),
         ]),
       ),
     );

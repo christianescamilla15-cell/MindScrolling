@@ -527,7 +527,7 @@ class _PackQuoteCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.swap_vert_rounded,
+                        const Icon(Icons.swap_vert_rounded,
                             size: 14, color: AppColors.textMuted),
                         const SizedBox(width: 6),
                         Text(

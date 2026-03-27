@@ -39,13 +39,9 @@ Future<void> main() async {
   // Resolve device ID once before the widget tree builds
   final deviceId = await DeviceIdService.getOrCreate();
 
-  // Device lock check — only 1 device allowed
+  // Device registration (multi-device mode — no blocking)
   final apiClient = ApiClient(deviceId: deviceId, baseUrl: ApiConstants.baseUrl);
-  final allowed = await DeviceLockService.checkOrRegister(apiClient);
-  if (!allowed) {
-    runApp(const _BlockedApp());
-    return;
-  }
+  await DeviceLockService.checkOrRegister(apiClient); // register for analytics, never blocks
 
   // Register device ID with EventLogger so analytics events include it
   EventLogger.setDeviceId(deviceId);

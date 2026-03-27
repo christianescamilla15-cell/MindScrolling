@@ -49,7 +49,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                 child: _buildBody(state),
               ),
             ),
-              AppBottomNav(currentIndex: 3),
+              const AppBottomNav(currentIndex: 3),
             ],
           ),
         ),
@@ -58,7 +58,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
   Widget _buildBody(InsightsState state) {
     if (state.isLoading) {
-      return _LoadingView();
+      return const _LoadingView();
     }
     if (state.premiumRequired) {
       return _PremiumPromptView(
@@ -72,7 +72,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
       );
     }
     if (state.insight == null) {
-      return _EmptyView();
+      return const _EmptyView();
     }
     return _InsightView(
       state: state,
@@ -113,7 +113,7 @@ class _Header extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.auto_awesome,
                   size: 12,
                   color: AppColors.philosophy,
@@ -167,7 +167,7 @@ class _InsightView extends StatelessWidget {
         if (generatedAt != null) ...[
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.schedule_outlined,
                 size: 13,
                 color: AppColors.textMuted,
@@ -233,7 +233,7 @@ class _InsightView extends StatelessWidget {
         // ── Caption ──────────────────────────────────────────────────────
         Row(
           children: [
-            Icon(
+            const Icon(
               Icons.auto_awesome_outlined,
               size: 13,
               color: AppColors.textMuted,
@@ -515,7 +515,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.cloud_off_outlined,
               size: 48,
               color: AppColors.textMuted,

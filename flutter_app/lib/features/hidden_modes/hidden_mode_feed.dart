@@ -94,7 +94,7 @@ class _HiddenModeFeedState extends ConsumerState<HiddenModeFeed> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.cloud_off, color: AppColors.textMuted, size: 40),
+            const Icon(Icons.cloud_off, color: AppColors.textMuted, size: 40),
             const SizedBox(height: 12),
             Text(
               context.tr.hiddenModeComingSoon,

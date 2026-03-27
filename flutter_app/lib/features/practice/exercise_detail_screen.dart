@@ -334,7 +334,7 @@ class _MetaRow extends StatelessWidget {
       children: [
         _DifficultyStars(difficulty: exercise.difficulty),
         const SizedBox(width: 12),
-        Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
+        const Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
         const SizedBox(width: 4),
         Text(
           '${exercise.estimatedTime} min',

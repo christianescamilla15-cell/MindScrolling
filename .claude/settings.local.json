@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(\"C:\\\\flutter\\\\flutter\\\\bin\\\\flutter.bat\" build:*)",
+      "Bash(\"C:\\\\flutter\\\\flutter\\\\bin\\\\flutter.bat\" analyze:*)",
+      "Read(//c/Users/Chris/Documents/GitHub/wolves/**)"
     ]
   }
 }

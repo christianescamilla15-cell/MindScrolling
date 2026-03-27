@@ -25,31 +25,31 @@ class AmbientTrack {
 // PRODUCTION: Replace with real Pixabay/Zen meditation tracks
 
 List<AmbientTrack> get kAmbientTracks => [
-  AmbientTrack(
-    id: 'relax',
-    nameEn: 'Relax',
-    nameEs: 'Relajaci\u00f3n',
-    icon: Icons.waves_outlined,
-    accentColor: AppColors.stoicism,
-    audioUrl: '${ApiConstants.baseUrl}/static/audio/Clean_20Soul.mp3',
-  ),
-  AmbientTrack(
-    id: 'deep_focus',
-    nameEn: 'Deep Focus',
-    nameEs: 'Enfoque profundo',
-    icon: Icons.self_improvement_outlined,
-    accentColor: AppColors.discipline,
-    audioUrl: '${ApiConstants.baseUrl}/static/audio/Meditation_20Impromptu_2001.mp3',
-  ),
-  AmbientTrack(
-    id: 'night_reflection',
-    nameEn: 'Night Reflection',
-    nameEs: 'Reflexi\u00f3n nocturna',
-    icon: Icons.nightlight_outlined,
-    accentColor: AppColors.reflection,
-    audioUrl: '${ApiConstants.baseUrl}/static/audio/Long_20Note_20Four.mp3',
-  ),
-];
+      const AmbientTrack(
+        id: 'relax',
+        nameEn: 'Relax',
+        nameEs: 'Relajaci\u00f3n',
+        icon: Icons.waves_outlined,
+        accentColor: AppColors.stoicism,
+        audioUrl: '${ApiConstants.baseUrl}/static/audio/Clean_20Soul.mp3',
+      ),
+      const AmbientTrack(
+        id: 'deep_focus',
+        nameEn: 'Deep Focus',
+        nameEs: 'Enfoque profundo',
+        icon: Icons.self_improvement_outlined,
+        accentColor: AppColors.discipline,
+        audioUrl: '${ApiConstants.baseUrl}/static/audio/Meditation_20Impromptu_2001.mp3',
+      ),
+      const AmbientTrack(
+        id: 'night_reflection',
+        nameEn: 'Night Reflection',
+        nameEs: 'Reflexi\u00f3n nocturna',
+        icon: Icons.nightlight_outlined,
+        accentColor: AppColors.reflection,
+        audioUrl: '${ApiConstants.baseUrl}/static/audio/Long_20Note_20Four.mp3',
+      ),
+    ];
 
 AmbientTrack? trackById(String id) {
   try {

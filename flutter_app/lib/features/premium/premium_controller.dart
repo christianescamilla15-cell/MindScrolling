@@ -235,7 +235,7 @@ class PremiumController extends AsyncNotifier<PremiumUiState> {
           ),
         );
       } else {
-        final start = DateTime.parse(trialStartStr!);
+        final start = DateTime.parse(trialStartStr);
         // Use hours for precision — inDays truncates, causing day-0 to show 7
         final hoursElapsed = DateTime.now().difference(start).inHours;
         final daysLeft = _kTrialDurationDays - (hoursElapsed / 24).floor();

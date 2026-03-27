@@ -7,7 +7,6 @@ import '../../core/analytics/event_logger.dart';
 import '../../core/constants/app_constants.dart';
 import '../../data/models/user_profile_model.dart';
 import '../../data/repositories/feed_repository.dart';
-import '../ambient/ambient_audio_controller.dart';
 import '../settings/settings_controller.dart';
 import '../../core/utils/locale_utils.dart';
 

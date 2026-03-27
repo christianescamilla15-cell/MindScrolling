@@ -3,52 +3,60 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../network/api_client.dart';
 
-/// Manages single-device lock.
+/// Device registration for analytics (multi-device mode — no blocking).
 ///
-/// On first launch the real Android hardware ID is sent to the backend.
-/// The backend allows only ONE hardware ID ever. If a second device tries
-/// to register, the backend returns { allowed: false } and we block the app.
+/// On first launch the hardware ID is sent to the backend for tracking.
+/// All devices are allowed. No blocking occurs.
 class DeviceLockService {
   DeviceLockService._();
 
   static const _lockStatusKey = 'device_lock_status';
 
-  /// Returns `true` if this device is allowed to run the app.
+  /// Always returns `true`. Registers device for analytics only.
   static Future<bool> checkOrRegister(ApiClient apiClient) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // If already verified in a previous session, skip network call
+    // Already registered — skip network call
+    // Clear any old 'blocked' status from single-device era
     final cached = prefs.getString(_lockStatusKey);
+    if (cached == 'blocked') await prefs.remove(_lockStatusKey);
     if (cached == 'allowed') return true;
-    if (cached == 'blocked') return false;
 
-    // Get real hardware Android ID
+    // Get hardware ID for analytics tracking
     final hardwareId = await _getHardwareId();
     if (hardwareId == null || hardwareId.length < 8) {
-      // Can't determine hardware — block to be safe
-      return false;
+      // Can't determine hardware — allow anyway
+      await prefs.setString(_lockStatusKey, 'allowed');
+      return true;
     }
 
     try {
-      final response = await apiClient.post(
+      await apiClient.post(
         '/device-lock/register',
         body: {'hardware_id': hardwareId},
       );
-
-      final allowed = response['allowed'] == true;
-      await prefs.setString(_lockStatusKey, allowed ? 'allowed' : 'blocked');
-      return allowed;
+      await prefs.setString(_lockStatusKey, 'allowed');
     } catch (_) {
-      // Network error on first launch — allow temporarily (will re-check next launch)
-      // Don't cache so it re-checks next time
-      return true;
+      // Network error — still allow, cache for next time
+      await prefs.setString(_lockStatusKey, 'allowed');
     }
+    return true;
   }
 
   /// Clears cached lock status (useful for testing).
   static Future<void> clearCache() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_lockStatusKey);
+  }
+
+  static Future<bool> _isEmulator() async {
+    try {
+      final info = DeviceInfoPlugin();
+      final android = await info.androidInfo;
+      return !android.isPhysicalDevice;
+    } catch (_) {
+      return false;
+    }
   }
 
   static Future<String?> _getHardwareId() async {

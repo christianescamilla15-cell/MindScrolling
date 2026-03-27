@@ -182,7 +182,7 @@ class PaywallCard extends ConsumerWidget {
             // Divider with "or"
             Row(
               children: [
-                Expanded(
+                const Expanded(
                     child: Divider(color: AppColors.border, thickness: 1)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -192,7 +192,7 @@ class PaywallCard extends ConsumerWidget {
                         .copyWith(color: AppColors.textMuted),
                   ),
                 ),
-                Expanded(
+                const Expanded(
                     child: Divider(color: AppColors.border, thickness: 1)),
               ],
             ),

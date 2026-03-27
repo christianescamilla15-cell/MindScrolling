@@ -150,7 +150,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           TextButton(
             onPressed: () => Navigator.pop(c),
             child: Text(ctx.tr.continueReading,
-                style: TextStyle(color: AppColors.textMuted)),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -359,7 +359,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 if (ref.watch(premiumStateProvider).premiumState.isPremium)
                   const InsightPanel(),
                 Expanded(child: _buildBody(state)),
-                AppBottomNav(currentIndex: 0),
+                const AppBottomNav(currentIndex: 0),
               ],
             ),
             // Swipe direction indicator
@@ -377,7 +377,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   Widget _buildBody(FeedState state) {
     if (state.isLoading && state.items.isEmpty) {
-      return _LoadingShimmer();
+      return const _LoadingShimmer();
     }
     if (state.hasError && state.items.isEmpty) {
       return _ErrorView(

@@ -37,44 +37,26 @@ export default async function deviceLockRoutes(fastify) {
       return reply.status(500).send({ error: "Internal error", code: "INTERNAL_ERROR" });
     }
 
-    // Same hardware already registered — allow (could be reinstall)
+    // Device already known — allow
     if (existingByHw) {
       return reply.send({ allowed: true, reason: "known_device" });
     }
 
-    // Check if there's already a lock for ANY hardware (someone else got here first)
-    const { count, error: countErr } = await supabase
-      .from("device_locks")
-      .select("*", { count: "exact", head: true });
-
-    if (countErr) {
-      fastify.log.error(countErr, "device-lock count failed");
-      return reply.status(500).send({ error: "Internal error", code: "INTERNAL_ERROR" });
-    }
-
-    // Only 1 device allowed total — if count > 0 and it's not the same hw, block
-    if (count > 0) {
-      return reply.send({ allowed: false, reason: "device_limit_reached" });
-    }
-
-    // First ever registration — lock to this hardware
+    // Register new device — no limit enforced (multi-device allowed)
     const { error: insertErr } = await supabase
       .from("device_locks")
-      .insert({
+      .upsert({
         device_id: deviceId,
         hardware_id: hardware_id.trim(),
-      });
+      }, { onConflict: "hardware_id" });
 
     if (insertErr) {
-      // Race condition: someone else inserted between count and insert
-      if (insertErr.code === "23505") {
-        return reply.send({ allowed: false, reason: "device_limit_reached" });
-      }
       fastify.log.error(insertErr, "device-lock insert failed");
-      return reply.status(500).send({ error: "Internal error", code: "INTERNAL_ERROR" });
+      // Even on error, allow the device — don't block users
+      return reply.send({ allowed: true, reason: "fallback_allowed" });
     }
 
-    fastify.log.info({ deviceId, hardware_id }, "device locked");
+    fastify.log.info({ deviceId, hardware_id }, "device registered (multi-device mode)");
     return reply.send({ allowed: true, reason: "registered" });
   });
 }

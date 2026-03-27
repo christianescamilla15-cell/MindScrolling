@@ -96,6 +96,22 @@ class ApiConstants {
   static const String healthPath = '/health';
 
   // ------------------------------------------------------------------
+  // Practice Console
+  // ------------------------------------------------------------------
+
+  /// GET /exercises/list?language=python&difficulty=1&lang=en&limit=20
+  static const String exercisesListPath = '/exercises/list';
+
+  /// POST /exercises/:id/hint
+  static String exerciseHintPath(String id) => '/exercises/$id/hint';
+
+  /// POST /exercises/:id/submit
+  static String exerciseSubmitPath(String id) => '/exercises/$id/submit';
+
+  /// POST /exercises/:id/skip
+  static String exerciseSkipPath(String id) => '/exercises/$id/skip';
+
+  // ------------------------------------------------------------------
   // Insights
   // ------------------------------------------------------------------
 

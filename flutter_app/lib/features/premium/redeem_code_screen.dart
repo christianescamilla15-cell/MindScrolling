@@ -232,15 +232,15 @@ class _RedeemCodeScreenState extends ConsumerState<RedeemCodeScreen> {
             fillColor: AppColors.surfaceVariant,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.stoicism, width: 1.5),
+              borderSide: const BorderSide(color: AppColors.stoicism, width: 1.5),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,

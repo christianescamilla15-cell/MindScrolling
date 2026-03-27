@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/colors.dart';
-import '../../../app/theme/typography.dart';
 import '../../../data/models/philosophy_map_model.dart';
 
 /// 4-axis radar chart rendered with [CustomPainter].

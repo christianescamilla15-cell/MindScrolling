@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -61,8 +60,7 @@ class ShareExportService {
     await Future.delayed(const Duration(milliseconds: 100));
 
     try {
-      final boundary = repaintKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
+      final boundary = repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) throw Exception('Could not find render boundary');
 
       final image = await boundary.toImage(pixelRatio: 1.0);
