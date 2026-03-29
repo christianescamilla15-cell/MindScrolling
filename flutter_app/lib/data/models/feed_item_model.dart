@@ -16,6 +16,8 @@ class FeedItemModel {
 
   const FeedItemModel._({
     required this.type,
+    this.quote,
+    this.extra,
   });
 
   const FeedItemModel.quote(QuoteModel q)
