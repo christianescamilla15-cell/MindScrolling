@@ -338,6 +338,30 @@ class StringsEn implements AppStrings {
   String get optCuriosity => 'Curiosity';
 
   @override
+  String get optCreativity => 'Creativity';
+
+  @override
+  String get optHumor => 'Humor & Wit';
+
+  @override
+  String get selected => 'selected';
+
+  @override
+  String get shareWithFriend => 'Share with a friend';
+
+  @override
+  String get searchFriend => 'Search friend by name';
+
+  @override
+  String get recommendedBy => 'Recommended by';
+
+  @override
+  String get friendNeedsMindScrolling => 'Your friend needs MindScrolling to receive this';
+
+  @override
+  String get quoteSent => 'Quote sent!';
+
+  @override
   String get optCalmMind => 'Calm Mind';
 
   @override

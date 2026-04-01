@@ -156,6 +156,14 @@ abstract class AppStrings {
   String get optPersonalGrowth;
   String get optMindfulness;
   String get optCuriosity;
+  String get optCreativity;
+  String get optHumor;
+  String get selected;
+  String get shareWithFriend;
+  String get searchFriend;
+  String get recommendedBy;
+  String get friendNeedsMindScrolling;
+  String get quoteSent;
   String get optCalmMind;
   String get optDiscipline;
   String get optFindingMeaning;

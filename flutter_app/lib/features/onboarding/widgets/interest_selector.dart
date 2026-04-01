@@ -4,26 +4,28 @@ import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
 import '../../../shared/extensions/context_extensions.dart';
 
-/// Vertical list of 5 selectable interest tiles.
-///
-/// Selected tile shows a teal left accent border.
+/// Vertical list of 7 selectable interest tiles.
+/// Multi-select: user can pick 1-3 interests.
 class InterestSelector extends StatelessWidget {
   const InterestSelector({
     super.key,
     required this.selected,
-    required this.onSelected,
+    required this.onToggle,
+    this.maxSelections = 3,
   });
 
-  final String? selected;
-  final ValueChanged<String> onSelected;
+  final Set<String> selected;
+  final ValueChanged<String> onToggle;
+  final int maxSelections;
 
-  // Values and emojis are locale-independent; labels are resolved at build time.
   static const List<({String value, String emoji})> _optionBases = [
     (value: 'philosophy', emoji: '📚'),
     (value: 'stoicism', emoji: '🌿'),
     (value: 'personal_growth', emoji: '📈'),
     (value: 'mindfulness', emoji: '🧘'),
     (value: 'curiosity', emoji: '💡'),
+    (value: 'creativity', emoji: '🎨'),
+    (value: 'humor', emoji: '😄'),
   ];
 
   @override
@@ -36,6 +38,8 @@ class InterestSelector extends StatelessWidget {
       tr.optPersonalGrowth,
       tr.optMindfulness,
       tr.optCuriosity,
+      tr.optCreativity,
+      tr.optHumor,
     ];
 
     return Column(
@@ -47,15 +51,32 @@ class InterestSelector extends StatelessWidget {
             color: AppColors.textSecondary,
           ),
         ),
+        const SizedBox(height: 4),
+        Text(
+          '${selected.length}/$maxSelections ${tr.selected}',
+          style: AppTypography.labelSmall.copyWith(
+            color: selected.length >= maxSelections
+                ? AppColors.stoicism
+                : AppColors.textSecondary.withOpacity(0.6),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 10),
         ...List.generate(_optionBases.length, (i) {
           final base = _optionBases[i];
+          final isSelected = selected.contains(base.value);
+          final isDisabled = !isSelected && selected.length >= maxSelections;
+
           return _InterestTile(
             value: base.value,
             label: labels[i],
             emoji: base.emoji,
-            isSelected: selected == base.value,
-            onTap: () => onSelected(base.value),
+            isSelected: isSelected,
+            isDisabled: isDisabled,
+            onTap: () {
+              if (isDisabled) return;
+              onToggle(base.value);
+            },
           );
         }),
       ],
@@ -69,6 +90,7 @@ class _InterestTile extends StatelessWidget {
     required this.label,
     required this.emoji,
     required this.isSelected,
+    required this.isDisabled,
     required this.onTap,
   });
 
@@ -76,6 +98,7 @@ class _InterestTile extends StatelessWidget {
   final String label;
   final String emoji;
   final bool isSelected;
+  final bool isDisabled;
   final VoidCallback onTap;
 
   @override
@@ -89,32 +112,40 @@ class _InterestTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.stoicism.withOpacity(0.08)
-              : AppColors.surfaceVariant,
+              : isDisabled
+                  ? AppColors.surfaceVariant.withOpacity(0.5)
+                  : AppColors.surfaceVariant,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.stoicism : AppColors.border,
+            color: isSelected
+                ? AppColors.stoicism
+                : isDisabled
+                    ? AppColors.border.withOpacity(0.3)
+                    : AppColors.border,
             width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 20)),
+            Text(emoji, style: TextStyle(
+              fontSize: 20,
+              color: isDisabled ? Colors.grey : null,
+            )),
             const SizedBox(width: 12),
             Text(
               label,
               style: AppTypography.bodyMedium.copyWith(
-                color: isSelected ? AppColors.stoicism : AppColors.textPrimary,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected
+                    ? AppColors.stoicism
+                    : isDisabled
+                        ? AppColors.textSecondary.withOpacity(0.4)
+                        : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
             const Spacer(),
             if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                size: 16,
-                color: AppColors.stoicism,
-              ),
+              const Icon(Icons.check_circle, size: 16, color: AppColors.stoicism),
           ],
         ),
       ),

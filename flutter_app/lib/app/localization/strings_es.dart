@@ -338,6 +338,30 @@ class StringsEs implements AppStrings {
   String get optCuriosity => 'Curiosidad';
 
   @override
+  String get optCreativity => 'Creatividad';
+
+  @override
+  String get optHumor => 'Humor e Ingenio';
+
+  @override
+  String get selected => 'seleccionados';
+
+  @override
+  String get shareWithFriend => 'Compartir con un amigo';
+
+  @override
+  String get searchFriend => 'Buscar amigo por nombre';
+
+  @override
+  String get recommendedBy => 'Recomendado por';
+
+  @override
+  String get friendNeedsMindScrolling => 'Tu amigo necesita MindScrolling para recibir esto';
+
+  @override
+  String get quoteSent => 'Cita enviada!';
+
+  @override
   String get optCalmMind => 'Mente tranquila';
 
   @override
