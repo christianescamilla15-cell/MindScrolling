@@ -279,8 +279,8 @@ class _Page1 extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           InterestSelector(
-            selected: controller.interest,
-            onSelected: controller.setInterest,
+            selected: controller.interests,
+            onToggle: controller.toggleInterest,
           ),
           const SizedBox(height: 28),
           GoalSelector(

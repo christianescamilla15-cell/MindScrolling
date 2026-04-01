@@ -1,0 +1,1 @@
+{"_timestamp": 1775086536.4030895, "_repo_hash": "27d8f23cb52f", "_result": [{"check": "package.json", "status": "pass"}, {"check": "Vite config", "status": "pass"}, {"check": "Tests (0)", "status": "warn"}, {"check": "No hardcoded keys", "status": "fail", "detail": "Found: ['scripts\\\\pre-release-check.js']"}, {"check": "Build output (dist/)", "status": "info"}]}

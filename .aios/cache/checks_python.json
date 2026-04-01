@@ -1,0 +1,1 @@
+{"_timestamp": 1775086536.3742607, "_repo_hash": "27d8f23cb52f", "_result": [{"check": "Dependency file", "status": "fail"}, {"check": "Tests (5)", "status": "pass"}, {"check": ".env.example", "status": "pass"}, {"check": "Type hints (100%)", "status": "pass"}, {"check": "Health endpoint", "status": "warn"}]}

@@ -51,9 +51,13 @@ function buildWeights(prefs, profile) {
 
   CATEGORIES.forEach(c => { raw[c] ??= BASE_WEIGHT; });
 
-  if (profile?.interest) {
-    Object.entries(INTEREST_BOOST[profile.interest] ?? {}).forEach(([cat, delta]) => {
-      raw[cat] = (raw[cat] ?? BASE_WEIGHT) + delta;
+  // Support multi-interest (comma-separated) or single interest
+  const interests = profile?.interest ? profile.interest.split(',').map(s => s.trim()).filter(Boolean) : [];
+  for (const interest of interests) {
+    const boost = INTEREST_BOOST[interest] ?? {};
+    const weight = 1 / (interests.length || 1); // distribute weight across selected interests
+    Object.entries(boost).forEach(([cat, delta]) => {
+      raw[cat] = (raw[cat] ?? BASE_WEIGHT) + delta * weight;
     });
   }
   if (profile?.goal) {

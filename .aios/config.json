@@ -1,0 +1,15 @@
+{
+  "project_name": "MindScrolling",
+  "policy": "default",
+  "modules": [
+    "python",
+    "react",
+    "multiagent",
+    "cicd"
+  ],
+  "default_mode_detection": "hybrid",
+  "release_gate": "standard",
+  "memory_backend": "files",
+  "prompt_backend": "cloudcode",
+  "auto_detect_stacks": true
+}
