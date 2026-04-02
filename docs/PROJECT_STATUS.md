@@ -1,18 +1,18 @@
 # MindScrolling — Project Status
 
-> Auto-generated on 2026-03-20
+> Auto-generated on 2026-04-02
 
 ## Overview
 
 | Metric | Value |
 |--------|-------|
-| App Version | `1.2.1+8` |
-| Total Commits | 89 |
-| Last Commit | `ba3187e fix(ci): resolve all CI failures + add self-healing ci-doctor workflow` |
-| Backend Files (JS) | 33 |
-| Flutter Files (Dart) | 127 |
-| API Route Files | 16 |
-| DB Migrations | 20 |
+| App Version | `2.0.0+9` |
+| Total Commits | 151 |
+| Last Commit | `41d3675 feat: Firebase + FCM push notifications setup` |
+| Backend Files (JS) | 40 |
+| Flutter Files (Dart) | 164 |
+| API Route Files | 22 |
+| DB Migrations | 66 |
 
 ## Architecture
 
@@ -22,7 +22,7 @@
 - **AI**: Claude API for weekly insights
 - **Payments**: RevenueCat + Google Play Billing
 
-## API Endpoints: 16 route files
+## API Endpoints: 22 route files
 
 See [API_REFERENCE.md](API_REFERENCE.md) for full details.
 
