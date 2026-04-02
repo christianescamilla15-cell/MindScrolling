@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
+import 'firebase_options.dart';
 import 'core/analytics/event_logger.dart';
 import 'core/constants/api_constants.dart';
 import 'core/network/api_client.dart';
 import 'core/providers/core_providers.dart';
 import 'core/services/device_lock_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'core/services/notification_service.dart';
+import 'core/services/push_notification_service.dart';
 import 'core/utils/device_id.dart';
 
 Future<void> main() async {
@@ -32,6 +37,10 @@ Future<void> main() async {
     ),
   );
 
+  // Initialize Firebase + FCM
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   // Pre-load shared preferences so LocalStorage is ready
   await SharedPreferences.getInstance();
   await NotificationService.init();
@@ -42,6 +51,9 @@ Future<void> main() async {
   // Device registration (multi-device mode — no blocking)
   final apiClient = ApiClient(deviceId: deviceId, baseUrl: ApiConstants.baseUrl);
   await DeviceLockService.checkOrRegister(apiClient); // register for analytics, never blocks
+
+  // Initialize FCM push notifications (fire-and-forget)
+  PushNotificationService.init(apiClient).ignore();
 
   // Register device ID with EventLogger so analytics events include it
   EventLogger.setDeviceId(deviceId);

@@ -59,6 +59,8 @@ dependencies:
   in_app_review: ^2.0.9
   package_info_plus: ^8.0.0
   device_info_plus: ^10.1.2
+  firebase_core: ^3.4.0
+  firebase_messaging: ^15.1.0
 
 dev_dependencies:
   flutter_test:
