@@ -42,6 +42,7 @@ import deviceLockRoutes  from "./routes/device-lock.js";
 import insightMatchRoutes from "./routes/insight.js";
 import exercisesRoutes   from "./routes/exercises.js";
 import stripeRoutes      from "./routes/stripe.js";
+import socialRoutes      from "./routes/social.js";
 import deviceIdPlugin   from "./plugins/deviceId.js";
 
 const app = Fastify({
@@ -106,6 +107,7 @@ await app.register(deviceLockRoutes,  { prefix: "/device-lock" });
 await app.register(insightMatchRoutes, { prefix: "/insight" });
 await app.register(exercisesRoutes,    { prefix: "/exercises" });
 await app.register(stripeRoutes,      { prefix: "/stripe" });
+await app.register(socialRoutes,      { prefix: "/social" });
 
 /* ─── Health ───────────────────────────────────────────────────────────────── */
 app.get("/health", async () => ({ status: "ok", ts: new Date().toISOString() }));

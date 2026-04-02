@@ -90,6 +90,9 @@ export default async function vaultRoutes(fastify) {
     // Fire-and-forget: update semantic preference vector (strongest signal α=0.25)
     updatePreferenceVector(deviceId, quote_id, "vault").catch(() => {});
 
+    // Fire-and-forget: log social activity for friends' feed
+    supabase.from("social_activity").insert({ device_id: deviceId, quote_id, action_type: "vault" }).then(() => {});
+
     return reply.send({ ok: true });
   });
 

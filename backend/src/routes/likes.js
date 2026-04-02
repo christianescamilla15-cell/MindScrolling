@@ -44,6 +44,9 @@ export default async function likesRoutes(fastify) {
 
       // Fire-and-forget: update semantic preference vector (strong signal α=0.20)
       updatePreferenceVector(deviceId, id, "like").catch(() => {});
+
+      // Fire-and-forget: log social activity for friends' feed
+      supabase.from("social_activity").insert({ device_id: deviceId, quote_id: id, action_type: "like" }).then(() => {});
     } else {
       const [deleteRes, rpcRes] = await Promise.all([
         supabase.from("likes").delete().eq("device_id", deviceId).eq("quote_id", id),
