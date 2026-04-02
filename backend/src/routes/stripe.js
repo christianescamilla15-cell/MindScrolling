@@ -26,6 +26,17 @@ const PRICE_MAP = {
   modern_human_condition:  process.env.STRIPE_PRICE_MODERN || "price_1THbErQqMY6dT0VmrD0Bkpdu",
 };
 
+// Pre-generated Payment Links (more reliable than Checkout Sessions)
+const PAYMENT_LINKS = {
+  inside:                  process.env.STRIPE_LINK_INSIDE || "https://buy.stripe.com/test_28EbJ3cfAfOwaXDeZg3ZK02",
+  stoicism_deep:           process.env.STRIPE_LINK_STOICISM || "https://buy.stripe.com/test_00w3cx6VggSAd5L18q3ZK03",
+  existentialism:          process.env.STRIPE_LINK_EXISTENTIALISM || "https://buy.stripe.com/test_dRm9AV93o6dWe9P04m3ZK04",
+  zen_mindfulness:         process.env.STRIPE_LINK_ZEN || "https://buy.stripe.com/test_dRmaEZdjE59S2r76sK3ZK05",
+  renaissance_mind:        process.env.STRIPE_LINK_RENAISSANCE || "https://buy.stripe.com/test_00wcN76VgdGo6Hn8AS3ZK06",
+  classical_foundations:   process.env.STRIPE_LINK_CLASSICAL || "https://buy.stripe.com/test_6oUcN74N88m4e9P7wO3ZK07",
+  modern_human_condition:  process.env.STRIPE_LINK_MODERN || "https://buy.stripe.com/test_7sY8wRgvQ59S4zfeZg3ZK08",
+};
+
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 export default async function stripeRoutes(fastify) {
@@ -135,6 +146,7 @@ export default async function stripeRoutes(fastify) {
     const prices = Object.entries(PRICE_MAP).map(([product, priceId]) => ({
       product,
       price_id: priceId,
+      payment_link: PAYMENT_LINKS[product] || null,
       amount: product === "inside" ? 4.99 : 2.99,
       currency: "USD",
       type: product === "inside" ? "premium_unlock" : "pack_purchase",
