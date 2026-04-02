@@ -18,6 +18,8 @@ const INTEREST_BOOST = {
   personal_growth: { discipline:   10 },
   mindfulness:     { reflection:   10 },
   curiosity:       { stoicism: 3, philosophy: 3, discipline: 3, reflection: 3 },
+  creativity:      { philosophy: 5, reflection: 5 },
+  humor:           { philosophy: 4, discipline: 3, reflection: 3 },
 };
 const GOAL_BOOST = {
   discipline:        { discipline:  8 },

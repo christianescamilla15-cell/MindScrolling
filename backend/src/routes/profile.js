@@ -1,7 +1,7 @@
 import { supabase } from "../db/client.js";
 
 const VALID_AGE_RANGES  = ["18-24", "25-34", "35-44", "45+"];
-const VALID_INTERESTS   = ["philosophy", "stoicism", "personal_growth", "mindfulness", "curiosity"];
+const VALID_INTERESTS   = ["philosophy", "stoicism", "personal_growth", "mindfulness", "curiosity", "creativity", "humor"];
 const VALID_GOALS       = ["calm_mind", "discipline", "meaning", "emotional_clarity"];
 const VALID_LANGUAGES   = ["en", "es"];
 
@@ -19,8 +19,16 @@ export default async function profileRoutes(fastify) {
     if (age_range && !VALID_AGE_RANGES.includes(age_range)) {
       return reply.status(400).send({ error: `age_range must be one of: ${VALID_AGE_RANGES.join(", ")}`, code: "INVALID_FIELD" });
     }
-    if (interest && !VALID_INTERESTS.includes(interest)) {
-      return reply.status(400).send({ error: `interest must be one of: ${VALID_INTERESTS.join(", ")}`, code: "INVALID_FIELD" });
+    // Support comma-separated multi-interests (e.g. "philosophy,creativity,humor")
+    if (interest) {
+      const parts = interest.split(",").map(s => s.trim()).filter(Boolean);
+      const invalid = parts.filter(p => !VALID_INTERESTS.includes(p));
+      if (invalid.length > 0) {
+        return reply.status(400).send({ error: `invalid interest(s): ${invalid.join(", ")}. Valid: ${VALID_INTERESTS.join(", ")}`, code: "INVALID_FIELD" });
+      }
+      if (parts.length > 3) {
+        return reply.status(400).send({ error: "maximum 3 interests allowed", code: "INVALID_FIELD" });
+      }
     }
     if (goal && !VALID_GOALS.includes(goal)) {
       return reply.status(400).send({ error: `goal must be one of: ${VALID_GOALS.join(", ")}`, code: "INVALID_FIELD" });
