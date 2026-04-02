@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/black"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/quote_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Swipe to discover wisdom"
+        android:textColor="#F5F0E8"
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.4"
+        android:maxLines="5"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/quote_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="— MindScrolling"
+        android:textColor="#14B8A6"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="MINDSCROLLING"
+        android:textColor="#40F5F0E8"
+        android:textSize="8sp"
+        android:letterSpacing="0.3"
+        android:gravity="center" />
+
+</LinearLayout>

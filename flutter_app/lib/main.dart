@@ -16,6 +16,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'core/services/notification_service.dart';
 import 'core/services/push_notification_service.dart';
+import 'core/services/widget_service.dart';
 import 'core/utils/device_id.dart';
 
 Future<void> main() async {
@@ -54,6 +55,10 @@ Future<void> main() async {
 
   // Initialize FCM push notifications (fire-and-forget)
   PushNotificationService.init(apiClient).ignore();
+
+  // Initialize home screen widget + update QOTD
+  WidgetService.init().ignore();
+  WidgetService.updateQuoteOfDay(apiClient).ignore();
 
   // Register device ID with EventLogger so analytics events include it
   EventLogger.setDeviceId(deviceId);

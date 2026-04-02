@@ -26,6 +26,7 @@ import '../features/vault/vault_screen.dart';
 import '../features/practice/practice_console_screen.dart';
 import '../features/practice/exercise_detail_screen.dart';
 import '../features/practice/exercise_model.dart';
+import '../features/social/social_feed_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Router provider
@@ -180,6 +181,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: '/social',
+        builder: (context, state) => const SocialFeedScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
