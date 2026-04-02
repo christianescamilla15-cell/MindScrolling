@@ -1,6 +1,6 @@
 # MindScrolling API Reference
 
-> Auto-generated on 2026-03-20
+> Auto-generated on 2026-04-02
 
 Base URL: `https://mindscrolling.onrender.com/api`
 
@@ -19,7 +19,7 @@ Base URL: `https://mindscrolling.onrender.com/api`
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/analytics/event` | Create/update event |
+| `POST` | `/api/analytics/event` | Max JSON size for properties (4KB) |
 
 ### Authors (`/api/authors`)
 
@@ -35,17 +35,42 @@ Base URL: `https://mindscrolling.onrender.com/api`
 | `GET` | `/api/challenges/today` | Retrieve today |
 | `POST` | `/api/challenges/:id/progress` | Create/update {id}/progress |
 
+### Device Lock (`/api/device-lock`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/device-lock/register` | Create/update register |
+
+### Exercises (`/api/exercises`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/exercises/list` | Retrieve list |
+| `GET` | `/api/exercises/stats` | Retrieve stats |
+| `GET` | `/api/exercises/languages` | Retrieve languages |
+| `GET` | `/api/exercises/:id` | Retrieve {id} |
+| `POST` | `/api/exercises/:id/hint` | Create/update {id}/hint |
+| `POST` | `/api/exercises/:id/submit` | Create/update {id}/submit |
+
+### Insight (`/api/insight`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/insight/match` | Create/update match |
+| `POST` | `/api/insight/mood` | Create/update mood |
+| `GET` | `/api/insight/mood-history` | Retrieve mood-history |
+
 ### Insights (`/api/insights`)
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/insights/weekly` | Retrieve weekly |
 
-### Likes (registered under `/api/quotes`)
+### Likes (`/api/likes`)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/quotes/:id/like` | Like or unlike a quote. Body: `{ action: "like" \| "unlike" }` |
+| `POST` | `/api/likes/:id/like` | POST /quotes/:id/like  body: { action: "like" | "unlike" } |
 
 ### Map (`/api/map`)
 
@@ -77,7 +102,7 @@ Base URL: `https://mindscrolling.onrender.com/api`
 | `POST` | `/api/premium/start-trial` | ── POST /premium/start-trial ───────────────────────────────────────────── |
 | `POST` | `/api/premium/purchase/verify` | Create/update purchase/verify |
 | `POST` | `/api/premium/restore` | Create/update restore |
-| `POST` | `/api/premium/unlock` | ── POST /premium/unlock (legacy — backward compatibility) ──────────────── |
+| `POST` | `/api/premium/unlock` | Replaced with a 410 Gone response. All premium unlocks must go through |
 | `POST` | `/api/premium/redeem` | ── POST /premium/redeem ────────────────────────────────────────────────── |
 
 ### Profile (`/api/profile`)
@@ -92,12 +117,43 @@ Base URL: `https://mindscrolling.onrender.com/api`
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/quotes/feed` | Retrieve feed |
+| `GET` | `/api/quotes/daily-pick` | Retrieve daily-pick |
+| `GET` | `/api/quotes/:id/similar` | Retrieve {id}/similar |
+
+### Shares (`/api/shares`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/shares/api/shares` | Share a quote with a friend |
+| `GET` | `/api/shares/api/shares/pending` | Get pending (unread) shared quotes |
+| `POST` | `/api/shares/api/shares/:id/seen` | Mark share as seen |
+| `GET` | `/api/shares/api/shares/search-user` | Search users by display name (for friend finder) |
+
+### Social (`/api/social`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/social/follow` | ── POST /social/follow ─────────────────────────────────────────────────── |
+| `DELETE` | `/api/social/follow/:id` | ── DELETE /social/follow/:id ───────────────────────────────────────────── |
+| `GET` | `/api/social/following` | ── GET /social/following ───────────────────────────────────────────────── |
+| `GET` | `/api/social/feed` | ── GET /social/feed ────────────────────────────────────────────────────── |
+| `GET` | `/api/social/streak` | ── GET /social/streak ──────────────────────────────────────────────────── |
+| `POST` | `/api/social/streak/checkin` | ── POST /social/streak/checkin ─────────────────────────────────────────── |
+| `GET` | `/api/social/qotd` | ── GET /social/qotd ───────────────────────────────────────────────────── |
 
 ### Stats (`/api/stats`)
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/stats` | GET /stats — user streak + reflections + category distribution |
+
+### Stripe (`/api/stripe`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/stripe/checkout` | ── POST /stripe/checkout ───────────────────────────────────────────────── |
+| `POST` | `/api/stripe/webhook` | ── POST /stripe/webhook ────────────────────────────────────────────────── |
+| `GET` | `/api/stripe/prices` | ── GET /stripe/prices ──────────────────────────────────────────────────── |
 
 ### Swipes (`/api/swipes`)
 
@@ -121,11 +177,7 @@ Base URL: `https://mindscrolling.onrender.com/api`
 
 ## Authentication
 
-All endpoints require `x-device-id` header (UUID v4), except:
-- `/health` — public health check
-- `/admin/*` — uses `X-Admin-Secret` header instead
-- `/webhooks/*` — uses `Authorization` header instead
-
+All endpoints require `x-device-id` header (UUID v4).
 Premium endpoints additionally check entitlement status.
 
 ## Rate Limits
