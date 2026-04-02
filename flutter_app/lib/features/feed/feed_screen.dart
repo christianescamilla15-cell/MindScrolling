@@ -12,6 +12,7 @@ import '../../data/models/feed_item_model.dart';
 import '../ambient/ambient_audio_controller.dart';
 import '../onboarding/feature_tour.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../app/localization/app_strings.dart'; // for AppStringsToastResolver extension
 import '../../shared/widgets/app_bottom_nav.dart';
 import '../../core/utils/haptics_service.dart';
 import '../challenges/challenges_controller.dart';
