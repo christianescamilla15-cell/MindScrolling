@@ -1,8 +1,8 @@
 import { supabase } from "../db/client.js";
 
 const VALID_AGE_RANGES  = ["18-24", "25-34", "35-44", "45+"];
-const VALID_INTERESTS   = ["philosophy", "stoicism", "personal_growth", "mindfulness", "curiosity", "creativity", "humor"];
-const VALID_GOALS       = ["calm_mind", "discipline", "meaning", "emotional_clarity"];
+const VALID_INTERESTS   = ["philosophy", "stoicism", "personal_growth", "mindfulness"];
+const VALID_GOALS       = ["calm_mind", "discipline", "meaning", "emotional_clarity", "curiosity", "creativity", "humor"];
 const VALID_LANGUAGES   = ["en", "es"];
 
 export default async function profileRoutes(fastify) {
@@ -30,8 +30,16 @@ export default async function profileRoutes(fastify) {
         return reply.status(400).send({ error: "maximum 3 interests allowed", code: "INVALID_FIELD" });
       }
     }
-    if (goal && !VALID_GOALS.includes(goal)) {
-      return reply.status(400).send({ error: `goal must be one of: ${VALID_GOALS.join(", ")}`, code: "INVALID_FIELD" });
+    // Support comma-separated multi-goals (e.g. "discipline,curiosity")
+    if (goal) {
+      const parts = goal.split(",").map(s => s.trim()).filter(Boolean);
+      const invalid = parts.filter(p => !VALID_GOALS.includes(p));
+      if (invalid.length > 0) {
+        return reply.status(400).send({ error: `invalid goal(s): ${invalid.join(", ")}. Valid: ${VALID_GOALS.join(", ")}`, code: "INVALID_FIELD" });
+      }
+      if (parts.length > 2) {
+        return reply.status(400).send({ error: "maximum 2 goals allowed", code: "INVALID_FIELD" });
+      }
     }
     if (preferred_language && !VALID_LANGUAGES.includes(preferred_language)) {
       return reply.status(400).send({ error: `preferred_language must be one of: ${VALID_LANGUAGES.join(", ")}`, code: "INVALID_FIELD" });

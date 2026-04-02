@@ -17,9 +17,6 @@ const INTEREST_BOOST = {
   stoicism:        { stoicism:     10 },
   personal_growth: { discipline:   10 },
   mindfulness:     { reflection:   10 },
-  curiosity:       { stoicism: 3, philosophy: 3, discipline: 3, reflection: 3 },
-  creativity:      { philosophy: 5, reflection: 5 },
-  humor:           { philosophy: 4, discipline: 3, reflection: 3 },
 };
 const GOAL_BOOST = {
   discipline:        { discipline:  8 },
@@ -27,6 +24,9 @@ const GOAL_BOOST = {
   mindfulness:       { stoicism:    8, reflection: 8 },
   meaning:           { philosophy:  8 },
   emotional_clarity: { reflection:  8 },
+  curiosity:         { stoicism: 3, philosophy: 3, discipline: 3, reflection: 3 },
+  creativity:        { philosophy: 5, reflection: 5 },
+  humor:             { philosophy: 4, discipline: 3, reflection: 3 },
 };
 
 // ─── Preference model helpers ──────────────────────────────────────────────────
@@ -62,9 +62,13 @@ function buildWeights(prefs, profile) {
       raw[cat] = (raw[cat] ?? BASE_WEIGHT) + delta * weight;
     });
   }
-  if (profile?.goal) {
-    Object.entries(GOAL_BOOST[profile.goal] ?? {}).forEach(([cat, delta]) => {
-      raw[cat] = (raw[cat] ?? BASE_WEIGHT) + delta;
+  // Support multi-goal (comma-separated) or single goal
+  const goals = profile?.goal ? profile.goal.split(',').map(s => s.trim()).filter(Boolean) : [];
+  for (const g of goals) {
+    const boost = GOAL_BOOST[g] ?? {};
+    const weight = 1 / (goals.length || 1);
+    Object.entries(boost).forEach(([cat, delta]) => {
+      raw[cat] = (raw[cat] ?? BASE_WEIGHT) + delta * weight;
     });
   }
 

@@ -35,7 +35,7 @@ class OnboardingController extends ChangeNotifier {
 
   String? _ageRange;
   final Set<String> _interests = {};
-  String? _goal;
+  final Set<String> _goals = {};
   String _lang = _detectDeviceLang();
 
   static String _detectDeviceLang() {
@@ -46,13 +46,15 @@ class OnboardingController extends ChangeNotifier {
   Set<String> get interests => Set.unmodifiable(_interests);
   /// Legacy getter for backward compatibility
   String? get interest => _interests.isNotEmpty ? _interests.first : null;
-  String? get goal => _goal;
+  Set<String> get goals => Set.unmodifiable(_goals);
+  /// Legacy getter — returns first goal or null
+  String? get goal => _goals.isNotEmpty ? _goals.first : null;
   String get lang => _lang;
 
   UserProfileModel get profileSnapshot => UserProfileModel(
         ageRange: _ageRange,
         interest: _interests.isNotEmpty ? _interests.join(',') : null,
-        goal: _goal,
+        goal: _goals.isNotEmpty ? _goals.join(',') : null,
         preferredLanguage: _lang,
       );
 
@@ -77,10 +79,17 @@ class OnboardingController extends ChangeNotifier {
   /// Legacy setter for backward compatibility
   void setInterest(String value) => toggleInterest(value);
 
-  void setGoal(String value) {
-    _goal = _goal == value ? null : value;
+  void toggleGoal(String value) {
+    if (_goals.contains(value)) {
+      _goals.remove(value);
+    } else if (_goals.length < 2) {
+      _goals.add(value);
+    }
     notifyListeners();
   }
+
+  /// Legacy setter
+  void setGoal(String value) => toggleGoal(value);
 
   void setLang(String value) {
     if (_lang == value) return;

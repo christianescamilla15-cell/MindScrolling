@@ -1,9 +1,14 @@
--- 060: Support multi-interest selection (comma-separated) + new interests (creativity, humor)
--- The original CHECK constraint only allowed single values from 5 options.
--- Now we need to store comma-separated values like 'philosophy,creativity,humor'.
+-- 060: Support multi-interest + multi-goal selection (comma-separated)
+--
+-- Interest = direction (philosophy, stoicism, personal_growth, mindfulness)
+-- Goal = what user wants to achieve (calm_mind, discipline, meaning, emotional_clarity, curiosity, creativity, humor)
+--
+-- Both columns now store comma-separated values.
 
--- 1. Drop the old CHECK constraint on interest column
+-- 1. Drop old CHECK constraints
 ALTER TABLE user_profiles DROP CONSTRAINT IF EXISTS user_profiles_interest_check;
+ALTER TABLE user_profiles DROP CONSTRAINT IF EXISTS user_profiles_goal_check;
 
--- 2. Widen the column to accommodate comma-separated interests (up to 3 × ~20 chars + commas)
+-- 2. Widen columns for comma-separated values
 ALTER TABLE user_profiles ALTER COLUMN interest TYPE VARCHAR(100);
+ALTER TABLE user_profiles ALTER COLUMN goal TYPE VARCHAR(100);

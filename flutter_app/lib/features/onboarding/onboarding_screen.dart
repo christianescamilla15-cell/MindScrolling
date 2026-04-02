@@ -284,8 +284,8 @@ class _Page1 extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           GoalSelector(
-            selected: controller.goal,
-            onSelected: controller.setGoal,
+            selected: controller.goals,
+            onSelected: controller.toggleGoal,
           ),
           const SizedBox(height: 28),
           _LangToggle(

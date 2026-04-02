@@ -23,9 +23,6 @@ class InterestSelector extends StatelessWidget {
     (value: 'stoicism', emoji: '🌿'),
     (value: 'personal_growth', emoji: '📈'),
     (value: 'mindfulness', emoji: '🧘'),
-    (value: 'curiosity', emoji: '💡'),
-    (value: 'creativity', emoji: '🎨'),
-    (value: 'humor', emoji: '😄'),
   ];
 
   @override
@@ -37,9 +34,6 @@ class InterestSelector extends StatelessWidget {
       tr.optStoicism,
       tr.optPersonalGrowth,
       tr.optMindfulness,
-      tr.optCuriosity,
-      tr.optCreativity,
-      tr.optHumor,
     ];
 
     return Column(
