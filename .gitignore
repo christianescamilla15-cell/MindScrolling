@@ -176,3 +176,72 @@ tags_temp.json
 *.tags
 MindScroll-saved*.html
 Key
+
+# ─────────────────────────────────────────────────────────────
+# NexusForge Security Policy - Never commit these
+# ─────────────────────────────────────────────────────────────
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.sample
+
+# Credentials & Keys
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cert
+credentials.json
+service-account*.json
+firebase-adminsdk-*.json
+google-services.json
+GoogleService-Info.plist
+client_secret*.json
+auth.json
+token.json
+.aws/
+.ssh/
+
+# Secrets directories
+secrets/
+.secrets/
+private/
+.private/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+
+# Build & dependencies
+node_modules/
+dist/
+build/
+out/
+target/
+*.log
+.cache/
+.parcel-cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Deployment
+.vercel/
+.netlify/
+.firebase/
+.serverless/
