@@ -1,0 +1,12 @@
+{
+  "security_gate": {
+    "enabled": true,
+    "strict": false,
+    "max_critical": 0,
+    "max_high": 5
+  },
+  "engagement": {
+    "scaffold_script": "C:/Users/DANNY/amx-platform/amx-hallazgos-audit/nemesis/nemesis-engagements/_catalog/scaffold.py",
+    "quarter_default": "2026-Q2"
+  }
+}

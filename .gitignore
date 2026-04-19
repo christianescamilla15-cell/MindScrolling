@@ -245,3 +245,11 @@ env/
 .netlify/
 .firebase/
 .serverless/
+
+# ─── AIOS / Mythos / Nemesis runtime artifacts ───────────────────────────────
+# Track: findings, reports, config. Ignore: caches, scratch workspaces.
+.aios/cache/
+arena/arena-memory/runs/*/workspace/
+nemesis/nemesis-engagements/*/workspace/
+nemesis-engagements/*/workspace/
+mythos-output/tmp/

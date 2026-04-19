@@ -1,0 +1,22 @@
+[target]
+id = "mindscrolling-backend"
+name = "MindScrolling Fastify Backend"
+artifact_path = "backend/src"
+primary_stack = "javascript"
+criticality = "HIGH"
+
+[scanners]
+enabled = ["injection", "crypto", "secrets", "pii"]
+disabled = ["iac", "container"]
+
+[policy]
+severity_gate = "HIGH"
+allow_medium_in_prod = false
+max_age_days_for_cve = 30
+
+[amx_patterns]
+forbidden_literals = []
+forbidden_regex = []
+
+[known_findings]
+fase1_refs = []
