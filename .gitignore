@@ -105,9 +105,6 @@ flutter_app/ios/GoogleService-Info.plist
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
-frontend_legacy/node_modules/
-frontend_legacy/dist/
-frontend_legacy/.vite/
 
 # ─── Supabase ────────────────────────────────────────────────────────────────
 .supabase/
@@ -174,7 +171,6 @@ $RECYCLE.BIN/
 # ─── Tags / misc generated ───────────────────────────────────────────────────
 tags_temp.json
 *.tags
-MindScroll-saved*.html
 Key
 
 # ─────────────────────────────────────────────────────────────
