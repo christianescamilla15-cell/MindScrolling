@@ -1,0 +1,1945 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "mythos",
+          "version": "0.1.0",
+          "informationUri": "https://github.com/christianescamilla15-cell/amx-hallazgos-audit",
+          "rules": [
+            {
+              "id": "PII-EMAIL_IN_LOG",
+              "shortDescription": {
+                "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+              },
+              "fullDescription": {
+                "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "cwe": "CWE-532",
+                "owasp": "A09",
+                "scanner": "pii"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-79",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #1 \u00b7 Cross-site Scripting (XSS)"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #1 \u00b7 Cross-site Scripting (XSS)"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-79",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-787",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #2 \u00b7 Out-of-bounds Write"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #2 \u00b7 Out-of-bounds Write"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-787",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-89",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #3 \u00b7 SQL Injection"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #3 \u00b7 SQL Injection"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-89",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-352",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #4 \u00b7 CSRF"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #4 \u00b7 CSRF"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-352",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-22",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #5 \u00b7 Path Traversal"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #5 \u00b7 Path Traversal"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-22",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-125",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #6 \u00b7 Out-of-bounds Read"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #6 \u00b7 Out-of-bounds Read"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-125",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-78",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #7 \u00b7 OS Command Injection"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #7 \u00b7 OS Command Injection"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-78",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-416",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #8 \u00b7 Use After Free"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #8 \u00b7 Use After Free"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-416",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-862",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #9 \u00b7 Missing Authorization"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #9 \u00b7 Missing Authorization"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-862",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-434",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #10 \u00b7 Unrestricted Upload of File with Dangerous Type"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #10 \u00b7 Unrestricted Upload of File with Dangerous Type"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-434",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-94",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #11 \u00b7 Improper Control of Code Generation (Code Injection)"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #11 \u00b7 Improper Control of Code Generation (Code Injection)"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-94",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-20",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #12 \u00b7 Improper Input Validation"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #12 \u00b7 Improper Input Validation"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-20",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-77",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #13 \u00b7 Command Injection (generic)"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #13 \u00b7 Command Injection (generic)"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-77",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-287",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #14 \u00b7 Improper Authentication"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #14 \u00b7 Improper Authentication"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-287",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-269",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #15 \u00b7 Improper Privilege Management"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #15 \u00b7 Improper Privilege Management"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-269",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-502",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #16 \u00b7 Deserialization of Untrusted Data"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #16 \u00b7 Deserialization of Untrusted Data"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-502",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-200",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #17 \u00b7 Exposure of Sensitive Information"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #17 \u00b7 Exposure of Sensitive Information"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-200",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-863",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #18 \u00b7 Incorrect Authorization"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #18 \u00b7 Incorrect Authorization"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-863",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-918",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #19 \u00b7 SSRF"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #19 \u00b7 SSRF"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-918",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-119",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #20 \u00b7 Improper Restriction of Operations within Memory Buffer"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #20 \u00b7 Improper Restriction of Operations within Memory Buffer"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-119",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-476",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #21 \u00b7 NULL Pointer Dereference"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #21 \u00b7 NULL Pointer Dereference"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-476",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-798",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #22 \u00b7 Hardcoded Credentials"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #22 \u00b7 Hardcoded Credentials"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-798",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-190",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #23 \u00b7 Integer Overflow or Wraparound"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #23 \u00b7 Integer Overflow or Wraparound"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-190",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-400",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #24 \u00b7 Uncontrolled Resource Consumption"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #24 \u00b7 Uncontrolled Resource Consumption"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-400",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            },
+            {
+              "id": "COVERAGE-GAP-CWE-306",
+              "shortDescription": {
+                "text": "No detection for CWE Top-25 rank #25 \u00b7 Missing Authentication for Critical Function"
+              },
+              "fullDescription": {
+                "text": "No detection for CWE Top-25 rank #25 \u00b7 Missing Authentication for Critical Function"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "cwe": "CWE-306",
+                "owasp": null,
+                "scanner": "adversary-coverage"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 151,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 152,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 159,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 164,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 165,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 172,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 1125,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 1550,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\048_exercises_sql_html.sql"
+                },
+                "region": {
+                  "startLine": 1555,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\050_exercises_typescript.sql"
+                },
+                "region": {
+                  "startLine": 783,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\050_exercises_typescript.sql"
+                },
+                "region": {
+                  "startLine": 811,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\050_exercises_typescript.sql"
+                },
+                "region": {
+                  "startLine": 812,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\050_exercises_typescript.sql"
+                },
+                "region": {
+                  "startLine": 948,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\050_exercises_typescript.sql"
+                },
+                "region": {
+                  "startLine": 949,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\050_exercises_typescript.sql"
+                },
+                "region": {
+                  "startLine": 951,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 233,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 234,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 237,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 241,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 1169,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 1170,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 1172,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 1173,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\052_exercises_sql.sql"
+                },
+                "region": {
+                  "startLine": 1177,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\055_exercises_kotlin.sql"
+                },
+                "region": {
+                  "startLine": 1405,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\055_exercises_kotlin.sql"
+                },
+                "region": {
+                  "startLine": 1406,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\055_exercises_kotlin.sql"
+                },
+                "region": {
+                  "startLine": 1408,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "PII-EMAIL_IN_LOG",
+          "level": "warning",
+          "message": {
+            "text": "Possible PII (EMAIL_IN_LOG) present outside redaction"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db\\migrations\\055_exercises_kotlin.sql"
+                },
+                "region": {
+                  "startLine": 1409,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "cvss": "5.3",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Ensure redact_mapping / redact_text applied before log/export"
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-79",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #1 \u00b7 Cross-site Scripting (XSS)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-787",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #2 \u00b7 Out-of-bounds Write"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-89",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #3 \u00b7 SQL Injection"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-352",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #4 \u00b7 CSRF"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-22",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #5 \u00b7 Path Traversal"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-125",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #6 \u00b7 Out-of-bounds Read"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-78",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #7 \u00b7 OS Command Injection"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-416",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #8 \u00b7 Use After Free"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-862",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #9 \u00b7 Missing Authorization"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-434",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #10 \u00b7 Unrestricted Upload of File with Dangerous Type"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-94",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #11 \u00b7 Improper Control of Code Generation (Code Injection)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-20",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #12 \u00b7 Improper Input Validation"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-77",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #13 \u00b7 Command Injection (generic)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-287",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #14 \u00b7 Improper Authentication"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-269",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #15 \u00b7 Improper Privilege Management"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-502",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #16 \u00b7 Deserialization of Untrusted Data"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-200",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #17 \u00b7 Exposure of Sensitive Information"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-863",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #18 \u00b7 Incorrect Authorization"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-918",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #19 \u00b7 SSRF"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-119",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #20 \u00b7 Improper Restriction of Operations within Memory Buffer"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-476",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #21 \u00b7 NULL Pointer Dereference"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-798",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #22 \u00b7 Hardcoded Credentials"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-190",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #23 \u00b7 Integer Overflow or Wraparound"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-400",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #24 \u00b7 Uncontrolled Resource Consumption"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        },
+        {
+          "ruleId": "COVERAGE-GAP-CWE-306",
+          "level": "note",
+          "message": {
+            "text": "No detection for CWE Top-25 rank #25 \u00b7 Missing Authentication for Critical Function"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "(coverage)"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "INFO",
+            "cvss": "0.0",
+            "status": "OPEN",
+            "suppression_reason": null,
+            "target": "mindscrolling-backend",
+            "recommendation": "Add a dedicated detector OR document why this CWE is N/A for this target. Silence is not evidence of absence."
+          }
+        }
+      ]
+    }
+  ]
+}

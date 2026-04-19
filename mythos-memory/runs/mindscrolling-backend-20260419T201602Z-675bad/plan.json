@@ -1,0 +1,19 @@
+{
+  "target_id": "mindscrolling-backend",
+  "artifact_path": "backend/src",
+  "primary_stack": "javascript",
+  "scanners": [
+    "injection",
+    "crypto",
+    "secrets",
+    "pii"
+  ],
+  "severity_gate": "HIGH",
+  "delta_mode": true,
+  "extras": {
+    "criticality": "HIGH",
+    "forbidden_literals": [],
+    "forbidden_regex": [],
+    "fase1_refs": []
+  }
+}
