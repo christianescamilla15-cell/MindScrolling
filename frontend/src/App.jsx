@@ -16,6 +16,7 @@ import { shuffle } from "./utils/shuffle.js";
 import { CATEGORY_META, DIR_TO_CATEGORY, USER_LANG } from "./constants/index.js";
 import { t } from "./i18n/index.js";
 import { exportQuoteImage } from "./utils/exportImage.js";
+import { useSheetRoute } from "./utils/useSheetRoute.js";
 import Onboarding    from "./components/Onboarding.jsx";
 import Settings      from "./components/Settings.jsx";
 import DonationPanel from "./components/DonationPanel.jsx";
@@ -364,12 +365,18 @@ function hasCompletedOnboarding() {
 
 /* ─── MAIN APP ───────────────────────────────────────────────────────────────── */
 export default function App() {
+  const sheet = useSheetRoute();
+  const showVault     = sheet.active === "vault";
+  const showSettings  = sheet.active === "settings";
+  const showDonation  = sheet.active === "donation";
+  const showMap       = sheet.active === "map";
+  const showChallenge = sheet.active === "challenge";
+
   const [deck,        setDeck]        = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [current,     setCurrent]     = useState(0);
   const [liked,       setLiked]       = useState(() => new Set(loadState()?.liked ?? []));
   const [vault,       setVault]       = useState(() => loadState()?.vault ?? []);
-  const [showVault,   setShowVault]   = useState(false);
   const [streak,      setStreak]      = useState(() => loadState()?.streak ?? 0);
   const [reflections, setReflections] = useState(() => loadState()?.reflections ?? 0);
   const [showHints,   setShowHints]   = useState(true);
@@ -377,12 +384,8 @@ export default function App() {
   const [toastMsg,    setToastMsg]    = useState(null);
   const [streakPulse, setStreakPulse] = useState(false);
 
-  // New Sprint 4 state
+  // Onboarding keeps its own gate (completion persists in localStorage)
   const [showOnboarding, setShowOnboarding] = useState(() => !hasCompletedOnboarding());
-  const [showSettings,   setShowSettings]   = useState(false);
-  const [showDonation,   setShowDonation]   = useState(false);
-  const [showMap,        setShowMap]        = useState(false);
-  const [showChallenge,  setShowChallenge]  = useState(false);
   const [mapData,        setMapData]        = useState(null);
   const [challengeData,  setChallengeData]  = useState(null);
   const [challengeProgress, setChallengeProgress] = useState({ progress: 0, completed: false });
@@ -622,7 +625,7 @@ export default function App() {
           </div>
           {/* Settings gear button */}
           <button
-            onClick={() => setShowSettings(true)}
+            onClick={() => sheet.open("settings")}
             style={{
               background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -675,7 +678,7 @@ export default function App() {
             <div key={cat} title={m.label} style={{ width: 8, height: 8, borderRadius: "50%", background: swipeCounts[cat] > 0 ? m.color : "rgba(255,255,255,0.12)", transition: "background 0.3s" }} />
           ))}
         </div>
-        <button onClick={() => setShowVault(true)} style={{ background: vault.length > 0 ? "rgba(20,184,166,0.12)" : "rgba(255,255,255,0.05)", border: `1px solid ${vault.length > 0 ? "rgba(20,184,166,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: 22, padding: "10px 20px", display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: vault.length > 0 ? "#14B8A6" : "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>
+        <button onClick={() => sheet.open("vault")} style={{ background: vault.length > 0 ? "rgba(20,184,166,0.12)" : "rgba(255,255,255,0.05)", border: `1px solid ${vault.length > 0 ? "rgba(20,184,166,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: 22, padding: "10px 20px", display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: vault.length > 0 ? "#14B8A6" : "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>
           <BookmarkIcon size={16} filled={vault.length > 0} />
           {t(lang, "vault")} {vault.length > 0 && <span style={{ background: "#14B8A6", color: "#0f0f13", borderRadius: 10, padding: "1px 6px", fontSize: 11, fontWeight: 700 }}>{vault.length}</span>}
         </button>
@@ -688,7 +691,7 @@ export default function App() {
       {showVault && (
         <VaultSheet
           items={vault}
-          onClose={() => setShowVault(false)}
+          onClose={sheet.close}
           onRemove={handleRemove}
           lang={lang}
         />
@@ -699,18 +702,18 @@ export default function App() {
           lang={lang}
           onLangChange={handleLangChange}
           isPremium={isPremium}
-          onClose={() => setShowSettings(false)}
+          onClose={sheet.close}
           showToast={showToast}
-          onShowMap={() => { setShowSettings(false); setShowMap(true); }}
-          onShowChallenge={() => { setShowSettings(false); setShowChallenge(true); }}
-          onShowDonation={() => { setShowSettings(false); setShowDonation(true); }}
+          onShowMap={() => sheet.open("map")}
+          onShowChallenge={() => sheet.open("challenge")}
+          onShowDonation={() => sheet.open("donation")}
         />
       )}
 
       {showDonation && (
         <DonationPanel
           lang={lang}
-          onClose={() => setShowDonation(false)}
+          onClose={sheet.close}
         />
       )}
 
@@ -727,7 +730,7 @@ export default function App() {
             snapshot_date: null,
           }}
           lang={lang}
-          onClose={() => setShowMap(false)}
+          onClose={sheet.close}
         />
       )}
 
@@ -736,7 +739,7 @@ export default function App() {
           challenge={challengeData}
           progress={challengeProgress}
           lang={lang}
-          onClose={() => setShowChallenge(false)}
+          onClose={sheet.close}
         />
       )}
 
