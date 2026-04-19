@@ -183,6 +183,34 @@ export default async function quotesRoutes(fastify) {
     const take          = Math.min(Math.max(Number(limit) || 20, 1), 20);
     const poolSize      = take * POOL_MULTIPLIER;
 
+    // Category-balanced fallback · used when RPCs fail or return 0.
+    // Captures effectiveLang/isPremium/poolSize from the enclosing scope.
+    async function fetchCategoryFallback(effectiveLang, isPremium) {
+      const perCategory = Math.ceil(poolSize / CATEGORIES.length);
+      const categoryQueries = CATEGORIES.map(cat => {
+        let q = supabase
+          .from("quotes")
+          .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at, content_type, tags")
+          .eq("lang", effectiveLang)
+          .eq("category", cat)
+          .or("pack_name.eq.free,pack_name.is.null")
+          .eq("is_hidden_mode", false)
+          .limit(perCategory);
+        if (!isPremium) q = q.eq("is_premium", false);
+        return q;
+      });
+      const results = await Promise.all(categoryQueries);
+      const allQuotes = [];
+      for (const { data, error: qErr } of results) {
+        if (!qErr && data) allQuotes.push(...data);
+      }
+      for (let i = allQuotes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allQuotes[i], allQuotes[j]] = [allQuotes[j], allQuotes[i]];
+      }
+      return allQuotes.slice(0, poolSize);
+    }
+
     // ── Parallel fetch: profile + preferences + premium + challenge + pref vector ──
     const [
       { data: profile },
@@ -275,33 +303,8 @@ export default async function quotesRoutes(fastify) {
 
     // Fallback: if RPC not yet deployed, fetch balanced by category
     if (rpcErr) {
-      const perCategory = Math.ceil(poolSize / CATEGORIES.length);
-      const categoryQueries = CATEGORIES.map(cat => {
-        let q = supabase
-          .from("quotes")
-          .select("id, text, author, category, lang, swipe_dir, pack_name, is_premium, created_at, content_type, tags")
-          .eq("lang", effectiveLang)
-          .eq("category", cat)
-          .or("pack_name.eq.free,pack_name.is.null")
-          .eq("is_hidden_mode", false)
-          .limit(perCategory);
-        if (!isPremium) q = q.eq("is_premium", false);
-        return q;
-      });
-
-      const results = await Promise.all(categoryQueries);
-      const allQuotes = [];
-      for (const { data, error: qErr } of results) {
-        if (!qErr && data) allQuotes.push(...data);
-      }
-
-      // Shuffle for randomness
-      for (let i = allQuotes.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [allQuotes[i], allQuotes[j]] = [allQuotes[j], allQuotes[i]];
-      }
-
-      candidates = allQuotes.slice(0, poolSize);
+      fastify.log.warn({ err: rpcErr }, "feed: RPC failed, using category fallback");
+      candidates = await fetchCategoryFallback(effectiveLang, isPremium);
     }
 
     // ── Handle exhaustion: all quotes seen — reset seen list and restart ───────
@@ -315,9 +318,14 @@ export default async function quotesRoutes(fastify) {
 
       const { data: fresh, error: freshErr } = await retryParams;
       if (freshErr) {
-        return reply.status(500).send({ error: "Failed to fetch quotes", code: "INTERNAL_ERROR" });
+        // RPC retry failed — fall back to category queries instead of 500ing.
+        // A 500 here blocks the feed screen entirely; an empty feed degrades
+        // gracefully and lets the user retry.
+        fastify.log.warn({ err: freshErr }, "feed: RPC retry failed, using category fallback");
+        candidates = await fetchCategoryFallback(effectiveLang, isPremium);
+      } else {
+        candidates = fresh || [];
       }
-      candidates = fresh || [];
 
       // HIGH-04: Apply content_type filter on retry too
       if (candidates.length > 0 && (content_type || sub_category)) {
@@ -330,6 +338,7 @@ export default async function quotesRoutes(fastify) {
     }
 
     if (candidates.length === 0) {
+      fastify.log.warn({ deviceId, effectiveLang, isPremium }, "feed: no candidates after retry + fallback");
       return reply.send({ data: [], next_cursor: null, has_more: false });
     }
 
