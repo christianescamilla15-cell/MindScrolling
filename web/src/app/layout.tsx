@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "./sw-register";
+import { SITE_URL } from "@/lib/site";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -19,6 +20,10 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  // Resolves relative OG image URLs (including the auto-generated
+  // opengraph-image.tsx endpoints) against this base — otherwise Next.js
+  // falls back to http://localhost:3000 and crawlers fetch the wrong host.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "MindScrolling",
     template: "%s — MindScrolling",
