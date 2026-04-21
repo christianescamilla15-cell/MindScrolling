@@ -18,7 +18,6 @@ import { shuffle } from "./utils/shuffle";
 import { CATEGORY_META, DIR_TO_CATEGORY, USER_LANG } from "./constants";
 import { t } from "./i18n";
 import { exportQuoteImage } from "./utils/exportImage";
-import Onboarding    from "./components/Onboarding";
 import Settings      from "./components/Settings";
 import DonationPanel from "./components/DonationPanel";
 import PhilosophyMap from "./components/PhilosophyMap";
@@ -482,9 +481,6 @@ function loadProfile(): Profile | null {
     return raw ? (JSON.parse(raw) as Profile) : null;
   } catch { return null; }
 }
-function hasCompletedOnboarding(): boolean {
-  try { return localStorage.getItem("mindscroll_onboarding") === "true"; } catch { return false; }
-}
 
 /* ─── MAIN APP ───────────────────────────────────────────────────────────────── */
 export default function App() {
@@ -501,8 +497,7 @@ export default function App() {
   const [toastMsg,    setToastMsg]    = useState<Toast | null>(null);
   const [streakPulse, setStreakPulse] = useState(false);
 
-  // New Sprint 4 state
-  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => !hasCompletedOnboarding());
+  // New Sprint 4 state — onboarding gating now lives in app/page.tsx
   const [showSettings,   setShowSettings]   = useState(false);
   const [showDonation,   setShowDonation]   = useState(false);
   const [showMap,        setShowMap]        = useState(false);
@@ -547,35 +542,30 @@ export default function App() {
     saveState({ liked: [...liked], vault, streak, reflections });
   }, [liked, vault, streak, reflections]);
 
-  // Load challenge from API on mount (fire-and-forget)
+  // Load challenge from API on mount (fire-and-forget). Onboarding gate
+  // upstream guarantees this only runs after the user has a profile.
   useEffect(() => {
-    if (!showOnboarding) {
-      apiGetTodayChallenge().then(ch => {
-        if (ch) setChallengeData(ch);
-      }).catch(() => {});
-    }
-  }, [showOnboarding]);
+    apiGetTodayChallenge().then(ch => {
+      if (ch) setChallengeData(ch);
+    }).catch(() => {});
+  }, []);
 
   // Load philosophy map from API (fire-and-forget)
   useEffect(() => {
-    if (!showOnboarding) {
-      apiGetMap().then(data => {
-        if (data) setMapData(data);
-      }).catch(() => {});
-    }
-  }, [showOnboarding]);
+    apiGetMap().then(data => {
+      if (data) setMapData(data);
+    }).catch(() => {});
+  }, []);
 
   // Load premium status from API; always respect cached value as optimistic state
   useEffect(() => {
-    if (!showOnboarding) {
-      apiGetPremiumStatus().then(data => {
-        if (data?.is_premium) {
-          setIsPremium(true);
-          saveIsPremium(true);
-        }
-      }).catch(() => {});
-    }
-  }, [showOnboarding]);
+    apiGetPremiumStatus().then(data => {
+      if (data?.is_premium) {
+        setIsPremium(true);
+        saveIsPremium(true);
+      }
+    }).catch(() => {});
+  }, []);
 
   // Track swipe start time for dwell measurement
   useEffect(() => {
@@ -591,15 +581,6 @@ export default function App() {
   const handleLangChange = useCallback((newLang: Lang) => {
     setLang(newLang);
     saveLang(newLang);
-  }, []);
-
-  const handleOnboardingComplete = useCallback((prof: Profile) => {
-    setProfile(prof);
-    if (prof.preferred_language) {
-      setLang(prof.preferred_language);
-      saveLang(prof.preferred_language);
-    }
-    setShowOnboarding(false);
   }, []);
 
   const handleSwipe = useCallback((dir: Direction) => {
@@ -707,11 +688,6 @@ export default function App() {
 
   return (
     <div className="w-full min-h-screen bg-mindscroll-bg relative overflow-hidden font-sans">
-      {/* Onboarding overlay */}
-      {showOnboarding && (
-        <Onboarding lang={lang} onComplete={handleOnboardingComplete} />
-      )}
-
       {/* Ambient background glow — gradient color drives off the active category */}
       <div
         className="fixed inset-0 pointer-events-none z-0 transition-[background] duration-700 ease-out"
