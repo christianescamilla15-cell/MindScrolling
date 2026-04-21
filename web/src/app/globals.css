@@ -84,3 +84,9 @@
 button:hover {
   opacity: 0.8;
 }
+
+/* Dark dropdowns inside the onboarding wizard's <select>s */
+select option {
+  background: #1e1e27;
+  color: #F5F0E8;
+}

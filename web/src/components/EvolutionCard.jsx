@@ -30,36 +30,30 @@ function MiniBar({ color, current, previous }) {
   const diff    = curPct - prevPct;
 
   return (
-    <div style={{ flex: 1 }}>
+    <div className="flex-1">
       {/* Current bar */}
-      <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.06)", marginBottom: 3, overflow: "hidden" }}>
-        <div style={{
-          height: "100%",
-          width: `${curPct}%`,
-          background: `linear-gradient(90deg, ${color}99, ${color})`,
-          borderRadius: 3,
-          transition: "width 0.6s ease",
-        }} />
+      <div className="h-[5px] rounded-[3px] bg-white/[0.06] mb-[3px] overflow-hidden">
+        <div
+          className="h-full rounded-[3px] transition-[width] duration-700 ease-out"
+          style={{
+            width: `${curPct}%`,
+            background: `linear-gradient(90deg, ${color}99, ${color})`,
+          }}
+        />
       </div>
       {/* Previous bar (ghost) */}
-      <div style={{ height: 3, borderRadius: 2, background: "rgba(255,255,255,0.04)", overflow: "hidden" }}>
-        <div style={{
-          height: "100%",
-          width: `${prevPct}%`,
-          background: `${color}33`,
-          borderRadius: 2,
-        }} />
+      <div className="h-[3px] rounded-sm bg-white/[0.04] overflow-hidden">
+        <div
+          className="h-full rounded-sm"
+          style={{ width: `${prevPct}%`, background: `${color}33` }}
+        />
       </div>
       {/* Diff */}
       {diff !== 0 && (
-        <p style={{
-          margin: "4px 0 0",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 10,
-          color: diff > 0 ? color : "rgba(255,255,255,0.25)",
-          fontWeight: 600,
-          textAlign: "center",
-        }}>
+        <p
+          className="mt-1 mb-0 font-sans text-[10px] font-semibold text-center"
+          style={{ color: diff > 0 ? color : "rgba(255,255,255,0.25)" }}
+        >
           {diff > 0 ? "+" : ""}{diff}%
         </p>
       )}
@@ -90,67 +84,35 @@ export default function EvolutionCard({ current, previous, lang = "en" }) {
   }, categories[0]);
 
   return (
-    <div style={{
-      position: "absolute", top: "50%", left: "50%",
-      transform: "translate(-50%, -50%)",
-      width: "min(380px, 90vw)",
-      minHeight: 420,
-      borderRadius: 28,
-      background: "linear-gradient(145deg, #1c1c22, #161618)",
-      border: "1px solid rgba(255,255,255,0.07)",
-      boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
-      display: "flex", flexDirection: "column",
-      padding: "36px 32px 28px",
-      boxSizing: "border-box",
-      zIndex: 10,
-      userSelect: "none",
-    }}>
+    <div
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-h-[420px] rounded-[28px] bg-gradient-to-br from-mindscroll-bg-card to-mindscroll-bg-card-end border border-white/[0.07] shadow-[0_32px_80px_rgba(0,0,0,0.6),_0_0_0_1px_rgba(255,255,255,0.05)] flex flex-col px-8 pt-9 pb-7 z-10 select-none"
+      style={{ width: "min(380px, 90vw)" }}
+    >
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <p style={{
-          margin: "0 0 4px",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: CATEGORY_COLORS[biggest],
-        }}>
+      <div className="mb-7">
+        <p
+          className="mt-0 mb-1 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase"
+          style={{ color: CATEGORY_COLORS[biggest] }}
+        >
           Philosophy Map
         </p>
-        <h2 style={{
-          margin: 0,
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 22,
-          fontWeight: 600,
-          color: "#F5F0E8",
-          fontStyle: "italic",
-        }}>
+        <h2 className="m-0 font-serif text-[22px] font-semibold text-mindscroll-cream italic">
           Your thinking is evolving.
         </h2>
       </div>
 
       {/* Bars */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 18, justifyContent: "center" }}>
+      <div className="flex-1 flex flex-col gap-[18px] justify-center">
         {categories.map(cat => (
           <div key={cat}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: CATEGORY_COLORS[cat],
-              }}>
+            <div className="flex justify-between items-center mb-1.5">
+              <span
+                className="font-sans text-[11px] font-semibold tracking-[0.08em] uppercase"
+                style={{ color: CATEGORY_COLORS[cat] }}
+              >
                 {CATEGORY_LABELS[cat]}
               </span>
-              <span style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "#F5F0E8",
-              }}>
+              <span className="font-sans text-[13px] font-semibold text-mindscroll-cream">
                 {Math.round(cur[cat] * 100)}%
               </span>
             </div>
@@ -164,15 +126,15 @@ export default function EvolutionCard({ current, previous, lang = "en" }) {
       </div>
 
       {/* Legend */}
-      <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ display: "flex", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 16, height: 4, background: "rgba(255,255,255,0.5)", borderRadius: 2 }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>Now</span>
+      <div className="mt-6 pt-5 border-t border-white/[0.06]">
+        <div className="flex gap-4">
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-1 bg-white/50 rounded-sm" />
+            <span className="font-sans text-[11px] text-white/30">Now</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 16, height: 4, background: "rgba(255,255,255,0.2)", borderRadius: 2 }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>Before</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-1 bg-white/20 rounded-sm" />
+            <span className="font-sans text-[11px] text-white/30">Before</span>
           </div>
         </div>
       </div>

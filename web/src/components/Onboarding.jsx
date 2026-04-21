@@ -5,46 +5,30 @@ import { t } from "../i18n/index.js";
 const ONBOARDING_KEY = "mindscroll_onboarding";
 const PROFILE_KEY    = "mindscroll_profile";
 
-const selectStyle = {
-  width: "100%",
-  background: "#1e1e27",
-  border: "1px solid rgba(255,255,255,0.12)",
-  borderRadius: 12,
-  color: "#F5F0E8",
-  fontFamily: "'DM Sans', sans-serif",
-  fontSize: 14,
-  padding: "12px 16px",
-  appearance: "none",
-  WebkitAppearance: "none",
-  cursor: "pointer",
-  outline: "none",
-};
+const SELECT = "w-full bg-[#1e1e27] border border-white/[0.12] rounded-xl text-mindscroll-cream font-sans text-sm py-3 px-4 appearance-none cursor-pointer outline-none";
+const LABEL  = "block font-sans text-xs font-semibold tracking-[0.08em] uppercase text-white/40 mb-1.5";
 
-const labelStyle = {
-  fontFamily: "'DM Sans', sans-serif",
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  color: "rgba(255,255,255,0.4)",
-  marginBottom: 6,
-  display: "block",
-};
+function PrimaryButton({ children, onClick, color = "#14B8A6", className = "" }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full p-4 rounded-2xl font-sans text-[15px] font-semibold cursor-pointer tracking-[0.04em] transition-all duration-200 border ${className}`}
+      style={{
+        background: `linear-gradient(135deg, ${color}22, ${color}44)`,
+        borderColor: `${color}66`,
+        color,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
-const primaryBtn = (color = "#14B8A6") => ({
-  width: "100%",
-  padding: "16px",
-  background: `linear-gradient(135deg, ${color}22, ${color}44)`,
-  border: `1px solid ${color}66`,
-  borderRadius: 16,
-  color: color,
-  fontFamily: "'DM Sans', sans-serif",
-  fontSize: 15,
-  fontWeight: 600,
-  cursor: "pointer",
-  letterSpacing: "0.04em",
-  transition: "all 0.2s",
-});
+function ChevronDown() {
+  return (
+    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none">▾</span>
+  );
+}
 
 /* ─── Screen 1: Swipe explanation ─────────────────────────────────────────── */
 function ScreenSwipes({ lang, onNext }) {
@@ -56,56 +40,50 @@ function ScreenSwipes({ lang, onNext }) {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, padding: "48px 32px 32px" }}>
+    <div className="flex flex-col items-center flex-1 px-8 pt-12 pb-8">
       {/* Logo */}
-      <h1 style={{ margin: "0 0 8px", fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 600, color: "#F5F0E8", letterSpacing: "-0.02em" }}>
-        Mind<span style={{ color: "#14B8A6" }}>Scroll</span>
+      <h1 className="mt-0 mb-2 font-serif text-[32px] font-semibold text-mindscroll-cream tracking-[-0.02em]">
+        Mind<span className="text-mindscroll-teal">Scroll</span>
       </h1>
-      <p style={{ margin: "0 0 48px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.4)", textAlign: "center" }}>
+      <p className="mt-0 mb-12 font-sans text-sm text-white/40 text-center">
         {t(lang, "onboarding_subtitle")}
       </p>
 
       {/* Direction grid */}
-      <div style={{ width: "100%", maxWidth: 320, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 40 }}>
+      <div className="w-full max-w-[320px] grid grid-cols-2 gap-3 mb-10">
         {directions.map(d => (
-          <div key={d.key} style={{
-            background: `${d.color}11`,
-            border: `1px solid ${d.color}33`,
-            borderRadius: 16,
-            padding: "20px 16px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-            animation: "hint-pulse 2.5s ease-in-out infinite",
-          }}>
-            <span style={{ fontSize: 28, color: d.color, lineHeight: 1 }}>{d.icon}</span>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: d.color }}>{d.label}</span>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.5)", textAlign: "center" }}>{t(lang, d.key)}</span>
+          <div
+            key={d.key}
+            className="rounded-2xl py-5 px-4 flex flex-col items-center gap-2 animate-hint-pulse border"
+            style={{ background: `${d.color}11`, borderColor: `${d.color}33` }}
+          >
+            <span className="text-[28px] leading-none" style={{ color: d.color }}>{d.icon}</span>
+            <span
+              className="font-sans text-[11px] font-semibold tracking-[0.1em] uppercase"
+              style={{ color: d.color }}
+            >
+              {d.label}
+            </span>
+            <span className="font-sans text-xs text-white/50 text-center">
+              {t(lang, d.key)}
+            </span>
           </div>
         ))}
       </div>
 
       {/* Swipe graphic hint */}
-      <div style={{ marginBottom: 40, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-        <div style={{
-          width: 60, height: 60,
-          background: "linear-gradient(145deg, #1c1c22, #161618)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 18,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 24,
-        }}>
+      <div className="mb-10 flex flex-col items-center gap-1.5">
+        <div className="w-15 h-15 bg-gradient-to-br from-mindscroll-bg-card to-mindscroll-bg-card-end border border-white/[0.08] rounded-[18px] flex items-center justify-center text-2xl" style={{ width: 60, height: 60 }}>
           ✦
         </div>
-        <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+        <p className="m-0 font-sans text-[11px] text-white/25 tracking-[0.08em] uppercase">
           swipe the card
         </p>
       </div>
 
-      <button onClick={onNext} style={primaryBtn("#14B8A6")}>
+      <PrimaryButton onClick={onNext}>
         {t(lang, "onboarding_next")} →
-      </button>
+      </PrimaryButton>
     </div>
   );
 }
@@ -133,35 +111,35 @@ function ScreenProfile({ lang, onComplete }) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1, padding: "48px 32px 32px" }}>
-      <h2 style={{ margin: "0 0 8px", fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 600, color: "#F5F0E8" }}>
+    <div className="flex flex-col flex-1 px-8 pt-12 pb-8">
+      <h2 className="mt-0 mb-2 font-serif text-[26px] font-semibold text-mindscroll-cream">
         {t(lang, "onboarding_profile")}
       </h2>
-      <p style={{ margin: "0 0 36px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.4)" }}>
+      <p className="mt-0 mb-9 font-sans text-sm text-white/40">
         {t(lang, "onboarding_subtitle")}
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
+      <div className="flex flex-col gap-5 flex-1">
         {/* Age range */}
         <div>
-          <label style={labelStyle}>{t(lang, "age_range")}</label>
-          <div style={{ position: "relative" }}>
-            <select value={profile.age_range} onChange={e => set("age_range", e.target.value)} style={selectStyle}>
+          <label className={LABEL}>{t(lang, "age_range")}</label>
+          <div className="relative">
+            <select value={profile.age_range} onChange={e => set("age_range", e.target.value)} className={SELECT}>
               <option value="">—</option>
               <option value="18-24">18–24</option>
               <option value="25-34">25–34</option>
               <option value="35-44">35–44</option>
               <option value="45+">45+</option>
             </select>
-            <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)", pointerEvents: "none" }}>▾</span>
+            <ChevronDown />
           </div>
         </div>
 
         {/* Interest */}
         <div>
-          <label style={labelStyle}>{t(lang, "interest")}</label>
-          <div style={{ position: "relative" }}>
-            <select value={profile.interest} onChange={e => set("interest", e.target.value)} style={selectStyle}>
+          <label className={LABEL}>{t(lang, "interest")}</label>
+          <div className="relative">
+            <select value={profile.interest} onChange={e => set("interest", e.target.value)} className={SELECT}>
               <option value="">—</option>
               <option value="philosophy">Philosophy</option>
               <option value="stoicism">Stoicism</option>
@@ -169,42 +147,42 @@ function ScreenProfile({ lang, onComplete }) {
               <option value="mindfulness">Mindfulness</option>
               <option value="curiosity">Curiosity</option>
             </select>
-            <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)", pointerEvents: "none" }}>▾</span>
+            <ChevronDown />
           </div>
         </div>
 
         {/* Goal */}
         <div>
-          <label style={labelStyle}>{t(lang, "goal")}</label>
-          <div style={{ position: "relative" }}>
-            <select value={profile.goal} onChange={e => set("goal", e.target.value)} style={selectStyle}>
+          <label className={LABEL}>{t(lang, "goal")}</label>
+          <div className="relative">
+            <select value={profile.goal} onChange={e => set("goal", e.target.value)} className={SELECT}>
               <option value="">—</option>
               <option value="calm_mind">Calm Mind</option>
               <option value="discipline">Discipline</option>
               <option value="meaning">Meaning</option>
               <option value="emotional_clarity">Emotional Clarity</option>
             </select>
-            <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)", pointerEvents: "none" }}>▾</span>
+            <ChevronDown />
           </div>
         </div>
 
         {/* Language */}
         <div>
-          <label style={labelStyle}>{t(lang, "language")}</label>
-          <div style={{ position: "relative" }}>
-            <select value={profile.preferred_language} onChange={e => set("preferred_language", e.target.value)} style={selectStyle}>
+          <label className={LABEL}>{t(lang, "language")}</label>
+          <div className="relative">
+            <select value={profile.preferred_language} onChange={e => set("preferred_language", e.target.value)} className={SELECT}>
               <option value="en">English</option>
               <option value="es">Espa&ntilde;ol</option>
             </select>
-            <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)", pointerEvents: "none" }}>▾</span>
+            <ChevronDown />
           </div>
         </div>
       </div>
 
-      <div style={{ marginTop: 32 }}>
-        <button onClick={handleSubmit} style={primaryBtn("#14B8A6")}>
+      <div className="mt-8">
+        <PrimaryButton onClick={handleSubmit}>
           {t(lang, "onboarding_start")} ✦
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );
@@ -213,17 +191,17 @@ function ScreenProfile({ lang, onComplete }) {
 /* ─── Screen 3: All set ───────────────────────────────────────────────────── */
 function ScreenReady({ lang, onGo }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, padding: "48px 32px 32px", textAlign: "center" }}>
-      <div style={{ fontSize: 64, marginBottom: 24 }}>✦</div>
-      <h2 style={{ margin: "0 0 12px", fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, color: "#F5F0E8" }}>
+    <div className="flex flex-col items-center justify-center flex-1 px-8 pt-12 pb-8 text-center">
+      <div className="text-[64px] mb-6">✦</div>
+      <h2 className="mt-0 mb-3 font-serif text-[28px] font-semibold text-mindscroll-cream">
         You&apos;re all set.
       </h2>
-      <p style={{ margin: "0 0 48px", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
+      <p className="mt-0 mb-12 font-sans text-[15px] text-white/50 leading-[1.6]">
         Start scrolling through wisdom.
       </p>
-      <button onClick={onGo} style={{ ...primaryBtn("#14B8A6"), maxWidth: 280 }}>
+      <PrimaryButton onClick={onGo} className="!max-w-[280px]">
         Let&apos;s go →
-      </button>
+      </PrimaryButton>
     </div>
   );
 }
@@ -256,30 +234,16 @@ export default function Onboarding({ onComplete, lang = "en" }) {
   };
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 500,
-      background: "#0f0f13",
-      display: "flex", flexDirection: "column",
-      animation: "fade-in 0.3s ease",
-    }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap');
-        @keyframes fade-in { from { opacity:0 } to { opacity:1 } }
-        @keyframes hint-pulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
-        * { box-sizing:border-box; }
-        select option { background:#1e1e27; color:#F5F0E8; }
-      `}</style>
-
+    <div className="fixed inset-0 z-[500] bg-mindscroll-bg flex flex-col animate-fade-in">
       {/* Progress dots */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "20px 0 0" }}>
+      <div className="flex justify-center gap-2 pt-5">
         {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            width: i === screen ? 20 : 8,
-            height: 8,
-            borderRadius: 4,
-            background: i === screen ? "#14B8A6" : "rgba(255,255,255,0.12)",
-            transition: "all 0.3s ease",
-          }} />
+          <div
+            key={i}
+            className={`h-2 rounded transition-all duration-300 ${
+              i === screen ? "w-5 bg-mindscroll-teal" : "w-2 bg-white/[0.12]"
+            }`}
+          />
         ))}
       </div>
 

@@ -2,120 +2,70 @@ import { t } from "../i18n/index.js";
 
 const APP_VERSION = "1.0.0";
 
-const rowStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "16px 0",
-  borderBottom: "1px solid rgba(255,255,255,0.06)",
-  cursor: "pointer",
-};
+const ROW = "flex justify-between items-center py-4 border-b border-white/[0.06] cursor-pointer";
+const ROW_LABEL = "m-0 font-sans text-[15px] font-medium text-mindscroll-cream";
+const ROW_SUB = "mt-0.5 mb-0 font-sans text-xs text-white/30";
 
-const rowLabelStyle = {
-  fontFamily: "'DM Sans', sans-serif",
-  fontSize: 15,
-  fontWeight: 500,
-  color: "#F5F0E8",
-};
+function Chevron({ color = "rgba(255,255,255,0.25)" }) {
+  return <span className="text-base leading-none" style={{ color }}>›</span>;
+}
 
-const rowSubStyle = {
-  fontFamily: "'DM Sans', sans-serif",
-  fontSize: 12,
-  color: "rgba(255,255,255,0.3)",
-  marginTop: 2,
-};
-
-const chevron = (color = "rgba(255,255,255,0.25)") => (
-  <span style={{ fontSize: 16, color, lineHeight: 1 }}>›</span>
-);
-
-const sectionHeader = (label) => (
-  <p style={{
-    margin: "24px 0 4px",
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: 11,
-    fontWeight: 600,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.25)",
-  }}>{label}</p>
-);
+function SectionHeader({ children }) {
+  return (
+    <p className="mt-6 mb-1 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/25">
+      {children}
+    </p>
+  );
+}
 
 export default function Settings({ lang, onLangChange, isPremium, onClose, showToast, onShowMap, onShowChallenge, onShowDonation }) {
   return (
     <div
-      style={{
-        position: "fixed", inset: 0, zIndex: 200,
-        background: "rgba(0,0,0,0.7)",
-        display: "flex", alignItems: "flex-end",
-        animation: "fade-in 0.2s ease",
-      }}
       onClick={onClose}
+      className="fixed inset-0 z-[200] bg-black/70 flex items-end animate-fade-in"
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxHeight: "86vh",
-          background: "#18181f",
-          borderRadius: "28px 28px 0 0",
-          border: "1px solid rgba(255,255,255,0.07)",
-          display: "flex",
-          flexDirection: "column",
-          animation: "slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1)",
-          overflow: "hidden",
-        }}
+        className="w-full max-h-[86vh] bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] flex flex-col animate-slide-up overflow-hidden"
       >
         {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "16px 0 0" }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+        <div className="flex justify-center pt-4">
+          <div className="w-10 h-1 rounded-sm bg-white/[0.15]" />
         </div>
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 28px 0" }}>
-          <h2 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, color: "#F5F0E8" }}>
+        <div className="flex justify-between items-center pt-4 px-7">
+          <h2 className="m-0 font-serif text-[22px] font-semibold text-mindscroll-cream">
             {t(lang, "settings")}
           </h2>
           <button
             onClick={onClose}
-            style={{
-              background: "none", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 20, padding: "8px 14px",
-              fontSize: 13, fontFamily: "'DM Sans', sans-serif",
-              color: "rgba(255,255,255,0.3)", cursor: "pointer",
-            }}
+            className="bg-transparent border border-white/10 rounded-[20px] py-2 px-3.5 text-[13px] font-sans text-white/30 cursor-pointer"
           >
             {t(lang, "close")}
           </button>
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 28px 40px" }}>
+        <div className="overflow-y-auto flex-1 px-7 pb-10">
 
           {/* Language */}
-          {sectionHeader("Preferences")}
-          <div style={rowStyle}>
+          <SectionHeader>Preferences</SectionHeader>
+          <div className={ROW}>
             <div>
-              <p style={rowLabelStyle}>{t(lang, "language")}</p>
-              <p style={rowSubStyle}>{lang === "es" ? "Espa\u00F1ol" : "English"}</p>
+              <p className={ROW_LABEL}>{t(lang, "language")}</p>
+              <p className={ROW_SUB}>{lang === "es" ? "Espa\u00F1ol" : "English"}</p>
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div className="flex gap-2">
               {["en", "es"].map(code => (
                 <button
                   key={code}
                   onClick={() => onLangChange(code)}
-                  style={{
-                    background: lang === code ? "rgba(20,184,166,0.15)" : "rgba(255,255,255,0.05)",
-                    border: `1px solid ${lang === code ? "rgba(20,184,166,0.4)" : "rgba(255,255,255,0.1)"}`,
-                    borderRadius: 10,
-                    padding: "6px 12px",
-                    fontSize: 13,
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontWeight: 600,
-                    color: lang === code ? "#14B8A6" : "rgba(255,255,255,0.4)",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
+                  className={`rounded-[10px] py-1.5 px-3 text-[13px] font-sans font-semibold cursor-pointer transition-all duration-150 border ${
+                    lang === code
+                      ? "bg-mindscroll-teal/15 border-mindscroll-teal/40 text-mindscroll-teal"
+                      : "bg-white/[0.05] border-white/10 text-white/40"
+                  }`}
                 >
                   {code.toUpperCase()}
                 </button>
@@ -124,77 +74,71 @@ export default function Settings({ lang, onLangChange, isPremium, onClose, showT
           </div>
 
           {/* Explore */}
-          {sectionHeader("Explore")}
+          <SectionHeader>Explore</SectionHeader>
 
-          <div style={{ ...rowStyle, cursor: "pointer" }} onClick={onShowMap}>
+          <div className={ROW} onClick={onShowMap}>
             <div>
-              <p style={rowLabelStyle}>{t(lang, "map_title")}</p>
-              <p style={rowSubStyle}>Visualize your thinking style</p>
+              <p className={ROW_LABEL}>{t(lang, "map_title")}</p>
+              <p className={ROW_SUB}>Visualize your thinking style</p>
             </div>
-            {chevron("#A78BFA")}
+            <Chevron color="#A78BFA" />
           </div>
 
-          <div style={{ ...rowStyle, cursor: "pointer" }} onClick={onShowChallenge}>
+          <div className={ROW} onClick={onShowChallenge}>
             <div>
-              <p style={rowLabelStyle}>{t(lang, "challenge_title")}</p>
-              <p style={rowSubStyle}>Today&apos;s reflection challenge</p>
+              <p className={ROW_LABEL}>{t(lang, "challenge_title")}</p>
+              <p className={ROW_SUB}>Today&apos;s reflection challenge</p>
             </div>
-            {chevron("#F59E0B")}
+            <Chevron color="#F59E0B" />
           </div>
 
           {/* Premium */}
-          {sectionHeader("Premium")}
+          <SectionHeader>Premium</SectionHeader>
 
           {!isPremium ? (
             <div
-              style={{
-                ...rowStyle,
-                background: "linear-gradient(135deg, rgba(249,115,22,0.08), rgba(245,158,11,0.08))",
-                border: "1px solid rgba(249,115,22,0.2)",
-                borderRadius: 16,
-                padding: "16px",
-                marginBottom: 12,
-                cursor: "pointer",
-              }}
               onClick={() => showToast && showToast("Premium coming soon!", "#F97316")}
+              className="flex justify-between items-center py-4 px-4 mb-3 rounded-2xl cursor-pointer bg-gradient-to-br from-mindscroll-orange/[0.08] to-mindscroll-amber/[0.08] border border-mindscroll-orange/20"
             >
               <div>
-                <p style={{ ...rowLabelStyle, color: "#F97316" }}>{t(lang, "premium_unlock")}</p>
-                <p style={rowSubStyle}>Export images, unlock all packs</p>
+                <p className="m-0 font-sans text-[15px] font-medium text-mindscroll-orange">
+                  {t(lang, "premium_unlock")}
+                </p>
+                <p className={ROW_SUB}>Export images, unlock all packs</p>
               </div>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#F59E0B" }}>
+              <span className="font-sans text-[15px] font-bold text-mindscroll-amber">
                 {t(lang, "premium_price")}
               </span>
             </div>
           ) : (
-            <div style={{ ...rowStyle, cursor: "default" }}>
+            <div className="flex justify-between items-center py-4 border-b border-white/[0.06]">
               <div>
-                <p style={{ ...rowLabelStyle, color: "#14B8A6" }}>Premium Active</p>
-                <p style={rowSubStyle}>All features unlocked</p>
+                <p className="m-0 font-sans text-[15px] font-medium text-mindscroll-teal">Premium Active</p>
+                <p className={ROW_SUB}>All features unlocked</p>
               </div>
-              <span style={{ fontSize: 18 }}>✦</span>
+              <span className="text-lg">✦</span>
             </div>
           )}
 
           {/* Donation */}
-          <div style={{ ...rowStyle, cursor: "pointer" }} onClick={onShowDonation}>
+          <div className={ROW} onClick={onShowDonation}>
             <div>
-              <p style={rowLabelStyle}>{t(lang, "donate_title")}</p>
-              <p style={rowSubStyle}>Support the project</p>
+              <p className={ROW_LABEL}>{t(lang, "donate_title")}</p>
+              <p className={ROW_SUB}>Support the project</p>
             </div>
-            {chevron("#F59E0B")}
+            <Chevron color="#F59E0B" />
           </div>
 
           {/* About */}
-          {sectionHeader("About")}
-          <div style={{ padding: "16px 0" }}>
-            <p style={{ margin: "0 0 4px", fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#F5F0E8" }}>
-              Mind<span style={{ color: "#14B8A6" }}>Scroll</span>
+          <SectionHeader>About</SectionHeader>
+          <div className="py-4">
+            <p className="mt-0 mb-1 font-serif text-base text-mindscroll-cream">
+              Mind<span className="text-mindscroll-teal">Scroll</span>
             </p>
-            <p style={{ margin: "0 0 8px", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>
+            <p className="mt-0 mb-2 font-sans text-xs text-white/30">
               Version {APP_VERSION}
             </p>
-            <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.35)", lineHeight: 1.6 }}>
+            <p className="m-0 font-sans text-[13px] text-white/35 leading-[1.6]">
               Philosophical wisdom for your daily mind. Swipe, reflect, grow.
             </p>
           </div>

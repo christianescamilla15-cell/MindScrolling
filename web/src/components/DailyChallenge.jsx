@@ -17,21 +17,11 @@ function ProgressRing({ value, target, color = "#14B8A6" }) {
   const dash      = circ * pct;
 
   return (
-    <svg width={radius * 2} height={radius * 2} style={{ transform: "rotate(-90deg)" }}>
-      {/* Track */}
+    <svg width={radius * 2} height={radius * 2} className="-rotate-90">
+      <circle cx={radius} cy={radius} r={normalizedR} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
       <circle
         cx={radius} cy={radius} r={normalizedR}
-        fill="none"
-        stroke="rgba(255,255,255,0.06)"
-        strokeWidth={stroke}
-      />
-      {/* Progress */}
-      <circle
-        cx={radius} cy={radius} r={normalizedR}
-        fill="none"
-        stroke={color}
-        strokeWidth={stroke}
-        strokeLinecap="round"
+        fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
         strokeDasharray={`${dash} ${circ}`}
         style={{ transition: "stroke-dasharray 0.5s ease" }}
       />
@@ -50,79 +40,46 @@ export default function DailyChallenge({ challenge, progress, lang = "en", onClo
 
   return (
     <div
-      style={{
-        position: "fixed", inset: 0, zIndex: 300,
-        background: "rgba(0,0,0,0.75)",
-        display: "flex", alignItems: "flex-end",
-        animation: "fade-in 0.2s ease",
-      }}
       onClick={onClose}
+      className="fixed inset-0 z-[300] bg-black/75 flex items-end animate-fade-in"
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%",
-          background: "#18181f",
-          borderRadius: "28px 28px 0 0",
-          border: "1px solid rgba(255,255,255,0.07)",
-          animation: "slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1)",
-          overflow: "hidden",
-        }}
+        className="w-full bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] animate-slide-up overflow-hidden"
       >
         {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "16px 0 0" }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+        <div className="flex justify-center pt-4">
+          <div className="w-10 h-1 rounded-sm bg-white/[0.15]" />
         </div>
 
-        <div style={{ padding: "20px 28px 48px" }}>
+        <div className="pt-5 pb-12 px-7">
           {/* Header row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-            <div style={{ flex: 1 }}>
-              <p style={{
-                margin: "0 0 4px",
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: accentColor,
-              }}>
+          <div className="flex justify-between items-start mb-7">
+            <div className="flex-1">
+              <p
+                className="mt-0 mb-1 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase"
+                style={{ color: accentColor }}
+              >
                 {t(lang, "challenge_title")}
               </p>
-              <h2 style={{
-                margin: 0,
-                fontFamily: "'Playfair Display', serif",
-                fontSize: 22,
-                fontWeight: 600,
-                color: "#F5F0E8",
-              }}>
+              <h2 className="m-0 font-serif text-[22px] font-semibold text-mindscroll-cream">
                 {ch.title}
               </h2>
             </div>
 
             {/* Progress ring or checkmark */}
-            <div style={{ flexShrink: 0, marginLeft: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div className="shrink-0 ml-4 flex items-center justify-center">
               {done ? (
-                <div style={{
-                  width: 56, height: 56,
-                  background: "rgba(20,184,166,0.15)",
-                  border: "2px solid rgba(20,184,166,0.5)",
-                  borderRadius: "50%",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 22,
-                }}>
+                <div className="w-14 h-14 bg-mindscroll-teal/15 border-2 border-mindscroll-teal/50 rounded-full flex items-center justify-center text-[22px]">
                   ✓
                 </div>
               ) : (
-                <div style={{ position: "relative", width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div className="relative w-14 h-14 flex items-center justify-center">
                   <ProgressRing value={current} target={target} color={accentColor} />
-                  <span style={{
-                    position: "absolute",
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: accentColor,
-                  }}>
+                  <span
+                    className="absolute font-sans text-xs font-bold"
+                    style={{ color: accentColor }}
+                  >
                     {pct}%
                   </span>
                 </div>
@@ -131,52 +88,35 @@ export default function DailyChallenge({ challenge, progress, lang = "en", onClo
           </div>
 
           {/* Description */}
-          <p style={{
-            margin: "0 0 24px",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 15,
-            color: "rgba(255,255,255,0.55)",
-            lineHeight: 1.65,
-          }}>
+          <p className="mt-0 mb-6 font-sans text-[15px] text-white/55 leading-[1.65]">
             {ch.description}
           </p>
 
           {/* Progress bar */}
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>
-                Progress
-              </span>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: accentColor }}>
+          <div className="mb-7">
+            <div className="flex justify-between mb-2">
+              <span className="font-sans text-xs text-white/30">Progress</span>
+              <span
+                className="font-sans text-xs font-semibold"
+                style={{ color: accentColor }}
+              >
                 {current} / {target}
               </span>
             </div>
-            <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
-              <div style={{
-                height: "100%",
-                width: `${pct}%`,
-                background: done
-                  ? "linear-gradient(90deg, #14B8A6cc, #14B8A6)"
-                  : `linear-gradient(90deg, ${accentColor}cc, ${accentColor})`,
-                borderRadius: 3,
-                transition: "width 0.6s ease",
-              }} />
+            <div className="h-1.5 rounded-[3px] bg-white/[0.06] overflow-hidden">
+              <div
+                className="h-full rounded-[3px] transition-[width] duration-700 ease-out"
+                style={{
+                  width: `${pct}%`,
+                  background: `linear-gradient(90deg, ${accentColor}cc, ${accentColor})`,
+                }}
+              />
             </div>
           </div>
 
           {/* Done message */}
           {done && (
-            <div style={{
-              background: "rgba(20,184,166,0.1)",
-              border: "1px solid rgba(20,184,166,0.25)",
-              borderRadius: 12,
-              padding: "12px 16px",
-              marginBottom: 20,
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13,
-              color: "#14B8A6",
-              textAlign: "center",
-            }}>
+            <div className="bg-mindscroll-teal/10 border border-mindscroll-teal/25 rounded-xl py-3 px-4 mb-5 font-sans text-[13px] text-mindscroll-teal text-center">
               Challenge complete! Come back tomorrow for a new one.
             </div>
           )}
@@ -184,18 +124,7 @@ export default function DailyChallenge({ challenge, progress, lang = "en", onClo
           {/* Close */}
           <button
             onClick={onClose}
-            style={{
-              width: "100%",
-              padding: "14px",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 14,
-              fontSize: 14,
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 500,
-              color: "rgba(255,255,255,0.4)",
-              cursor: "pointer",
-            }}
+            className="w-full py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-sm font-sans font-medium text-white/40 cursor-pointer"
           >
             {t(lang, "close")}
           </button>

@@ -20,69 +20,47 @@ function ProgressBar({ label, color, value, prevValue, showDiff }) {
   const diff    = prevPct !== null ? pct - prevPct : null;
 
   return (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <span style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 12,
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          color: color,
-        }}>
+    <div className="mb-5">
+      <div className="flex justify-between items-center mb-2">
+        <span
+          className="font-sans text-xs font-semibold tracking-[0.08em] uppercase"
+          style={{ color }}
+        >
           {label}
         </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="flex items-center gap-2">
           {showDiff && diff !== null && diff !== 0 && (
-            <span style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 11,
-              color: diff > 0 ? "#14B8A6" : "#EF4444",
-              fontWeight: 600,
-            }}>
+            <span
+              className="font-sans text-[11px] font-semibold"
+              style={{ color: diff > 0 ? "#14B8A6" : "#EF4444" }}
+            >
               {diff > 0 ? "+" : ""}{diff}%
             </span>
           )}
-          <span style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14,
-            fontWeight: 600,
-            color: "#F5F0E8",
-          }}>
+          <span className="font-sans text-sm font-semibold text-mindscroll-cream">
             {pct}%
           </span>
         </div>
       </div>
 
       {/* Current bar */}
-      <div style={{
-        height: 8, borderRadius: 4,
-        background: "rgba(255,255,255,0.06)",
-        overflow: "hidden",
-        marginBottom: prevPct !== null && showDiff ? 4 : 0,
-      }}>
-        <div style={{
-          height: "100%",
-          width: `${pct}%`,
-          background: `linear-gradient(90deg, ${color}cc, ${color})`,
-          borderRadius: 4,
-          transition: "width 0.8s cubic-bezier(0.34,1.56,0.64,1)",
-        }} />
+      <div className={`h-2 rounded bg-white/[0.06] overflow-hidden ${prevPct !== null && showDiff ? "mb-1" : ""}`}>
+        <div
+          className="h-full rounded transition-[width] duration-700"
+          style={{
+            width: `${pct}%`,
+            background: `linear-gradient(90deg, ${color}cc, ${color})`,
+          }}
+        />
       </div>
 
       {/* Previous bar (snapshot comparison) */}
       {prevPct !== null && showDiff && (
-        <div style={{
-          height: 4, borderRadius: 2,
-          background: "rgba(255,255,255,0.04)",
-          overflow: "hidden",
-        }}>
-          <div style={{
-            height: "100%",
-            width: `${prevPct}%`,
-            background: `${color}44`,
-            borderRadius: 2,
-          }} />
+        <div className="h-1 rounded-sm bg-white/[0.04] overflow-hidden">
+          <div
+            className="h-full rounded-sm"
+            style={{ width: `${prevPct}%`, background: `${color}44` }}
+          />
         </div>
       )}
     </div>
@@ -125,80 +103,59 @@ export default function PhilosophyMap({ mapData, lang = "en", onClose }) {
 
   return (
     <div
-      style={{
-        position: "fixed", inset: 0, zIndex: 200,
-        background: "rgba(0,0,0,0.75)",
-        display: "flex", alignItems: "flex-end",
-        animation: "fade-in 0.2s ease",
-      }}
       onClick={onClose}
+      className="fixed inset-0 z-[200] bg-black/75 flex items-end animate-fade-in"
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxHeight: "82vh",
-          background: "#18181f",
-          borderRadius: "28px 28px 0 0",
-          border: "1px solid rgba(255,255,255,0.07)",
-          display: "flex",
-          flexDirection: "column",
-          animation: "slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1)",
-          overflow: "hidden",
-        }}
+        className="w-full max-h-[82vh] bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] flex flex-col animate-slide-up overflow-hidden"
       >
         {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "16px 0 0" }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+        <div className="flex justify-center pt-4">
+          <div className="w-10 h-1 rounded-sm bg-white/[0.15]" />
         </div>
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 28px 0" }}>
+        <div className="flex justify-between items-center pt-4 px-7">
           <div>
-            <h2 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, color: "#F5F0E8" }}>
+            <h2 className="m-0 font-serif text-[22px] font-semibold text-mindscroll-cream">
               {t(lang, "map_title")}
             </h2>
-            <p style={{ margin: "2px 0 0", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>
+            <p className="mt-0.5 mb-0 font-sans text-xs text-white/30">
               Your thinking profile
             </p>
           </div>
           <button
             onClick={onClose}
-            style={{
-              background: "none", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 20, padding: "8px 14px",
-              fontSize: 13, fontFamily: "'DM Sans', sans-serif",
-              color: "rgba(255,255,255,0.3)", cursor: "pointer",
-            }}
+            className="bg-transparent border border-white/10 rounded-[20px] py-2 px-3.5 text-[13px] font-sans text-white/30 cursor-pointer"
           >
             {t(lang, "close")}
           </button>
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "24px 28px 40px" }}>
+        <div className="overflow-y-auto flex-1 pt-6 px-7 pb-10">
 
           {/* Dominant style callout */}
-          <div style={{
-            background: `${CATEGORY_COLORS[dominant]}14`,
-            border: `1px solid ${CATEGORY_COLORS[dominant]}33`,
-            borderRadius: 16,
-            padding: "16px 20px",
-            marginBottom: 28,
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-          }}>
-            <div style={{
-              width: 12, height: 12, borderRadius: "50%",
-              background: CATEGORY_COLORS[dominant],
-              flexShrink: 0,
-            }} />
+          <div
+            className="rounded-2xl py-4 px-5 mb-7 flex items-center gap-3.5 border"
+            style={{
+              background: `${CATEGORY_COLORS[dominant]}14`,
+              borderColor: `${CATEGORY_COLORS[dominant]}33`,
+            }}
+          >
+            <div
+              className="w-3 h-3 rounded-full shrink-0"
+              style={{ background: CATEGORY_COLORS[dominant] }}
+            />
             <div>
-              <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", marginBottom: 2 }}>
+              <p className="m-0 mb-0.5 font-sans text-xs text-white/35">
                 Dominant style
               </p>
-              <p style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 16, color: CATEGORY_COLORS[dominant], fontWeight: 600 }}>
+              <p
+                className="m-0 font-serif text-base font-semibold"
+                style={{ color: CATEGORY_COLORS[dominant] }}
+              >
                 {CATEGORY_LABELS[dominant]}
               </p>
             </div>
@@ -218,14 +175,14 @@ export default function PhilosophyMap({ mapData, lang = "en", onClose }) {
 
           {/* Snapshot comparison legend */}
           {hasSnap && (
-            <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 20, height: 4, background: "rgba(255,255,255,0.5)", borderRadius: 2 }} />
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>Today</span>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <div className="w-5 h-1 bg-white/50 rounded-sm" />
+                <span className="font-sans text-[11px] text-white/30">Today</span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 20, height: 4, background: "rgba(255,255,255,0.2)", borderRadius: 2 }} />
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+              <div className="flex items-center gap-1.5">
+                <div className="w-5 h-1 bg-white/20 rounded-sm" />
+                <span className="font-sans text-[11px] text-white/30">
                   Snapshot {mapData?.snapshot_date ? `(${formatDate(mapData.snapshot_date)})` : ""}
                 </span>
               </div>
@@ -234,7 +191,7 @@ export default function PhilosophyMap({ mapData, lang = "en", onClose }) {
 
           {/* Empty state */}
           {!mapData && (
-            <div style={{ textAlign: "center", padding: "20px 0", color: "rgba(255,255,255,0.25)", fontFamily: "'DM Sans', sans-serif", fontSize: 14 }}>
+            <div className="text-center py-5 text-white/25 font-sans text-sm">
               Keep swiping to build your philosophy profile.
             </div>
           )}
