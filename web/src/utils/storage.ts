@@ -1,4 +1,4 @@
-import { STORAGE_KEY } from "../constants/index.js";
+import { STORAGE_KEY } from "../constants";
 import type { PersistedState } from "../types";
 
 export function saveState(state: PersistedState): void {

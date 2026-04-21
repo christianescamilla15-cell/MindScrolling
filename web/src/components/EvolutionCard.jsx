@@ -1,4 +1,4 @@
-import { t } from "../i18n/index.js";
+import { t } from "../i18n";
 
 const CATEGORY_COLORS = {
   wisdom:     "#14B8A6",

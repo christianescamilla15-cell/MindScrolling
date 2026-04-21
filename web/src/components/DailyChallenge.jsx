@@ -1,4 +1,4 @@
-import { t } from "../i18n/index.js";
+import { t } from "../i18n";
 
 const DEFAULT_CHALLENGE = {
   id:          "offline_default",

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { apiSaveProfile } from "../api/quotes.js";
-import { t } from "../i18n/index.js";
+import { t } from "../i18n";
 
 const ONBOARDING_KEY = "mindscroll_onboarding";
 const PROFILE_KEY    = "mindscroll_profile";

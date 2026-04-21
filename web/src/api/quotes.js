@@ -4,12 +4,12 @@ import {
   CATEGORY_TO_DIR,
   PER_CATEGORY,
   USER_LANG,
-} from "../constants/index.js";
+} from "../constants";
 import { shuffle } from "../utils/shuffle";
 import { getDeviceId } from "../utils/storage";
-import QUOTES_EN from "../data/quotes_en.js";
-import QUOTES_ES from "../data/quotes_es.js";
-import { t } from "../i18n/index.js";
+import QUOTES_EN from "../data/quotes_en";
+import QUOTES_ES from "../data/quotes_es";
+import { t } from "../i18n";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 

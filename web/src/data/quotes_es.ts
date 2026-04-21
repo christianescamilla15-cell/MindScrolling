@@ -1,5 +1,7 @@
 /** Curated Spanish quotes — used when USER_LANG === "es" */
-const QUOTES_ES = [
+import type { Quote } from "../types";
+
+const QUOTES_ES: Quote[] = [
   // stoicism
   { id: "es-s1", text: "La felicidad de tu vida depende de la calidad de tus pensamientos.",                          author: "Marco Aurelio",       category: "stoicism",   dir: "left",  lang: "es" },
   { id: "es-s2", text: "Sufrimos más en la imaginación que en la realidad.",                                           author: "Séneca",              category: "stoicism",   dir: "left",  lang: "es" },

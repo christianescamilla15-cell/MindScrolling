@@ -15,8 +15,8 @@ import {
 } from "./api/quotes.js";
 import { saveState, loadState } from "./utils/storage";
 import { shuffle } from "./utils/shuffle";
-import { CATEGORY_META, DIR_TO_CATEGORY, USER_LANG } from "./constants/index.js";
-import { t } from "./i18n/index.js";
+import { CATEGORY_META, DIR_TO_CATEGORY, USER_LANG } from "./constants";
+import { t } from "./i18n";
 import { exportQuoteImage } from "./utils/exportImage";
 import Onboarding    from "./components/Onboarding.jsx";
 import Settings      from "./components/Settings.jsx";
