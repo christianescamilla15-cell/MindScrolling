@@ -1,8 +1,14 @@
 import { t } from "../i18n";
+import type { Lang } from "../types";
 
 const FALLBACK_URL = "#";
 
-export default function DonationPanel({ lang = "en", onClose }) {
+interface Props {
+  lang?: Lang;
+  onClose: () => void;
+}
+
+export default function DonationPanel({ lang = "en", onClose }: Props) {
   const donationUrl = process.env.NEXT_PUBLIC_DONATION_LINK || FALLBACK_URL;
 
   const handleCoffee = () => {
@@ -17,7 +23,7 @@ export default function DonationPanel({ lang = "en", onClose }) {
       className="fixed inset-0 z-[300] bg-black/75 flex items-end animate-fade-in"
     >
       <div
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         className="w-full bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] animate-slide-up overflow-hidden"
       >
         {/* Handle */}

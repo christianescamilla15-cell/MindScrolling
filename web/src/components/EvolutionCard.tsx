@@ -1,30 +1,39 @@
 import { t } from "../i18n";
+import type { CategoryScores, Lang, MapCategoryKey } from "../types";
 
-const CATEGORY_COLORS = {
+const CATEGORY_COLORS: Record<MapCategoryKey, string> = {
   wisdom:     "#14B8A6",
   discipline: "#F97316",
   reflection: "#A78BFA",
   philosophy: "#F59E0B",
 };
 
-const CATEGORY_LABELS = {
+const CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   wisdom:     "Wisdom",
   discipline: "Discipline",
   reflection: "Reflection",
   philosophy: "Philosophy",
 };
 
-function normalize(scores) {
-  if (!scores) return { wisdom: 0.25, discipline: 0.25, reflection: 0.25, philosophy: 0.25 };
-  const keys = ["wisdom", "discipline", "reflection", "philosophy"];
-  const total = keys.reduce((s, k) => s + (scores[k] || 0), 0);
-  if (total === 0) return { wisdom: 0.25, discipline: 0.25, reflection: 0.25, philosophy: 0.25 };
-  const r = {};
-  for (const k of keys) r[k] = (scores[k] || 0) / total;
+const EVEN_SCORES: CategoryScores = { wisdom: 0.25, discipline: 0.25, reflection: 0.25, philosophy: 0.25 };
+const KEYS: MapCategoryKey[] = ["wisdom", "discipline", "reflection", "philosophy"];
+
+function normalize(scores: CategoryScores | null | undefined): CategoryScores {
+  if (!scores) return EVEN_SCORES;
+  const total = KEYS.reduce((s, k) => s + (scores[k] || 0), 0);
+  if (total === 0) return EVEN_SCORES;
+  const r = {} as CategoryScores;
+  for (const k of KEYS) r[k] = (scores[k] || 0) / total;
   return r;
 }
 
-function MiniBar({ color, current, previous }) {
+interface MiniBarProps {
+  color: string;
+  current: number;
+  previous: number;
+}
+
+function MiniBar({ color, current, previous }: MiniBarProps) {
   const curPct  = Math.round(current  * 100);
   const prevPct = Math.round(previous * 100);
   const diff    = curPct - prevPct;
@@ -61,27 +70,27 @@ function MiniBar({ color, current, previous }) {
   );
 }
 
+interface EvolutionCardProps {
+  current: CategoryScores | null;
+  previous: CategoryScores | null;
+  /** Reserved for future i18n of "Your thinking is evolving." copy. */
+  lang?: Lang;
+}
+
 /**
  * EvolutionCard — a special feed-style card showing philosophy evolution.
  * Matches the same dimensions as QuoteCard.
- *
- * Props:
- *   current  — { wisdom, discipline, reflection, philosophy }
- *   previous — { wisdom, discipline, reflection, philosophy }
- *   lang     — "en" | "es"
  */
-export default function EvolutionCard({ current, previous, lang = "en" }) {
+export default function EvolutionCard({ current, previous }: EvolutionCardProps) {
   const cur  = normalize(current);
   const prev = normalize(previous);
 
-  const categories = ["wisdom", "discipline", "reflection", "philosophy"];
-
   // Compute the category that changed most positively
-  const biggest = categories.reduce((best, k) => {
+  const biggest = KEYS.reduce<MapCategoryKey>((best, k) => {
     const diff = cur[k] - prev[k];
     const bestDiff = cur[best] - prev[best];
     return diff > bestDiff ? k : best;
-  }, categories[0]);
+  }, KEYS[0]);
 
   return (
     <div
@@ -103,7 +112,7 @@ export default function EvolutionCard({ current, previous, lang = "en" }) {
 
       {/* Bars */}
       <div className="flex-1 flex flex-col gap-[18px] justify-center">
-        {categories.map(cat => (
+        {KEYS.map(cat => (
           <div key={cat}>
             <div className="flex justify-between items-center mb-1.5">
               <span

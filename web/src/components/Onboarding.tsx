@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { apiSaveProfile } from "../api/quotes";
 import { t } from "../i18n";
+import type { Lang, Profile } from "../types";
 
 const ONBOARDING_KEY = "mindscroll_onboarding";
 const PROFILE_KEY    = "mindscroll_profile";
@@ -8,7 +9,14 @@ const PROFILE_KEY    = "mindscroll_profile";
 const SELECT = "w-full bg-[#1e1e27] border border-white/[0.12] rounded-xl text-mindscroll-cream font-sans text-sm py-3 px-4 appearance-none cursor-pointer outline-none";
 const LABEL  = "block font-sans text-xs font-semibold tracking-[0.08em] uppercase text-white/40 mb-1.5";
 
-function PrimaryButton({ children, onClick, color = "#14B8A6", className = "" }) {
+interface PrimaryButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+  color?: string;
+  className?: string;
+}
+
+function PrimaryButton({ children, onClick, color = "#14B8A6", className = "" }: PrimaryButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -31,7 +39,7 @@ function ChevronDown() {
 }
 
 /* ─── Screen 1: Swipe explanation ─────────────────────────────────────────── */
-function ScreenSwipes({ lang, onNext }) {
+function ScreenSwipes({ lang, onNext }: { lang: Lang; onNext: () => void }) {
   const directions = [
     { key: "onboarding_swipe_up",    color: "#F59E0B", icon: "↑", label: t(lang, "philosophy") },
     { key: "onboarding_swipe_right", color: "#F97316", icon: "→", label: t(lang, "discipline") },
@@ -89,19 +97,20 @@ function ScreenSwipes({ lang, onNext }) {
 }
 
 /* ─── Screen 2: Profile collection ───────────────────────────────────────── */
-function ScreenProfile({ lang, onComplete }) {
-  const [profile, setProfile] = useState({
+function ScreenProfile({ lang, onComplete }: { lang: Lang; onComplete: (p: Profile) => void }) {
+  const [profile, setProfile] = useState<Profile>({
     age_range:          "",
     interest:           "",
     goal:               "",
     preferred_language: lang || "en",
   });
 
-  const set = (key, val) => setProfile(prev => ({ ...prev, [key]: val }));
+  const set = <K extends keyof Profile>(key: K, val: Profile[K]) =>
+    setProfile(prev => ({ ...prev, [key]: val }));
 
   const handleSubmit = () => {
     // Fill defaults if empty
-    const finalProfile = {
+    const finalProfile: Profile = {
       age_range:          profile.age_range          || "25-34",
       interest:           profile.interest           || "philosophy",
       goal:               profile.goal               || "meaning",
@@ -170,7 +179,7 @@ function ScreenProfile({ lang, onComplete }) {
         <div>
           <label className={LABEL}>{t(lang, "language")}</label>
           <div className="relative">
-            <select value={profile.preferred_language} onChange={e => set("preferred_language", e.target.value)} className={SELECT}>
+            <select value={profile.preferred_language} onChange={e => set("preferred_language", e.target.value as Lang)} className={SELECT}>
               <option value="en">English</option>
               <option value="es">Espa&ntilde;ol</option>
             </select>
@@ -189,7 +198,7 @@ function ScreenProfile({ lang, onComplete }) {
 }
 
 /* ─── Screen 3: All set ───────────────────────────────────────────────────── */
-function ScreenReady({ lang, onGo }) {
+function ScreenReady({ onGo }: { lang?: Lang; onGo: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center flex-1 px-8 pt-12 pb-8 text-center">
       <div className="text-[64px] mb-6">✦</div>
@@ -207,17 +216,22 @@ function ScreenReady({ lang, onGo }) {
 }
 
 /* ─── Main Onboarding component ───────────────────────────────────────────── */
-export default function Onboarding({ onComplete, lang = "en" }) {
-  const [screen, setScreen] = useState(0);
-  const [profile, setProfile] = useState(null);
+interface OnboardingProps {
+  onComplete: (profile: Profile) => void;
+  lang?: Lang;
+}
 
-  const handleProfileComplete = (prof) => {
+export default function Onboarding({ onComplete, lang = "en" }: OnboardingProps) {
+  const [screen, setScreen] = useState(0);
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  const handleProfileComplete = (prof: Profile) => {
     setProfile(prof);
     setScreen(2);
   };
 
   const handleGo = () => {
-    const finalProfile = profile || {
+    const finalProfile: Profile = profile || {
       age_range: "25-34",
       interest: "philosophy",
       goal: "meaning",
@@ -227,7 +241,9 @@ export default function Onboarding({ onComplete, lang = "en" }) {
     try {
       localStorage.setItem(ONBOARDING_KEY, "true");
       localStorage.setItem(PROFILE_KEY, JSON.stringify(finalProfile));
-    } catch (_) {}
+    } catch {
+      /* noop */
+    }
     // Fire-and-forget API save
     apiSaveProfile(finalProfile).catch(() => {});
     onComplete(finalProfile);

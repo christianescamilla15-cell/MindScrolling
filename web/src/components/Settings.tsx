@@ -1,4 +1,5 @@
 import { t } from "../i18n";
+import type { Lang, Toast } from "../types";
 
 const APP_VERSION = "1.0.0";
 
@@ -6,11 +7,11 @@ const ROW = "flex justify-between items-center py-4 border-b border-white/[0.06]
 const ROW_LABEL = "m-0 font-sans text-[15px] font-medium text-mindscroll-cream";
 const ROW_SUB = "mt-0.5 mb-0 font-sans text-xs text-white/30";
 
-function Chevron({ color = "rgba(255,255,255,0.25)" }) {
+function Chevron({ color = "rgba(255,255,255,0.25)" }: { color?: string }) {
   return <span className="text-base leading-none" style={{ color }}>›</span>;
 }
 
-function SectionHeader({ children }) {
+function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
     <p className="mt-6 mb-1 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/25">
       {children}
@@ -18,14 +19,25 @@ function SectionHeader({ children }) {
   );
 }
 
-export default function Settings({ lang, onLangChange, isPremium, onClose, showToast, onShowMap, onShowChallenge, onShowDonation }) {
+interface Props {
+  lang: Lang;
+  onLangChange: (lang: Lang) => void;
+  isPremium: boolean;
+  onClose: () => void;
+  showToast?: (msg: string, color?: Toast["color"]) => void;
+  onShowMap: () => void;
+  onShowChallenge: () => void;
+  onShowDonation: () => void;
+}
+
+export default function Settings({ lang, onLangChange, isPremium, onClose, showToast, onShowMap, onShowChallenge, onShowDonation }: Props) {
   return (
     <div
       onClick={onClose}
       className="fixed inset-0 z-[200] bg-black/70 flex items-end animate-fade-in"
     >
       <div
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         className="w-full max-h-[86vh] bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] flex flex-col animate-slide-up overflow-hidden"
       >
         {/* Handle */}
@@ -57,7 +69,7 @@ export default function Settings({ lang, onLangChange, isPremium, onClose, showT
               <p className={ROW_SUB}>{lang === "es" ? "Espa\u00F1ol" : "English"}</p>
             </div>
             <div className="flex gap-2">
-              {["en", "es"].map(code => (
+              {(["en", "es"] as const).map(code => (
                 <button
                   key={code}
                   onClick={() => onLangChange(code)}

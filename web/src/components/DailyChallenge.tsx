@@ -1,6 +1,7 @@
 import { t } from "../i18n";
+import type { ChallengeData, ChallengeProgress, Lang } from "../types";
 
-const DEFAULT_CHALLENGE = {
+const DEFAULT_CHALLENGE: ChallengeData = {
   id:          "offline_default",
   code:        "complete_eight_swipes",
   title:       "Daily Reflection",
@@ -8,7 +9,13 @@ const DEFAULT_CHALLENGE = {
   target:      8,
 };
 
-function ProgressRing({ value, target, color = "#14B8A6" }) {
+interface ProgressRingProps {
+  value: number;
+  target: number;
+  color?: string;
+}
+
+function ProgressRing({ value, target, color = "#14B8A6" }: ProgressRingProps) {
   const pct       = Math.min(1, value / Math.max(1, target));
   const radius    = 28;
   const stroke    = 4;
@@ -29,7 +36,14 @@ function ProgressRing({ value, target, color = "#14B8A6" }) {
   );
 }
 
-export default function DailyChallenge({ challenge, progress, lang = "en", onClose }) {
+interface Props {
+  challenge: ChallengeData | null | undefined;
+  progress: ChallengeProgress | null | undefined;
+  lang?: Lang;
+  onClose: () => void;
+}
+
+export default function DailyChallenge({ challenge, progress, lang = "en", onClose }: Props) {
   const ch       = challenge || DEFAULT_CHALLENGE;
   const target   = ch.target ?? 8;
   const current  = progress?.progress ?? 0;
@@ -44,7 +58,7 @@ export default function DailyChallenge({ challenge, progress, lang = "en", onClo
       className="fixed inset-0 z-[300] bg-black/75 flex items-end animate-fade-in"
     >
       <div
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         className="w-full bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] animate-slide-up overflow-hidden"
       >
         {/* Handle */}

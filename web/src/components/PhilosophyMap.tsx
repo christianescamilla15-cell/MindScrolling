@@ -1,20 +1,32 @@
 import { t } from "../i18n";
+import type { CategoryScores, Lang, MapCategoryKey, MapData } from "../types";
 
-const CATEGORY_COLORS = {
+const CATEGORY_COLORS: Record<MapCategoryKey, string> = {
   wisdom:     "#14B8A6",
   discipline: "#F97316",
   reflection: "#A78BFA",
   philosophy: "#F59E0B",
 };
 
-const CATEGORY_LABELS = {
+const CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   wisdom:     "Wisdom",
   discipline: "Discipline",
   reflection: "Reflection",
   philosophy: "Philosophy",
 };
 
-function ProgressBar({ label, color, value, prevValue, showDiff }) {
+const KEYS: MapCategoryKey[] = ["wisdom", "discipline", "reflection", "philosophy"];
+const EVEN_SCORES: CategoryScores = { wisdom: 0.25, discipline: 0.25, reflection: 0.25, philosophy: 0.25 };
+
+interface ProgressBarProps {
+  label: string;
+  color: string;
+  value: number;
+  prevValue?: number;
+  showDiff?: boolean;
+}
+
+function ProgressBar({ label, color, value, prevValue, showDiff }: ProgressBarProps) {
   const pct     = Math.min(100, Math.max(0, Math.round(value * 100)));
   const prevPct = prevValue !== undefined ? Math.min(100, Math.max(0, Math.round(prevValue * 100))) : null;
   const diff    = prevPct !== null ? pct - prevPct : null;
@@ -71,35 +83,38 @@ function ProgressBar({ label, color, value, prevValue, showDiff }) {
  * Normalizes a category scores object so values sum to 1.
  * Accepts either raw counts or already-fractional values.
  */
-function normalize(scores) {
-  if (!scores) return { wisdom: 0.25, discipline: 0.25, reflection: 0.25, philosophy: 0.25 };
-  const keys = ["wisdom", "discipline", "reflection", "philosophy"];
-  const total = keys.reduce((s, k) => s + (scores[k] || 0), 0);
-  if (total === 0) return { wisdom: 0.25, discipline: 0.25, reflection: 0.25, philosophy: 0.25 };
-  const result = {};
-  for (const k of keys) result[k] = (scores[k] || 0) / total;
+function normalize(scores: CategoryScores | null | undefined): CategoryScores {
+  if (!scores) return EVEN_SCORES;
+  const total = KEYS.reduce((s, k) => s + (scores[k] || 0), 0);
+  if (total === 0) return EVEN_SCORES;
+  const result = {} as CategoryScores;
+  for (const k of KEYS) result[k] = (scores[k] || 0) / total;
   return result;
 }
 
-function formatDate(dateStr) {
+function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
   try {
     return new Date(dateStr).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  } catch (_) {
+  } catch {
     return dateStr;
   }
 }
 
-export default function PhilosophyMap({ mapData, lang = "en", onClose }) {
+interface Props {
+  mapData: MapData | null;
+  lang?: Lang;
+  onClose: () => void;
+}
+
+export default function PhilosophyMap({ mapData, lang = "en", onClose }: Props) {
   const current  = normalize(mapData?.current);
   const snapshot = mapData?.snapshot ? normalize(mapData.snapshot) : null;
   const hasSnap  = snapshot !== null;
 
-  const categories = ["wisdom", "discipline", "reflection", "philosophy"];
-
   // Find dominant category
-  const dominant = categories.reduce((best, k) =>
-    current[k] > current[best] ? k : best, categories[0]);
+  const dominant = KEYS.reduce<MapCategoryKey>((best, k) =>
+    current[k] > current[best] ? k : best, KEYS[0]);
 
   return (
     <div
@@ -107,7 +122,7 @@ export default function PhilosophyMap({ mapData, lang = "en", onClose }) {
       className="fixed inset-0 z-[200] bg-black/75 flex items-end animate-fade-in"
     >
       <div
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         className="w-full max-h-[82vh] bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] flex flex-col animate-slide-up overflow-hidden"
       >
         {/* Handle */}
@@ -162,7 +177,7 @@ export default function PhilosophyMap({ mapData, lang = "en", onClose }) {
           </div>
 
           {/* Bars */}
-          {categories.map(cat => (
+          {KEYS.map(cat => (
             <ProgressBar
               key={cat}
               label={CATEGORY_LABELS[cat]}
