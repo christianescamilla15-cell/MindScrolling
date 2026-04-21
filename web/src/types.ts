@@ -123,3 +123,53 @@ export interface StripePriceEntry {
   currency: string;
   type: "premium_unlock" | "pack_purchase";
 }
+
+/* ─── Social ──────────────────────────────────────────────────────────────── */
+
+/** A user the current device follows. `since` is the follow timestamp. */
+export interface SocialUser {
+  user_id: string;
+  display_name: string;
+  since: string;
+}
+
+/** Backend uses these action types in social_activity.action_type. */
+export type SocialAction = "like" | "save" | "share";
+
+/** A row in /social/feed: someone you follow did something with a quote. */
+export interface SocialFeedItem {
+  id: string;
+  user: string;
+  action: SocialAction;
+  quote: {
+    id: string;
+    text?: string;
+    author?: string;
+    category?: CategoryKey;
+  };
+  at: string;
+}
+
+export interface SocialStreak {
+  streak: number;
+  longest: number;
+  last_active?: string;
+  active_today: boolean;
+}
+
+/** Response of POST /social/streak/checkin. */
+export interface StreakCheckin {
+  streak: number;
+  longest: number;
+  /** True when checkin happened earlier today; no streak change. */
+  already?: boolean;
+  /** True on every 7th day — UI can fire confetti. */
+  milestone?: boolean;
+}
+
+/** A single Quote of the Day. The backend ships `swipe_dir` next to the
+ *  Quote shape — we keep it loose to match. */
+export interface QuoteOfDay {
+  date: string;
+  quote: (Quote & { swipe_dir?: Direction }) | null;
+}

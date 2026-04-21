@@ -302,3 +302,63 @@ export async function apiGetStripePrices(): Promise<{ prices: import("../types")
   if (!res.ok) throw new Error(String(res.status));
   return res.json() as Promise<{ prices: import("../types").StripePriceEntry[] }>;
 }
+
+/* ─── SOCIAL ──────────────────────────────────────────────────────────────── */
+
+import type {
+  QuoteOfDay,
+  SocialFeedItem,
+  SocialStreak,
+  SocialUser,
+  StreakCheckin,
+} from "../types";
+
+export async function apiSocialFollow(userId: string): Promise<void> {
+  await fetch(`${API_BASE}/social/follow`, {
+    method: "POST",
+    headers: apiHeaders(),
+    body: JSON.stringify({ user_id: userId }),
+  });
+}
+
+export async function apiSocialUnfollow(userId: string): Promise<void> {
+  await fetch(`${API_BASE}/social/follow/${userId}`, {
+    method: "DELETE",
+    headers: apiHeaders(),
+  });
+}
+
+export async function apiGetFollowing(): Promise<{ following: SocialUser[] }> {
+  const res = await fetch(`${API_BASE}/social/following`, { headers: apiHeaders() });
+  if (!res.ok) return { following: [] };
+  return res.json() as Promise<{ following: SocialUser[] }>;
+}
+
+export async function apiGetSocialFeed(limit = 20): Promise<{ feed: SocialFeedItem[]; message?: string }> {
+  const res = await fetch(`${API_BASE}/social/feed?limit=${limit}`, { headers: apiHeaders() });
+  if (!res.ok) return { feed: [] };
+  return res.json() as Promise<{ feed: SocialFeedItem[]; message?: string }>;
+}
+
+export async function apiGetSocialStreak(): Promise<SocialStreak> {
+  const res = await fetch(`${API_BASE}/social/streak`, { headers: apiHeaders() });
+  if (!res.ok) return { streak: 0, longest: 0, active_today: false };
+  return res.json() as Promise<SocialStreak>;
+}
+
+/** Records the user as active today. Idempotent — calling twice the same day
+ *  returns `already: true` without bumping the streak. */
+export async function apiSocialCheckin(): Promise<StreakCheckin | null> {
+  const res = await fetch(`${API_BASE}/social/streak/checkin`, {
+    method: "POST",
+    headers: apiHeaders(),
+  });
+  if (!res.ok) return null;
+  return res.json() as Promise<StreakCheckin>;
+}
+
+export async function apiGetQuoteOfDay(lang: import("../types").Lang | string = "en"): Promise<QuoteOfDay | null> {
+  const res = await fetch(`${API_BASE}/social/qotd?lang=${encodeURIComponent(String(lang))}`, { headers: apiHeaders() });
+  if (!res.ok) return null;
+  return res.json() as Promise<QuoteOfDay>;
+}

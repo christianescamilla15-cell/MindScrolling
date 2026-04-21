@@ -84,6 +84,14 @@ const LockIcon = ({ size = 18 }: IconProps) => (
     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
   </svg>
 );
+const SocialIcon = ({ size = 18 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+    <circle cx="17" cy="7" r="3"/>
+    <path d="M21 21v-1.5a3.5 3.5 0 0 0-3.5-3.5"/>
+  </svg>
+);
 
 // Shape-only utility for icon buttons inside QuoteCard / VaultSheet.
 // Caller still drives the icon `color` inline because it's stateful
@@ -681,6 +689,13 @@ export default function App() {
               {vault.length}
             </span>
           )}
+        </Link>
+        <Link
+          href="/social"
+          title="Social"
+          className="rounded-[22px] py-2.5 px-3.5 flex items-center cursor-pointer transition-all duration-200 border bg-white/[0.05] border-white/[0.08] text-white/40 hover:text-mindscroll-amber hover:border-mindscroll-amber/30"
+        >
+          <SocialIcon size={16} />
         </Link>
         <span className="text-[11px] text-white/20 font-sans">
           {deck.length > 0 ? `${(current % deck.length) + 1} / ${deck.length}` : "—"}
