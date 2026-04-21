@@ -90,18 +90,21 @@ function ParticleBurst({ x, y, onDone }) {
   useEffect(() => { const tm = setTimeout(onDone, 700); return () => clearTimeout(tm); }, [onDone]);
 
   return (
-    <div style={{ position: "fixed", left: x, top: y, pointerEvents: "none", zIndex: 9999 }}>
+    <div className="fixed pointer-events-none z-[9999]" style={{ left: x, top: y }}>
       {particles.map(p => {
         const rad = (p.angle * Math.PI) / 180;
         return (
-          <div key={p.id} style={{
-            position: "absolute", width: p.size, height: p.size,
-            borderRadius: "50%", background: p.color,
-            transform: "translate(-50%,-50%)",
-            animation: "particle-burst 0.6s ease-out forwards",
-            "--tx": `${Math.cos(rad) * p.dist}px`,
-            "--ty": `${Math.sin(rad) * p.dist}px`,
-          }}/>
+          <div
+            key={p.id}
+            className="absolute rounded-full -translate-x-1/2 -translate-y-1/2 animate-particle-burst"
+            style={{
+              width: p.size,
+              height: p.size,
+              background: p.color,
+              "--tx": `${Math.cos(rad) * p.dist}px`,
+              "--ty": `${Math.sin(rad) * p.dist}px`,
+            }}
+          />
         );
       })}
     </div>
@@ -110,22 +113,22 @@ function ParticleBurst({ x, y, onDone }) {
 
 /* ─── SWIPE HINTS ────────────────────────────────────────────────────────────── */
 function SwipeHints() {
+  const HINTS = [
+    { label: "Philosophy", color: "#F59E0B", className: "top-4 left-1/2 -translate-x-1/2" },
+    { label: "Reflection", color: "#A78BFA", className: "bottom-[100px] left-1/2 -translate-x-1/2" },
+    { label: "Stoicism",   color: "#14B8A6", className: "left-3 top-1/2 -translate-y-1/2" },
+    { label: "Discipline", color: "#F97316", className: "right-3 top-1/2 -translate-y-1/2" },
+  ];
   return (
     <>
-      {[
-        { label: "Philosophy", color: "#F59E0B", style: { top: 16, left: "50%", transform: "translateX(-50%)" } },
-        { label: "Reflection", color: "#A78BFA", style: { bottom: 100, left: "50%", transform: "translateX(-50%)" } },
-        { label: "Stoicism",   color: "#14B8A6", style: { left: 12, top: "50%", transform: "translateY(-50%)" } },
-        { label: "Discipline", color: "#F97316", style: { right: 12, top: "50%", transform: "translateY(-50%)" } },
-      ].map(h => (
-        <div key={h.label} style={{
-          position: "absolute", ...h.style,
-          fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600,
-          letterSpacing: "0.12em", textTransform: "uppercase",
-          color: h.color, opacity: 0.35,
-          animation: "hint-pulse 2.5s ease-in-out infinite",
-          pointerEvents: "none", zIndex: 5,
-        }}>{h.label}</div>
+      {HINTS.map(h => (
+        <div
+          key={h.label}
+          className={`absolute font-sans text-[10px] font-semibold tracking-[0.12em] uppercase opacity-35 pointer-events-none z-[5] animate-hint-pulse ${h.className}`}
+          style={{ color: h.color }}
+        >
+          {h.label}
+        </div>
       ))}
     </>
   );
@@ -321,15 +324,18 @@ function VaultSheet({ items, onClose, onRemove, lang }) {
 function CategoryStats({ counts }) {
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
   return (
-    <div style={{ display: "flex", gap: 8, padding: "0 20px" }}>
+    <div className="flex gap-2 px-5">
       {Object.entries(CATEGORY_META).map(([cat, meta]) => {
         const pct = Math.round(((counts[cat] || 0) / total) * 100);
         return (
-          <div key={cat} style={{ flex: 1, textAlign: "center" }}>
-            <div style={{ height: 3, borderRadius: 2, background: "rgba(255,255,255,0.06)", marginBottom: 6, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${pct}%`, background: meta.color, borderRadius: 2, transition: "width 0.5s ease" }} />
+          <div key={cat} className="flex-1 text-center">
+            <div className="h-[3px] rounded-sm bg-white/[0.06] mb-1.5 overflow-hidden">
+              <div
+                className="h-full rounded-sm transition-[width] duration-500 ease-out"
+                style={{ width: `${pct}%`, background: meta.color }}
+              />
             </div>
-            <span style={{ fontSize: 9, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <span className="text-[9px] font-sans font-semibold tracking-[0.1em] uppercase text-white/25">
               {cat.slice(0, 4)}
             </span>
           </div>
@@ -573,68 +579,49 @@ export default function App() {
 
   // Loading screen
   if (loading) return (
-    <div style={{ width: "100%", minHeight: "100vh", background: "#0f0f13", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap');`}</style>
-      <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 22, color: "#F5F0E8", margin: 0 }}>
-        Mind<span style={{ color: "#14B8A6" }}>Scroll</span>
+    <div className="w-full min-h-screen bg-mindscroll-bg flex flex-col items-center justify-center gap-4">
+      <p className="font-serif italic text-[22px] text-mindscroll-cream m-0">
+        Mind<span className="text-mindscroll-teal">Scroll</span>
       </p>
-      <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+      <p className="font-sans text-xs text-white/25 m-0 tracking-[0.1em] uppercase">
         {t(lang, "loading")}
       </p>
     </div>
   );
 
   return (
-    <div style={{ width: "100%", minHeight: "100vh", background: "#0f0f13", position: "relative", overflow: "hidden", fontFamily: "'DM Sans', sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@400;500;600&display=swap');
-        @keyframes fade-in { from { opacity:0 } to { opacity:1 } }
-        @keyframes slide-up { from { transform:translateY(100%) } to { transform:translateY(0) } }
-        @keyframes hint-pulse { 0%,100%{opacity:0.25} 50%{opacity:0.5} }
-        @keyframes streak-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.25)} }
-        @keyframes toast-in { 0%{opacity:0;transform:translateX(-50%) translateY(10px)} 100%{opacity:1;transform:translateX(-50%) translateY(0)} }
-        @keyframes particle-burst { 0%{transform:translate(-50%,-50%) translate(0,0) scale(1);opacity:1} 100%{transform:translate(-50%,-50%) translate(var(--tx),var(--ty)) scale(0);opacity:0} }
-        * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        button:hover { opacity:0.8; }
-        ::-webkit-scrollbar { width:4px; }
-        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
-      `}</style>
-
+    <div className="w-full min-h-screen bg-mindscroll-bg relative overflow-hidden font-sans">
       {/* Onboarding overlay */}
       {showOnboarding && (
         <Onboarding lang={lang} onComplete={handleOnboardingComplete} />
       )}
 
-      {/* Ambient background glow */}
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, background: `radial-gradient(ellipse 60% 50% at 50% 100%, ${meta.color}18 0%, transparent 70%)`, transition: "background 0.8s ease" }} />
+      {/* Ambient background glow — gradient color drives off the active category */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 transition-[background] duration-700 ease-out"
+        style={{ background: `radial-gradient(ellipse 60% 50% at 50% 100%, ${meta.color}18 0%, transparent 70%)` }}
+      />
 
       {/* Header */}
-      <header style={{ position: "relative", zIndex: 20, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px 0" }}>
-        <h1 style={{ margin: 0, fontSize: 18, fontWeight: 600, fontFamily: "'Playfair Display', serif", color: "#F5F0E8", letterSpacing: "-0.02em" }}>
-          Mind<span style={{ color: meta.color, transition: "color 0.4s" }}>Scroll</span>
+      <header className="relative z-20 flex justify-between items-center px-6 pt-5">
+        <h1 className="m-0 text-[18px] font-semibold font-serif text-mindscroll-cream tracking-[-0.02em]">
+          Mind<span className="transition-colors duration-300" style={{ color: meta.color }}>Scroll</span>
         </h1>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 20, padding: "6px 12px", animation: streakPulse ? "streak-pulse 0.4s ease" : "none" }}>
+        <div className="flex gap-2.5 items-center">
+          <div
+            className={`flex items-center gap-1.5 bg-mindscroll-amber/10 border border-mindscroll-amber/20 rounded-[20px] py-1.5 px-3 ${streakPulse ? "animate-streak-pulse" : ""}`}
+          >
             <FireIcon size={15} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#F59E0B" }}>{streak}</span>
+            <span className="text-[13px] font-semibold text-mindscroll-amber">{streak}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "6px 12px" }}>
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>✦</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>{reflections}</span>
+          <div className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.08] rounded-[20px] py-1.5 px-3">
+            <span className="text-[13px] text-white/50">✦</span>
+            <span className="text-[13px] font-semibold text-white/70">{reflections}</span>
           </div>
           {/* Settings gear button */}
           <button
             onClick={() => setShowSettings(true)}
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 20,
-              padding: "8px",
-              cursor: "pointer",
-              color: "rgba(255,255,255,0.4)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.2s",
-            }}
+            className="bg-white/[0.05] border border-white/[0.08] rounded-[20px] p-2 cursor-pointer text-white/40 flex items-center justify-center transition-all duration-200"
             title={t(lang, "settings")}
           >
             <GearIcon size={16} />
@@ -643,14 +630,20 @@ export default function App() {
       </header>
 
       {/* Category stats bar */}
-      <div style={{ position: "relative", zIndex: 20, paddingTop: 16 }}>
+      <div className="relative z-20 pt-4">
         <CategoryStats counts={swipeCounts} />
       </div>
 
       {/* Card area */}
-      <div style={{ position: "relative", zIndex: 10, height: "calc(100vh - 200px)", minHeight: 480 }}>
+      <div className="relative z-10 min-h-[480px]" style={{ height: "calc(100vh - 200px)" }}>
         {deck[(current + 1) % Math.max(1, deck.length)] && (
-          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, calc(-50% + 12px)) scale(0.94)", width: "min(380px, 90vw)", height: 420, background: "#1a1a21", borderRadius: 28, border: "1px solid rgba(255,255,255,0.04)", zIndex: 9 }} />
+          <div
+            className="absolute top-1/2 left-1/2 h-[420px] rounded-[28px] bg-[#1a1a21] border border-white/[0.04] z-[9]"
+            style={{
+              width: "min(380px, 90vw)",
+              transform: "translate(-50%, calc(-50% + 12px)) scale(0.94)",
+            }}
+          />
         )}
         {quote && (
           <QuoteCard
@@ -671,17 +664,33 @@ export default function App() {
       </div>
 
       {/* Bottom nav */}
-      <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 30, display: "flex", justifyContent: "space-around", alignItems: "center", padding: "14px 32px 24px", background: "linear-gradient(to top, #0f0f13 60%, transparent)" }}>
-        <div style={{ display: "flex", gap: 6 }}>
+      <nav className="fixed bottom-0 inset-x-0 z-30 flex justify-around items-center pt-3.5 pb-6 px-8 bg-gradient-to-t from-mindscroll-bg from-60% to-transparent">
+        <div className="flex gap-1.5">
           {Object.entries(CATEGORY_META).map(([cat, m]) => (
-            <div key={cat} title={m.label} style={{ width: 8, height: 8, borderRadius: "50%", background: swipeCounts[cat] > 0 ? m.color : "rgba(255,255,255,0.12)", transition: "background 0.3s" }} />
+            <div
+              key={cat}
+              title={m.label}
+              className="w-2 h-2 rounded-full transition-colors duration-300"
+              style={{ background: swipeCounts[cat] > 0 ? m.color : "rgba(255,255,255,0.12)" }}
+            />
           ))}
         </div>
-        <button onClick={() => setShowVault(true)} style={{ background: vault.length > 0 ? "rgba(20,184,166,0.12)" : "rgba(255,255,255,0.05)", border: `1px solid ${vault.length > 0 ? "rgba(20,184,166,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: 22, padding: "10px 20px", display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: vault.length > 0 ? "#14B8A6" : "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>
+        <button
+          onClick={() => setShowVault(true)}
+          className={`rounded-[22px] py-2.5 px-5 flex items-center gap-2 cursor-pointer font-sans text-[13px] font-medium transition-all duration-200 border ${
+            vault.length > 0
+              ? "bg-mindscroll-teal/10 border-mindscroll-teal/30 text-mindscroll-teal"
+              : "bg-white/[0.05] border-white/[0.08] text-white/40"
+          }`}
+        >
           <BookmarkIcon size={16} filled={vault.length > 0} />
-          {t(lang, "vault")} {vault.length > 0 && <span style={{ background: "#14B8A6", color: "#0f0f13", borderRadius: 10, padding: "1px 6px", fontSize: 11, fontWeight: 700 }}>{vault.length}</span>}
+          {t(lang, "vault")} {vault.length > 0 && (
+            <span className="bg-mindscroll-teal text-mindscroll-bg rounded-[10px] py-px px-1.5 text-[11px] font-bold">
+              {vault.length}
+            </span>
+          )}
         </button>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", fontFamily: "'DM Sans', sans-serif" }}>
+        <span className="text-[11px] text-white/20 font-sans">
           {deck.length > 0 ? `${(current % deck.length) + 1} / ${deck.length}` : "—"}
         </span>
       </nav>
@@ -744,7 +753,10 @@ export default function App() {
 
       {/* Toast */}
       {toastMsg && (
-        <div style={{ position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: "#1e1e27", border: `1px solid ${toastMsg.color}40`, borderRadius: 24, padding: "10px 20px", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: toastMsg.color, zIndex: 200, whiteSpace: "nowrap", animation: "toast-in 0.25s ease", boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
+        <div
+          className="fixed bottom-[100px] left-1/2 -translate-x-1/2 bg-[#1e1e27] rounded-3xl py-2.5 px-5 font-sans text-[13px] font-medium z-[200] whitespace-nowrap animate-toast-in shadow-[0_8px_32px_rgba(0,0,0,0.4)] border"
+          style={{ color: toastMsg.color, borderColor: `${toastMsg.color}40` }}
+        >
           {toastMsg.msg}
         </div>
       )}
