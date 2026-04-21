@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   fetchQuotes,
   shareQuote,
@@ -10,7 +12,6 @@ import {
   apiRecordSwipe,
   apiGetTodayChallenge,
   apiUpdateChallengeProgress,
-  apiGetMap,
   apiGetPremiumStatus,
 } from "./api/quotes";
 import { saveState, loadState } from "./utils/storage";
@@ -20,18 +21,17 @@ import { t } from "./i18n";
 import { exportQuoteImage } from "./utils/exportImage";
 import Settings      from "./components/Settings";
 import DonationPanel from "./components/DonationPanel";
-import PhilosophyMap from "./components/PhilosophyMap";
 import DailyChallenge from "./components/DailyChallenge";
+import { EMPTY_SWIPE_COUNTS } from "./types";
 import type {
   CategoryKey,
   ChallengeData,
   ChallengeProgress,
   Direction,
   Lang,
-  MapData,
-  PersistedState,
   Profile,
   Quote,
+  SwipeCounts,
   Toast,
 } from "./types";
 
@@ -57,11 +57,6 @@ const FireIcon = ({ size = 18 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="#F59E0B" stroke="none">
     <path d="M12 2C9 7 6 9 6 14a6 6 0 0 0 12 0c0-5-3-7-6-12zm0 18a4 4 0 0 1-4-4c0-3 2-5 4-9 2 4 4 6 4 9a4 4 0 0 1-4 4z"/>
     <ellipse cx="12" cy="17" rx="2" ry="2.5" fill="#FDE68A" opacity="0.8"/>
-  </svg>
-);
-const XIcon = ({ size = 18 }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 );
 const ShareIcon = ({ size = 18 }: IconProps) => (
@@ -345,95 +340,7 @@ function QuoteCard({ quote, onSwipe, onLike, onSave, onShare, onExport, isLiked,
 }
 
 /* ─── VAULT SHEET ────────────────────────────────────────────────────────────── */
-interface VaultSheetProps {
-  items: Quote[];
-  onClose: () => void;
-  onRemove: (id: string) => void;
-  lang: Lang;
-}
-
-function VaultSheet({ items, onClose, onRemove, lang }: VaultSheetProps) {
-  return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-[100] bg-black/70 flex items-end animate-fade-in"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-h-[78vh] bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] flex flex-col animate-slide-up overflow-hidden"
-      >
-        <div className="flex justify-center pt-4">
-          <div className="w-10 h-1 rounded-sm bg-white/[0.15]" />
-        </div>
-        <div className="flex justify-between items-center pt-4 pb-3 px-7">
-          <div>
-            <h2 className="m-0 font-serif text-[22px] font-semibold text-mindscroll-cream">
-              {t(lang, "vault")}
-            </h2>
-            <p className="mt-0.5 mb-0 font-sans text-xs text-white/30">
-              {items.length} saved reflection{items.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className={`${ACTION_BTN} border border-white/10 rounded-[20px] py-2 px-3.5 text-[13px] font-sans`}
-            style={{ color: "rgba(255,255,255,0.3)" }}
-          >
-            {t(lang, "close")}
-          </button>
-        </div>
-        <div className="overflow-y-auto flex-1 px-5 pb-8">
-          {items.length === 0 ? (
-            <div className="text-center py-[60px] px-5 text-white/20 font-sans text-sm">
-              <div className="text-[32px] mb-3">🔮</div>
-              Save quotes to build your vault
-            </div>
-          ) : items.map(q => {
-            const m = CATEGORY_META[q.category];
-            return (
-              <div
-                key={q.id}
-                className="bg-[#1e1e27] rounded-2xl py-4 px-5 mb-3 border border-white/[0.05] flex gap-3.5 items-start"
-              >
-                <div
-                  className="w-[3px] min-h-10 rounded-sm shrink-0 mt-0.5"
-                  style={{ background: m.color }}
-                />
-                <div className="flex-1">
-                  <p className="mt-0 mb-2 font-serif text-sm italic text-mindscroll-cream-warm leading-[1.6]">
-                    &ldquo;{q.text}&rdquo;
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-sans text-[11px] text-white/35">
-                      — {q.author}
-                    </span>
-                    <span
-                      className="text-[10px] font-sans font-semibold tracking-[0.1em] uppercase"
-                      style={{ color: m.color }}
-                    >
-                      {q.category}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => onRemove(q.id)}
-                  className={`${ACTION_BTN} p-1.5 shrink-0`}
-                  style={{ color: "rgba(255,255,255,0.2)" }}
-                >
-                  <XIcon size={14} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ─── CATEGORY STATS ─────────────────────────────────────────────────────────── */
-type SwipeCounts = Record<CategoryKey, number>;
-
 function CategoryStats({ counts }: { counts: SwipeCounts }) {
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
   return (
@@ -489,20 +396,19 @@ export default function App() {
   const [current,     setCurrent]     = useState(0);
   const [liked,       setLiked]       = useState<Set<string>>(() => new Set(loadState()?.liked ?? []));
   const [vault,       setVault]       = useState<Quote[]>(() => loadState()?.vault ?? []);
-  const [showVault,   setShowVault]   = useState(false);
   const [streak,      setStreak]      = useState<number>(() => loadState()?.streak ?? 0);
   const [reflections, setReflections] = useState<number>(() => loadState()?.reflections ?? 0);
   const [showHints,   setShowHints]   = useState(true);
-  const [swipeCounts, setSwipeCounts] = useState<SwipeCounts>({ philosophy: 0, stoicism: 0, discipline: 0, reflection: 0 });
+  const [swipeCounts, setSwipeCounts] = useState<SwipeCounts>(() => loadState()?.swipeCounts ?? EMPTY_SWIPE_COUNTS);
   const [toastMsg,    setToastMsg]    = useState<Toast | null>(null);
   const [streakPulse, setStreakPulse] = useState(false);
+
+  const router = useRouter();
 
   // New Sprint 4 state — onboarding gating now lives in app/page.tsx
   const [showSettings,   setShowSettings]   = useState(false);
   const [showDonation,   setShowDonation]   = useState(false);
-  const [showMap,        setShowMap]        = useState(false);
   const [showChallenge,  setShowChallenge]  = useState(false);
-  const [mapData,        setMapData]        = useState<MapData | null>(null);
   const [challengeData,  setChallengeData]  = useState<ChallengeData | null>(null);
   const [challengeProgress, setChallengeProgress] = useState<ChallengeProgress>({ progress: 0, completed: false });
   const [isPremium,      setIsPremium]      = useState<boolean>(() => loadIsPremium());
@@ -537,23 +443,17 @@ export default function App() {
     }
   }, [current, deck.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Persist core state
+  // Persist core state — swipeCounts joins the bag so /map can build its
+  // offline fallback without round-tripping through React state.
   useEffect(() => {
-    saveState({ liked: [...liked], vault, streak, reflections });
-  }, [liked, vault, streak, reflections]);
+    saveState({ liked: [...liked], vault, streak, reflections, swipeCounts });
+  }, [liked, vault, streak, reflections, swipeCounts]);
 
   // Load challenge from API on mount (fire-and-forget). Onboarding gate
   // upstream guarantees this only runs after the user has a profile.
   useEffect(() => {
     apiGetTodayChallenge().then(ch => {
       if (ch) setChallengeData(ch);
-    }).catch(() => {});
-  }, []);
-
-  // Load philosophy map from API (fire-and-forget)
-  useEffect(() => {
-    apiGetMap().then(data => {
-      if (data) setMapData(data);
     }).catch(() => {});
   }, []);
 
@@ -767,8 +667,8 @@ export default function App() {
             />
           ))}
         </div>
-        <button
-          onClick={() => setShowVault(true)}
+        <Link
+          href="/vault"
           className={`rounded-[22px] py-2.5 px-5 flex items-center gap-2 cursor-pointer font-sans text-[13px] font-medium transition-all duration-200 border ${
             vault.length > 0
               ? "bg-mindscroll-teal/10 border-mindscroll-teal/30 text-mindscroll-teal"
@@ -781,22 +681,13 @@ export default function App() {
               {vault.length}
             </span>
           )}
-        </button>
+        </Link>
         <span className="text-[11px] text-white/20 font-sans">
           {deck.length > 0 ? `${(current % deck.length) + 1} / ${deck.length}` : "—"}
         </span>
       </nav>
 
-      {/* Overlays */}
-      {showVault && (
-        <VaultSheet
-          items={vault}
-          onClose={() => setShowVault(false)}
-          onRemove={handleRemove}
-          lang={lang}
-        />
-      )}
-
+      {/* Overlays — /vault and /map live as their own routes (1d-ii) */}
       {showSettings && (
         <Settings
           lang={lang}
@@ -804,7 +695,7 @@ export default function App() {
           isPremium={isPremium}
           onClose={() => setShowSettings(false)}
           showToast={showToast}
-          onShowMap={() => { setShowSettings(false); setShowMap(true); }}
+          onShowMap={() => { setShowSettings(false); router.push("/map"); }}
           onShowChallenge={() => { setShowSettings(false); setShowChallenge(true); }}
           onShowDonation={() => { setShowSettings(false); setShowDonation(true); }}
         />
@@ -814,23 +705,6 @@ export default function App() {
         <DonationPanel
           lang={lang}
           onClose={() => setShowDonation(false)}
-        />
-      )}
-
-      {showMap && (
-        <PhilosophyMap
-          mapData={mapData || {
-            current: {
-              wisdom:     swipeCounts.stoicism   || 0,
-              discipline: swipeCounts.discipline || 0,
-              reflection: swipeCounts.reflection || 0,
-              philosophy: swipeCounts.philosophy || 0,
-            },
-            snapshot: null,
-            snapshot_date: null,
-          }}
-          lang={lang}
-          onClose={() => setShowMap(false)}
         />
       )}
 

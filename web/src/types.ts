@@ -34,11 +34,23 @@ export interface Profile {
   preferred_language: Lang;
 }
 
+/** 4-category swipe counts. Mirrors CategoryKey one-to-one. */
+export type SwipeCounts = Record<CategoryKey, number>;
+
+export const EMPTY_SWIPE_COUNTS: SwipeCounts = {
+  philosophy: 0,
+  stoicism: 0,
+  discipline: 0,
+  reflection: 0,
+};
+
 export interface PersistedState {
   liked: string[];
   vault: Quote[];
   streak: number;
   reflections: number;
+  /** Optional for back-compat: legacy state from before 1d-ii lacked this. */
+  swipeCounts?: SwipeCounts;
 }
 
 export interface ChallengeData {
