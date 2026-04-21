@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { t } from "../i18n";
+import { apiCreateCheckoutSession } from "../api/quotes";
 import type { Lang, Toast } from "../types";
 
 const APP_VERSION = "1.0.0";
@@ -31,6 +33,23 @@ interface Props {
 }
 
 export default function Settings({ lang, onLangChange, isPremium, onClose, showToast, onShowMap, onShowChallenge, onShowDonation }: Props) {
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const handleUnlockPremium = async () => {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+    try {
+      const session = await apiCreateCheckoutSession("inside");
+      // Same-tab redirect — Stripe lands on /payment/success | /cancel
+      // configured by the backend's success_url / cancel_url.
+      window.location.href = session.url;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Checkout unavailable";
+      showToast?.(msg, "#EF4444");
+      setCheckoutLoading(false);
+    }
+  };
+
   return (
     <div
       onClick={onClose}
@@ -108,20 +127,21 @@ export default function Settings({ lang, onLangChange, isPremium, onClose, showT
           <SectionHeader>Premium</SectionHeader>
 
           {!isPremium ? (
-            <div
-              onClick={() => showToast && showToast("Premium coming soon!", "#F97316")}
-              className="flex justify-between items-center py-4 px-4 mb-3 rounded-2xl cursor-pointer bg-gradient-to-br from-mindscroll-orange/[0.08] to-mindscroll-amber/[0.08] border border-mindscroll-orange/20"
+            <button
+              onClick={handleUnlockPremium}
+              disabled={checkoutLoading}
+              className="w-full flex justify-between items-center py-4 px-4 mb-3 rounded-2xl cursor-pointer bg-gradient-to-br from-mindscroll-orange/[0.08] to-mindscroll-amber/[0.08] border border-mindscroll-orange/20 disabled:opacity-60 disabled:cursor-wait text-left"
             >
               <div>
                 <p className="m-0 font-sans text-[15px] font-medium text-mindscroll-orange">
-                  {t(lang, "premium_unlock")}
+                  {checkoutLoading ? "Opening checkout…" : t(lang, "premium_unlock")}
                 </p>
                 <p className={ROW_SUB}>Export images, unlock all packs</p>
               </div>
               <span className="font-sans text-[15px] font-bold text-mindscroll-amber">
                 {t(lang, "premium_price")}
               </span>
-            </div>
+            </button>
           ) : (
             <div className="flex justify-between items-center py-4 border-b border-white/[0.06]">
               <div>

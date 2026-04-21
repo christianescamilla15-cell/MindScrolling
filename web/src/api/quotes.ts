@@ -272,3 +272,33 @@ export async function apiUnlockPremium(purchaseData: Record<string, unknown>): P
   });
   return res.json() as Promise<PremiumStatus>;
 }
+
+/* ─── STRIPE ──────────────────────────────────────────────────────────────── */
+
+/**
+ * Open a Stripe Checkout session for the given product. Returns the URL the
+ * caller should redirect to. The webhook on the backend (POST /stripe/webhook)
+ * is what actually flips is_premium once the payment lands; this endpoint
+ * just creates the session.
+ */
+export async function apiCreateCheckoutSession(
+  product: import("../types").StripeProduct,
+): Promise<import("../types").StripeCheckoutSession> {
+  const res = await fetch(`${API_BASE}/stripe/checkout`, {
+    method: "POST",
+    headers: apiHeaders(),
+    body: JSON.stringify({ product }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(err.error || `Checkout failed (${res.status})`);
+  }
+  return res.json() as Promise<import("../types").StripeCheckoutSession>;
+}
+
+/** List all Stripe prices the backend knows about. */
+export async function apiGetStripePrices(): Promise<{ prices: import("../types").StripePriceEntry[] }> {
+  const res = await fetch(`${API_BASE}/stripe/prices`, { headers: apiHeaders() });
+  if (!res.ok) throw new Error(String(res.status));
+  return res.json() as Promise<{ prices: import("../types").StripePriceEntry[] }>;
+}

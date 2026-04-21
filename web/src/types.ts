@@ -99,3 +99,27 @@ export interface FeedResponse {
 export interface PremiumStatus {
   is_premium: boolean;
 }
+
+/** Catalog of Stripe products the backend exposes via GET /stripe/prices. */
+export type StripeProduct =
+  | "inside"
+  | "stoicism_deep"
+  | "existentialism"
+  | "zen_mindfulness"
+  | "renaissance_mind"
+  | "classical_foundations"
+  | "modern_human_condition";
+
+export interface StripeCheckoutSession {
+  url: string;
+  session_id: string;
+}
+
+export interface StripePriceEntry {
+  product: StripeProduct;
+  price_id: string;
+  payment_link: string | null;
+  amount: number;
+  currency: string;
+  type: "premium_unlock" | "pack_purchase";
+}
