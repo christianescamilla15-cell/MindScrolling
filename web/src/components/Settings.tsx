@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { t } from "../i18n";
 import { apiCreateCheckoutSession } from "../api/quotes";
+import {
+  hasPushSubscription,
+  pushPermission,
+  pushSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+  type PushPermission,
+} from "../utils/webpush";
 import type { Lang, Toast } from "../types";
 
 const APP_VERSION = "1.0.0";
@@ -34,6 +42,37 @@ interface Props {
 
 export default function Settings({ lang, onLangChange, isPremium, onClose, showToast, onShowMap, onShowChallenge, onShowDonation }: Props) {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [pushPerm, setPushPerm] = useState<PushPermission>("default");
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  // Hydrate push state on mount: permission + active subscription.
+  useEffect(() => {
+    setPushPerm(pushPermission());
+    void hasPushSubscription().then(setPushSubscribed);
+  }, []);
+
+  const handleTogglePush = async () => {
+    if (pushBusy) return;
+    setPushBusy(true);
+    try {
+      if (pushSubscribed) {
+        await unsubscribeFromPush();
+        setPushSubscribed(false);
+        showToast?.("Notifications off", "#A78BFA");
+      } else {
+        await subscribeToPush();
+        setPushPerm("granted");
+        setPushSubscribed(true);
+        showToast?.("Notifications on", "#14B8A6");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Couldn't enable notifications.";
+      showToast?.(msg, "#EF4444");
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   const handleUnlockPremium = async () => {
     if (checkoutLoading) return;
@@ -103,6 +142,33 @@ export default function Settings({ lang, onLangChange, isPremium, onClose, showT
               ))}
             </div>
           </div>
+
+          {/* Notifications */}
+          {pushSupported() && (
+            <div className={ROW}>
+              <div>
+                <p className={ROW_LABEL}>Notifications</p>
+                <p className={ROW_SUB}>
+                  {pushPerm === "denied"
+                    ? "Blocked in browser settings"
+                    : pushSubscribed
+                      ? "Daily reflection reminders on"
+                      : "Get a nudge for your daily quote"}
+                </p>
+              </div>
+              <button
+                onClick={handleTogglePush}
+                disabled={pushBusy || pushPerm === "denied"}
+                className={`rounded-[10px] py-1.5 px-3 text-[13px] font-sans font-semibold cursor-pointer transition-all duration-150 border disabled:opacity-50 disabled:cursor-not-allowed ${
+                  pushSubscribed
+                    ? "bg-mindscroll-teal/15 border-mindscroll-teal/40 text-mindscroll-teal"
+                    : "bg-white/[0.05] border-white/10 text-white/40"
+                }`}
+              >
+                {pushBusy ? "…" : pushSubscribed ? "ON" : "OFF"}
+              </button>
+            </div>
+          )}
 
           {/* Explore */}
           <SectionHeader>Explore</SectionHeader>
