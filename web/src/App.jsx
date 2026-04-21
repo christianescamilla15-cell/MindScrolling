@@ -13,11 +13,11 @@ import {
   apiGetMap,
   apiGetPremiumStatus,
 } from "./api/quotes.js";
-import { saveState, loadState } from "./utils/storage.js";
-import { shuffle } from "./utils/shuffle.js";
+import { saveState, loadState } from "./utils/storage";
+import { shuffle } from "./utils/shuffle";
 import { CATEGORY_META, DIR_TO_CATEGORY, USER_LANG } from "./constants/index.js";
 import { t } from "./i18n/index.js";
-import { exportQuoteImage } from "./utils/exportImage.js";
+import { exportQuoteImage } from "./utils/exportImage";
 import Onboarding    from "./components/Onboarding.jsx";
 import Settings      from "./components/Settings.jsx";
 import DonationPanel from "./components/DonationPanel.jsx";

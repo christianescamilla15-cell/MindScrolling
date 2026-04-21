@@ -5,8 +5,8 @@ import {
   PER_CATEGORY,
   USER_LANG,
 } from "../constants/index.js";
-import { shuffle } from "../utils/shuffle.js";
-import { getDeviceId } from "../utils/storage.js";
+import { shuffle } from "../utils/shuffle";
+import { getDeviceId } from "../utils/storage";
 import QUOTES_EN from "../data/quotes_en.js";
 import QUOTES_ES from "../data/quotes_es.js";
 import { t } from "../i18n/index.js";

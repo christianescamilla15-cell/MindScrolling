@@ -1,22 +1,25 @@
 import { STORAGE_KEY } from "../constants/index.js";
+import type { PersistedState } from "../types";
 
-export function saveState(state) {
+export function saveState(state: PersistedState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (_) {}
+  } catch {
+    /* swallow — quota errors and SSR no-window both end up here */
+  }
 }
 
-export function loadState() {
+export function loadState(): PersistedState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (_) {
+    return raw ? (JSON.parse(raw) as PersistedState) : null;
+  } catch {
     return null;
   }
 }
 
 /** Returns a persistent anonymous device ID, generating one on first use. */
-export function getDeviceId() {
+export function getDeviceId(): string {
   const KEY = "mindscroll_device_id";
   try {
     let id = localStorage.getItem(KEY);
@@ -25,7 +28,7 @@ export function getDeviceId() {
       localStorage.setItem(KEY, id);
     }
     return id;
-  } catch (_) {
+  } catch {
     return "anonymous";
   }
 }

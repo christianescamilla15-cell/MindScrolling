@@ -1,6 +1,7 @@
 // Canvas-based quote image export utility
+import type { CategoryKey, Quote } from "../types";
 
-const CATEGORY_COLORS = {
+const CATEGORY_COLORS: Record<CategoryKey, string> = {
   philosophy: "#F59E0B",
   stoicism:   "#14B8A6",
   discipline: "#F97316",
@@ -10,9 +11,9 @@ const CATEGORY_COLORS = {
 /**
  * Wraps text within a given max width, returning an array of lines.
  */
-function wrapText(ctx, text, maxWidth) {
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const words = text.split(" ");
-  const lines = [];
+  const lines: string[] = [];
   let current = "";
 
   for (const word of words) {
@@ -30,9 +31,8 @@ function wrapText(ctx, text, maxWidth) {
 
 /**
  * Exports a quote as a 1080x1080 PNG image and triggers a download.
- * @param {Object} quote - { text, author, category }
  */
-export async function exportQuoteImage(quote) {
+export async function exportQuoteImage(quote: Quote): Promise<void> {
   const SIZE = 1080;
   const PADDING = 90;
   const ACCENT_BAR_WIDTH = 6;
@@ -42,6 +42,7 @@ export async function exportQuoteImage(quote) {
   canvas.width = SIZE;
   canvas.height = SIZE;
   const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context unavailable");
 
   // Background: dark gradient
   const bg = ctx.createLinearGradient(0, 0, SIZE, SIZE);
