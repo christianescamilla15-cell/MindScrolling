@@ -72,12 +72,11 @@ const LockIcon = ({ size = 18 }) => (
   </svg>
 );
 
-const actionBtn = (color) => ({
-  background: "none", border: "none", cursor: "pointer",
-  color, padding: 8, borderRadius: 12,
-  display: "flex", alignItems: "center", justifyContent: "center",
-  transition: "transform 0.15s, opacity 0.15s",
-});
+// Shape-only utility for icon buttons inside QuoteCard / VaultSheet.
+// Caller still drives the icon `color` inline because it's stateful
+// (liked / saved / premium-gated) and the palette comes from runtime
+// CATEGORY_META.
+const ACTION_BTN = "bg-transparent border-0 cursor-pointer p-2 rounded-xl flex items-center justify-center transition-[transform,opacity] duration-150";
 
 /* ─── PARTICLE BURST ─────────────────────────────────────────────────────────── */
 function ParticleBurst({ x, y, onDone }) {
@@ -192,6 +191,19 @@ function QuoteCard({ quote, onSwipe, onLike, onSave, onShare, onExport, isLiked,
   const edgeColor = offset.x > 40 ? "#F97316" : offset.x < -40 ? "#14B8A6" : offset.y < -40 ? "#F59E0B" : offset.y > 40 ? "#A78BFA" : "transparent";
   const edgeGlow  = Math.min(1, Math.sqrt(offset.x ** 2 + offset.y ** 2) / 120);
 
+  // Dynamic runtime values — Tailwind classes can't express these.
+  const cardTransform = flyTransform
+    || `translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px) rotate(${offset.x / 20}deg)`;
+  const cardTransition = flyDir
+    ? "transform 0.35s cubic-bezier(0.4,0,1,1), opacity 0.35s"
+    : dragging
+      ? "none"
+      : "transform 0.4s cubic-bezier(0.34,1.56,0.64,1)";
+  const cardOpacity = flyDir ? 0 : Math.max(0.6, 1 - Math.sqrt(offset.x ** 2 + offset.y ** 2) / 400);
+  const cardBoxShadow = edgeColor !== "transparent"
+    ? `0 0 0 2px ${edgeColor}${Math.round(edgeGlow * 255).toString(16).padStart(2, "0")}, 0 32px 80px rgba(0,0,0,0.6)`
+    : "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)";
+
   return (
     <>
       {burst && <ParticleBurst x={burst.x} y={burst.y} onDone={() => setBurst(null)} />}
@@ -205,65 +217,82 @@ function QuoteCard({ quote, onSwipe, onLike, onSave, onShare, onExport, isLiked,
         onTouchMove={e => moveDrag(e.touches[0].clientX, e.touches[0].clientY)}
         onTouchEnd={e => endDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
         onClick={handleTap}
+        className={`absolute top-1/2 left-1/2 min-h-[420px] select-none z-10 rounded-[28px] bg-gradient-to-br from-mindscroll-bg-card to-mindscroll-bg-card-end border border-white/[0.07] flex flex-col px-8 pt-9 pb-7 ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
         style={{
-          position: "absolute", top: "50%", left: "50%",
-          width: "min(380px, 90vw)", minHeight: 420,
-          transform: flyTransform || `translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px) rotate(${offset.x / 20}deg)`,
-          transition: flyDir ? "transform 0.35s cubic-bezier(0.4,0,1,1), opacity 0.35s" : dragging ? "none" : "transform 0.4s cubic-bezier(0.34,1.56,0.64,1)",
-          opacity: flyDir ? 0 : Math.max(0.6, 1 - Math.sqrt(offset.x ** 2 + offset.y ** 2) / 400),
-          cursor: dragging ? "grabbing" : "grab", userSelect: "none", zIndex: 10,
-          borderRadius: 28, background: "linear-gradient(145deg, #1c1c22, #161618)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: edgeColor !== "transparent"
-            ? `0 0 0 2px ${edgeColor}${Math.round(edgeGlow * 255).toString(16).padStart(2,"0")}, 0 32px 80px rgba(0,0,0,0.6)`
-            : "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
-          display: "flex", flexDirection: "column", padding: "36px 32px 28px", boxSizing: "border-box",
+          width: "min(380px, 90vw)",
+          transform: cardTransform,
+          transition: cardTransition,
+          opacity: cardOpacity,
+          boxShadow: cardBoxShadow,
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-          <span style={{ fontSize: 11, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: meta.color, background: meta.bg, padding: "5px 12px", borderRadius: 20 }}>
+        <div className="flex justify-between items-center mb-8">
+          <span
+            className="text-[11px] font-sans font-semibold tracking-[0.12em] uppercase py-[5px] px-3 rounded-[20px]"
+            style={{ color: meta.color, background: meta.bg }}
+          >
             {meta.label}
           </span>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", fontFamily: "'DM Sans', sans-serif" }}>
-            {meta.dir}
-          </span>
+          <span className="text-[11px] text-white/25 font-sans">{meta.dir}</span>
         </div>
 
-        <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-          <blockquote style={{ margin: 0, padding: 0, fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(18px, 4vw, 24px)", fontWeight: 400, fontStyle: "italic", lineHeight: 1.65, color: "#F5F0E8", letterSpacing: "-0.01em" }}>
-            <span style={{ color: meta.color, fontSize: "2em", lineHeight: 0.3, verticalAlign: "-0.3em", marginRight: 4, fontStyle: "normal" }}>&ldquo;</span>
+        <div className="flex-1 flex items-center">
+          <blockquote
+            className="m-0 p-0 font-serif italic font-normal leading-[1.65] text-mindscroll-cream tracking-[-0.01em]"
+            style={{ fontSize: "clamp(18px, 4vw, 24px)" }}
+          >
+            <span
+              className="text-[2em] leading-[0.3] align-[-0.3em] mr-1 not-italic"
+              style={{ color: meta.color }}
+            >&ldquo;</span>
             {quote.text}
-            <span style={{ color: meta.color, fontSize: "2em", lineHeight: 0.3, verticalAlign: "-0.3em", marginLeft: 4, fontStyle: "normal" }}>&rdquo;</span>
+            <span
+              className="text-[2em] leading-[0.3] align-[-0.3em] ml-1 not-italic"
+              style={{ color: meta.color }}
+            >&rdquo;</span>
           </blockquote>
         </div>
 
-        <div style={{ marginTop: 28, marginBottom: 24 }}>
-          <div style={{ width: 32, height: 1, background: meta.color, opacity: 0.5, marginBottom: 10 }} />
-          <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.45)", letterSpacing: "0.05em" }}>
+        <div className="mt-7 mb-6">
+          <div className="w-8 h-px opacity-50 mb-2.5" style={{ background: meta.color }} />
+          <p className="m-0 font-sans text-[13px] font-medium text-white/45 tracking-[0.05em]">
             &mdash; {quote.author}
           </p>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <button onClick={e => { e.stopPropagation(); onLike(quote.id); }} style={actionBtn(isLiked ? "#F97316" : "rgba(255,255,255,0.2)")}>
+        <div className="flex justify-between items-center pt-5 border-t border-white/[0.06]">
+          <button
+            onClick={e => { e.stopPropagation(); onLike(quote.id); }}
+            className={ACTION_BTN}
+            style={{ color: isLiked ? "#F97316" : "rgba(255,255,255,0.2)" }}
+          >
             <HeartIcon filled={isLiked} size={19} />
           </button>
-          <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.18)", letterSpacing: "0.08em" }}>
+          <p className="m-0 font-sans text-[11px] text-white/[0.18] tracking-[0.08em]">
             {t(lang, "double_tap")}
           </p>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="flex gap-2">
             {/* Export image — premium gated */}
             <button
               onClick={e => { e.stopPropagation(); onExport(quote); }}
-              style={actionBtn(isPremium ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)")}
+              className={ACTION_BTN}
+              style={{ color: isPremium ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)" }}
               title={isPremium ? t(lang, "export_image") : t(lang, "premium_feature")}
             >
               {isPremium ? <ImageIcon size={19} /> : <LockIcon size={17} />}
             </button>
-            <button onClick={e => { e.stopPropagation(); onSave(quote); }} style={actionBtn(isSaved ? "#14B8A6" : "rgba(255,255,255,0.2)")}>
+            <button
+              onClick={e => { e.stopPropagation(); onSave(quote); }}
+              className={ACTION_BTN}
+              style={{ color: isSaved ? "#14B8A6" : "rgba(255,255,255,0.2)" }}
+            >
               <BookmarkIcon filled={isSaved} size={19} />
             </button>
-            <button onClick={e => { e.stopPropagation(); onShare(quote); }} style={actionBtn("rgba(255,255,255,0.2)")}>
+            <button
+              onClick={e => { e.stopPropagation(); onShare(quote); }}
+              className={ACTION_BTN}
+              style={{ color: "rgba(255,255,255,0.2)" }}
+            >
               <ShareIcon size={19} />
             </button>
           </div>
@@ -277,38 +306,72 @@ function QuoteCard({ quote, onSwipe, onLike, onSave, onShare, onExport, isLiked,
 /* ─── VAULT SHEET ────────────────────────────────────────────────────────────── */
 function VaultSheet({ items, onClose, onRemove, lang }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "flex-end", animation: "fade-in 0.2s ease" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxHeight: "78vh", background: "#18181f", borderRadius: "28px 28px 0 0", border: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", animation: "slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1)", overflow: "hidden" }}>
-        <div style={{ display: "flex", justifyContent: "center", padding: "16px 0 0" }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[100] bg-black/70 flex items-end animate-fade-in"
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="w-full max-h-[78vh] bg-mindscroll-bg-soft rounded-t-[28px] border border-white/[0.07] flex flex-col animate-slide-up overflow-hidden"
+      >
+        <div className="flex justify-center pt-4">
+          <div className="w-10 h-1 rounded-sm bg-white/[0.15]" />
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 28px 12px" }}>
+        <div className="flex justify-between items-center pt-4 pb-3 px-7">
           <div>
-            <h2 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, color: "#F5F0E8" }}>{t(lang, "vault")}</h2>
-            <p style={{ margin: "2px 0 0", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>
+            <h2 className="m-0 font-serif text-[22px] font-semibold text-mindscroll-cream">
+              {t(lang, "vault")}
+            </h2>
+            <p className="mt-0.5 mb-0 font-sans text-xs text-white/30">
               {items.length} saved reflection{items.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <button onClick={onClose} style={{ ...actionBtn("rgba(255,255,255,0.3)"), border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "8px 14px", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>{t(lang, "close")}</button>
+          <button
+            onClick={onClose}
+            className={`${ACTION_BTN} border border-white/10 rounded-[20px] py-2 px-3.5 text-[13px] font-sans`}
+            style={{ color: "rgba(255,255,255,0.3)" }}
+          >
+            {t(lang, "close")}
+          </button>
         </div>
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px 32px" }}>
+        <div className="overflow-y-auto flex-1 px-5 pb-8">
           {items.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "60px 20px", color: "rgba(255,255,255,0.2)", fontFamily: "'DM Sans', sans-serif", fontSize: 14 }}>
-              <div style={{ fontSize: 32, marginBottom: 12 }}>🔮</div>Save quotes to build your vault
+            <div className="text-center py-[60px] px-5 text-white/20 font-sans text-sm">
+              <div className="text-[32px] mb-3">🔮</div>
+              Save quotes to build your vault
             </div>
           ) : items.map(q => {
             const m = CATEGORY_META[q.category];
             return (
-              <div key={q.id} style={{ background: "#1e1e27", borderRadius: 16, padding: "18px 20px", marginBottom: 12, border: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: 14, alignItems: "flex-start" }}>
-                <div style={{ width: 3, minHeight: 40, borderRadius: 2, background: m.color, flexShrink: 0, marginTop: 2 }} />
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: "0 0 8px", fontFamily: "'Playfair Display', serif", fontSize: 14, fontStyle: "italic", color: "#E8E3D8", lineHeight: 1.6 }}>"{q.text}"</p>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.35)" }}>— {q.author}</span>
-                    <span style={{ fontSize: 10, color: m.color, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>{q.category}</span>
+              <div
+                key={q.id}
+                className="bg-[#1e1e27] rounded-2xl py-4 px-5 mb-3 border border-white/[0.05] flex gap-3.5 items-start"
+              >
+                <div
+                  className="w-[3px] min-h-10 rounded-sm shrink-0 mt-0.5"
+                  style={{ background: m.color }}
+                />
+                <div className="flex-1">
+                  <p className="mt-0 mb-2 font-serif text-sm italic text-mindscroll-cream-warm leading-[1.6]">
+                    &ldquo;{q.text}&rdquo;
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <span className="font-sans text-[11px] text-white/35">
+                      — {q.author}
+                    </span>
+                    <span
+                      className="text-[10px] font-sans font-semibold tracking-[0.1em] uppercase"
+                      style={{ color: m.color }}
+                    >
+                      {q.category}
+                    </span>
                   </div>
                 </div>
-                <button onClick={() => onRemove(q.id)} style={{ ...actionBtn("rgba(255,255,255,0.2)"), padding: 6, flexShrink: 0 }}>
+                <button
+                  onClick={() => onRemove(q.id)}
+                  className={`${ACTION_BTN} p-1.5 shrink-0`}
+                  style={{ color: "rgba(255,255,255,0.2)" }}
+                >
                   <XIcon size={14} />
                 </button>
               </div>
