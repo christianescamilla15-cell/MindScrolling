@@ -8,6 +8,7 @@ import {
   getRelatedQuotes,
   slugify,
 } from "@/lib/quotes-catalog";
+import { absUrl } from "@/lib/site";
 
 interface Params {
   id: string;
@@ -33,14 +34,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `"${quote.text.slice(0, 80)}${quote.text.length > 80 ? "…" : ""}" — ${quote.author}`;
   const description = `${quote.author} · ${CATEGORY_META[quote.category]?.label ?? "Reflection"} · MindScrolling.`;
+  const url = absUrl(`/quotes/${quote.id}`);
 
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       type: "article",
       title,
       description,
+      url,
       locale: quote.lang === "es" ? "es_ES" : "en_US",
     },
     twitter: {
@@ -59,9 +63,37 @@ export default async function QuotePage({ params }: PageProps) {
   const meta = CATEGORY_META[quote.category];
   const authorSlug = slugify(quote.author);
   const related = getRelatedQuotes(id, 3);
+  const canonical = absUrl(`/quotes/${quote.id}`);
+
+  // Schema.org Quotation — rich snippet candidate. Inlined as JSON-LD
+  // because Next.js metadata API doesn't have a structured-data slot.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Quotation",
+    "@id": canonical,
+    text: quote.text,
+    creator: {
+      "@type": "Person",
+      name: quote.author,
+      url: absUrl(`/authors/${authorSlug}`),
+    },
+    inLanguage: quote.lang ?? "en",
+    isFamilyFriendly: true,
+    url: canonical,
+    about: meta?.label,
+    publisher: {
+      "@type": "Organization",
+      name: "MindScrolling",
+      url: absUrl("/"),
+    },
+  };
 
   return (
     <main className="w-full min-h-screen bg-mindscroll-bg flex flex-col items-center px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Wordmark crumb back to / */}
       <Link
         href="/"

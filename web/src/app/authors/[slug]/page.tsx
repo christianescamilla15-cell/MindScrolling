@@ -7,6 +7,7 @@ import {
   getAuthorSlugs,
   getQuotesByAuthor,
 } from "@/lib/quotes-catalog";
+import { absUrl } from "@/lib/site";
 
 interface Params {
   slug: string;
@@ -29,14 +30,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${author.name} — quotes & reflections`;
   const description = `${author.quoteCount} curated quotes by ${author.name} on MindScrolling. Swipe through philosophy, stoicism, and reflection.`;
+  const url = absUrl(`/authors/${slug}`);
 
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       type: "profile",
       title,
       description,
+      url,
     },
     twitter: {
       card: "summary",
@@ -52,9 +56,30 @@ export default async function AuthorPage({ params }: PageProps) {
   if (!author) notFound();
 
   const quotes = getQuotesByAuthor(slug);
+  const canonical = absUrl(`/authors/${slug}`);
+
+  // Schema.org Person + nested Quotation list.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": canonical,
+    name: author.name,
+    url: canonical,
+    subjectOf: quotes.map(q => ({
+      "@type": "Quotation",
+      "@id": absUrl(`/quotes/${q.id}`),
+      text: q.text,
+      url: absUrl(`/quotes/${q.id}`),
+      inLanguage: q.lang ?? "en",
+    })),
+  };
 
   return (
     <main className="w-full min-h-screen bg-mindscroll-bg flex flex-col items-center px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Wordmark crumb */}
       <Link
         href="/"
