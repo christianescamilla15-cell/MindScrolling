@@ -12,7 +12,7 @@ import {
   apiUpdateChallengeProgress,
   apiGetMap,
   apiGetPremiumStatus,
-} from "./api/quotes.js";
+} from "./api/quotes";
 import { saveState, loadState } from "./utils/storage";
 import { shuffle } from "./utils/shuffle";
 import { CATEGORY_META, DIR_TO_CATEGORY, USER_LANG } from "./constants";
