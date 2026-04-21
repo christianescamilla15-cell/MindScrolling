@@ -7,7 +7,8 @@
 
 import QUOTES_EN from "../data/quotes_en";
 import QUOTES_ES from "../data/quotes_es";
-import type { Quote } from "../types";
+import type { CategoryKey, Quote } from "../types";
+import { CATEGORY_META } from "../constants";
 
 /** Strips diacritics and non-alphanumeric characters → "Marc Aurelio" → "marc-aurelio". */
 export function slugify(input: string): string {
@@ -83,4 +84,13 @@ export function getQuoteSlugs(): string[] {
 
 export function getAuthorSlugs(): string[] {
   return Array.from(AUTHOR_INDEX.keys());
+}
+
+/** Category slugs match the CategoryKey strings themselves — already URL-safe. */
+export function getAllCategoryKeys(): CategoryKey[] {
+  return Object.keys(CATEGORY_META) as CategoryKey[];
+}
+
+export function getQuotesByCategory(key: CategoryKey): Quote[] {
+  return ALL_QUOTES.filter(q => q.category === key);
 }

@@ -104,12 +104,13 @@ export default async function QuotePage({ params }: PageProps) {
 
       {/* Hero quote */}
       <article className="max-w-[640px] w-full">
-        <p
-          className="m-0 mb-4 font-sans text-[11px] font-semibold tracking-[0.18em] uppercase"
+        <Link
+          href={`/categories/${quote.category}`}
+          className="inline-block mb-4 font-sans text-[11px] font-semibold tracking-[0.18em] uppercase hover:opacity-80 transition-opacity"
           style={{ color: meta.color }}
         >
           {meta.label}
-        </p>
+        </Link>
 
         <blockquote
           className="m-0 mb-8 font-serif italic text-mindscroll-cream leading-[1.5] tracking-[-0.01em]"
