@@ -43,21 +43,34 @@ export default async function usersRoutes(fastify) {
     // doesn't accidentally match every row.
     const escaped = q.replace(/[\\%_]/g, (c) => "\\" + c);
 
+    // Query only columns that are guaranteed by 001_initial.sql.
+    // longest_streak (migration 062) is best-effort: it's added separately
+    // below so the endpoint still works in environments where 062 hasn't
+    // been applied yet.
     const { data, error } = await supabase
       .from("users")
-      .select("device_id, display_name, streak, longest_streak, is_premium")
+      .select("device_id, display_name, streak, is_premium")
       .ilike("display_name", `%${escaped}%`)
       .neq("device_id", deviceId)
-      .not("display_name", "is", null)
       .limit(limit);
 
     if (error) {
-      request.log.error({ err: error }, "users_search_failed");
-      return reply.status(500).send({ error: "Search failed", code: "DB_ERROR" });
+      request.log.error({ err: error.message, code: error.code, hint: error.hint }, "users_search_failed");
+      return reply.status(500).send({
+        error: "Search failed",
+        code:  "DB_ERROR",
+        // Surface the supabase code (e.g. 42703 = undefined column) so the
+        // operator can diagnose missing migrations from the response alone.
+        // Only the code, never the full hint/message — that may leak schema.
+        db_code: error.code ?? null,
+      });
     }
 
-    // Filter out empty display_names that ILIKE can match via '%%' edge cases.
-    const results = (data || []).filter((u) => (u.display_name || "").trim().length > 0);
+    // Filter out empty / null display_names. We don't add `.not("display_name", "is", null)`
+    // to the query because that filter rendering varies across supabase-js
+    // patch versions; doing it client-side here is unconditionally correct.
+    const results = (data || [])
+      .filter((u) => (u.display_name || "").trim().length > 0);
     return reply.send({ results });
   });
 
@@ -73,7 +86,7 @@ export default async function usersRoutes(fastify) {
 
     const { data, error } = await supabase
       .from("users")
-      .select("device_id, display_name, streak, longest_streak, is_premium, created_at")
+      .select("device_id, display_name, streak, is_premium, created_at")
       .eq("device_id", targetId)
       .maybeSingle();
 
