@@ -44,6 +44,7 @@ import exercisesRoutes   from "./routes/exercises.js";
 import stripeRoutes      from "./routes/stripe.js";
 import socialRoutes      from "./routes/social.js";
 import pushRoutes        from "./routes/push.js";
+import usersRoutes       from "./routes/users.js";
 import deviceIdPlugin   from "./plugins/deviceId.js";
 
 const app = Fastify({
@@ -110,6 +111,7 @@ await app.register(exercisesRoutes,    { prefix: "/exercises" });
 await app.register(stripeRoutes,      { prefix: "/stripe" });
 await app.register(socialRoutes,      { prefix: "/social" });
 await app.register(pushRoutes,        { prefix: "/push" });
+await app.register(usersRoutes,       { prefix: "/users" });
 
 /* ─── Health ───────────────────────────────────────────────────────────────── */
 app.get("/health", async () => ({ status: "ok", ts: new Date().toISOString() }));
