@@ -1,9 +1,11 @@
 // Web Push subscription helpers — wraps the Notifications API + PushManager.
-// The backend's `/push/subscribe` endpoint doesn't exist yet, so the
-// subscription gets cached in localStorage; once the backend lands we can
-// flush the cached subscription on next mount.
+// After obtaining a PushSubscription locally, sync it with the backend
+// via POST /push/subscribe so the server can deliver notifications.
+
+import { getDeviceId } from "./storage";
 
 const SUBSCRIPTION_KEY = "mindscroll_push_subscription";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 export type PushPermission = "default" | "granted" | "denied" | "unsupported";
 
@@ -68,6 +70,7 @@ export async function subscribeToPush(): Promise<PushSubscription> {
   });
 
   cacheSubscription(sub);
+  await syncSubscriptionToBackend(sub);
   return sub;
 }
 
@@ -77,6 +80,43 @@ export async function unsubscribeFromPush(): Promise<void> {
   const sub = await reg.pushManager.getSubscription();
   if (sub) await sub.unsubscribe();
   try { localStorage.removeItem(SUBSCRIPTION_KEY); } catch { /* noop */ }
+  await removeSubscriptionFromBackend();
+}
+
+/** POST PushSubscription to backend so it can deliver notifications.
+ *  Failure is logged but not thrown — local subscription still works,
+ *  the cache will retry next time the user toggles notifications. */
+async function syncSubscriptionToBackend(sub: PushSubscription): Promise<void> {
+  if (!API_BASE) return;
+  try {
+    const json = sub.toJSON();
+    await fetch(`${API_BASE}/push/subscribe`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-ID": getDeviceId(),
+      },
+      body: JSON.stringify({
+        endpoint: json.endpoint,
+        keys: json.keys,
+      }),
+    });
+  } catch (err) {
+    console.warn("[webpush] backend sync failed:", err);
+  }
+}
+
+/** DELETE all subscriptions for this device on the backend. */
+async function removeSubscriptionFromBackend(): Promise<void> {
+  if (!API_BASE) return;
+  try {
+    await fetch(`${API_BASE}/push/subscribe`, {
+      method: "DELETE",
+      headers: { "X-Device-ID": getDeviceId() },
+    });
+  } catch (err) {
+    console.warn("[webpush] backend unsubscribe failed:", err);
+  }
 }
 
 /** True if the device has an active push subscription (synced via cache). */
