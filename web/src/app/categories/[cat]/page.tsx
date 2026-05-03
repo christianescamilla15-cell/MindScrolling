@@ -128,7 +128,7 @@ export default async function CategoryPage({ params }: PageProps) {
         >
           {meta.label}
         </h1>
-        <p className="m-0 font-sans text-sm text-white/50">
+        <p className="m-0 font-sans text-sm text-white/70">
           {quotes.length} curated {quotes.length === 1 ? "quote" : "quotes"}
         </p>
       </header>
@@ -145,7 +145,7 @@ export default async function CategoryPage({ params }: PageProps) {
               <blockquote className="m-0 mb-2 font-serif italic text-[17px] leading-[1.55] text-mindscroll-cream">
                 &ldquo;{q.text}&rdquo;
               </blockquote>
-              <span className="font-sans text-[12px] text-white/40">— {q.author}</span>
+              <span className="font-sans text-[12px] text-white/60">— {q.author}</span>
             </div>
           </Link>
         ))}

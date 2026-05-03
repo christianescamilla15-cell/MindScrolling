@@ -7,7 +7,7 @@ const ONBOARDING_KEY = "mindscroll_onboarding";
 const PROFILE_KEY    = "mindscroll_profile";
 
 const SELECT = "w-full bg-[#1e1e27] border border-white/[0.12] rounded-xl text-mindscroll-cream font-sans text-sm py-3 px-4 appearance-none cursor-pointer outline-none";
-const LABEL  = "block font-sans text-xs font-semibold tracking-[0.08em] uppercase text-white/40 mb-1.5";
+const LABEL  = "block font-sans text-xs font-semibold tracking-[0.08em] uppercase text-white/60 mb-1.5";
 
 interface PrimaryButtonProps {
   children: React.ReactNode;
@@ -53,7 +53,7 @@ function ScreenSwipes({ lang, onNext }: { lang: Lang; onNext: () => void }) {
       <h1 className="mt-0 mb-2 font-serif text-[32px] font-semibold text-mindscroll-cream tracking-[-0.02em]">
         Mind<span className="text-mindscroll-teal">Scroll</span>
       </h1>
-      <p className="mt-0 mb-12 font-sans text-sm text-white/40 text-center">
+      <p className="mt-0 mb-12 font-sans text-sm text-white/60 text-center">
         {t(lang, "onboarding_subtitle")}
       </p>
 
@@ -72,7 +72,7 @@ function ScreenSwipes({ lang, onNext }: { lang: Lang; onNext: () => void }) {
             >
               {d.label}
             </span>
-            <span className="font-sans text-xs text-white/50 text-center">
+            <span className="font-sans text-xs text-white/70 text-center">
               {t(lang, d.key)}
             </span>
           </div>
@@ -84,7 +84,7 @@ function ScreenSwipes({ lang, onNext }: { lang: Lang; onNext: () => void }) {
         <div className="w-15 h-15 bg-gradient-to-br from-mindscroll-bg-card to-mindscroll-bg-card-end border border-white/[0.08] rounded-[18px] flex items-center justify-center text-2xl" style={{ width: 60, height: 60 }}>
           ✦
         </div>
-        <p className="m-0 font-sans text-[11px] text-white/25 tracking-[0.08em] uppercase">
+        <p className="m-0 font-sans text-[11px] text-white/55 tracking-[0.08em] uppercase">
           swipe the card
         </p>
       </div>
@@ -124,7 +124,7 @@ function ScreenProfile({ lang, onComplete }: { lang: Lang; onComplete: (p: Profi
       <h2 className="mt-0 mb-2 font-serif text-[26px] font-semibold text-mindscroll-cream">
         {t(lang, "onboarding_profile")}
       </h2>
-      <p className="mt-0 mb-9 font-sans text-sm text-white/40">
+      <p className="mt-0 mb-9 font-sans text-sm text-white/60">
         {t(lang, "onboarding_subtitle")}
       </p>
 
@@ -205,7 +205,7 @@ function ScreenReady({ onGo }: { lang?: Lang; onGo: () => void }) {
       <h2 className="mt-0 mb-3 font-serif text-[28px] font-semibold text-mindscroll-cream">
         You&apos;re all set.
       </h2>
-      <p className="mt-0 mb-12 font-sans text-[15px] text-white/50 leading-[1.6]">
+      <p className="mt-0 mb-12 font-sans text-[15px] text-white/70 leading-[1.6]">
         Start scrolling through wisdom.
       </p>
       <PrimaryButton onClick={onGo} className="!max-w-[280px]">

@@ -41,7 +41,7 @@ export default function DonationPanel({ lang = "en", onClose }: Props) {
             {t(lang, "donate_title")}
           </h2>
 
-          <p className="mt-0 mb-8 font-sans text-sm text-white/50 leading-[1.7] max-w-[300px]">
+          <p className="mt-0 mb-8 font-sans text-sm text-white/70 leading-[1.7] max-w-[300px]">
             {t(lang, "donate_body")}
           </p>
 

@@ -277,7 +277,7 @@ function QuoteCard({ quote, onSwipe, onLike, onSave, onShare, onExport, isLiked,
           >
             {meta.label}
           </span>
-          <span className="text-[11px] text-white/25 font-sans">{meta.dir}</span>
+          <span className="text-[11px] text-white/55 font-sans">{meta.dir}</span>
         </div>
 
         <div className="flex-1 flex items-center">
@@ -363,7 +363,7 @@ function CategoryStats({ counts }: { counts: SwipeCounts }) {
                 style={{ width: `${pct}%`, background: meta.color }}
               />
             </div>
-            <span className="text-[9px] font-sans font-semibold tracking-[0.1em] uppercase text-white/25">
+            <span className="text-[9px] font-sans font-semibold tracking-[0.1em] uppercase text-white/55">
               {cat.slice(0, 4)}
             </span>
           </div>
@@ -588,7 +588,7 @@ export default function App() {
       <p className="font-serif italic text-[22px] text-mindscroll-cream m-0">
         Mind<span className="text-mindscroll-teal">Scroll</span>
       </p>
-      <p className="font-sans text-xs text-white/25 m-0 tracking-[0.1em] uppercase">
+      <p className="font-sans text-xs text-white/55 m-0 tracking-[0.1em] uppercase">
         {t(lang, "loading")}
       </p>
     </div>
@@ -615,13 +615,13 @@ export default function App() {
             <span className="text-[13px] font-semibold text-mindscroll-amber">{streak}</span>
           </div>
           <div className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.08] rounded-[20px] py-1.5 px-3">
-            <span className="text-[13px] text-white/50">✦</span>
+            <span className="text-[13px] text-white/70">✦</span>
             <span className="text-[13px] font-semibold text-white/70">{reflections}</span>
           </div>
           {/* Settings gear button */}
           <button
             onClick={() => setShowSettings(true)}
-            className="bg-white/[0.05] border border-white/[0.08] rounded-[20px] p-2 cursor-pointer text-white/40 flex items-center justify-center transition-all duration-200"
+            className="bg-white/[0.05] border border-white/[0.08] rounded-[20px] p-2 cursor-pointer text-white/60 flex items-center justify-center transition-all duration-200"
             title={t(lang, "settings")}
           >
             <GearIcon size={16} />
@@ -680,7 +680,7 @@ export default function App() {
           className={`rounded-[22px] py-2.5 px-5 flex items-center gap-2 cursor-pointer font-sans text-[13px] font-medium transition-all duration-200 border ${
             vault.length > 0
               ? "bg-mindscroll-teal/10 border-mindscroll-teal/30 text-mindscroll-teal"
-              : "bg-white/[0.05] border-white/[0.08] text-white/40"
+              : "bg-white/[0.05] border-white/[0.08] text-white/60"
           }`}
         >
           <BookmarkIcon size={16} filled={vault.length > 0} />
@@ -693,7 +693,7 @@ export default function App() {
         <Link
           href="/social"
           title="Social"
-          className="rounded-[22px] py-2.5 px-3.5 flex items-center cursor-pointer transition-all duration-200 border bg-white/[0.05] border-white/[0.08] text-white/40 hover:text-mindscroll-amber hover:border-mindscroll-amber/30"
+          className="rounded-[22px] py-2.5 px-3.5 flex items-center cursor-pointer transition-all duration-200 border bg-white/[0.05] border-white/[0.08] text-white/60 hover:text-mindscroll-amber hover:border-mindscroll-amber/30"
         >
           <SocialIcon size={16} />
         </Link>

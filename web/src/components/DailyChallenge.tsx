@@ -138,7 +138,7 @@ export default function DailyChallenge({ challenge, progress, lang = "en", onClo
           {/* Close */}
           <button
             onClick={onClose}
-            className="w-full py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-sm font-sans font-medium text-white/40 cursor-pointer"
+            className="w-full py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-sm font-sans font-medium text-white/60 cursor-pointer"
           >
             {t(lang, "close")}
           </button>

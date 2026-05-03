@@ -83,7 +83,7 @@ export default function SocialSheet({ streak, qotd, feed, emptyMessage, onClose 
                 <p className="mt-1 mb-0 font-serif text-[26px] font-semibold text-mindscroll-cream">
                   {streak.streak} day{streak.streak === 1 ? "" : "s"}
                 </p>
-                <p className="mt-1 mb-0 font-sans text-xs text-white/40">
+                <p className="mt-1 mb-0 font-sans text-xs text-white/60">
                   Longest: {streak.longest} · {streak.active_today ? "Active today ✓" : "Open the app daily to keep it"}
                 </p>
               </div>
@@ -96,7 +96,7 @@ export default function SocialSheet({ streak, qotd, feed, emptyMessage, onClose 
           {/* Quote of the day */}
           {qotd?.quote && (
             <>
-              <p className="m-0 mb-2 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/40">
+              <p className="m-0 mb-2 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/60">
                 Quote of the day
               </p>
               <div
@@ -116,7 +116,7 @@ export default function SocialSheet({ streak, qotd, feed, emptyMessage, onClose 
           )}
 
           {/* Feed */}
-          <p className="m-0 mb-2 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/40">
+          <p className="m-0 mb-2 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/60">
             Activity
           </p>
           {feed.length === 0 ? (
@@ -140,7 +140,7 @@ export default function SocialSheet({ streak, qotd, feed, emptyMessage, onClose 
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="m-0 mb-1.5 font-sans text-[12px] text-white/50">
+                    <p className="m-0 mb-1.5 font-sans text-[12px] text-white/70">
                       <span className="text-mindscroll-cream font-semibold">{item.user}</span>{" "}
                       {ACTION_LABEL[item.action]} a quote
                     </p>

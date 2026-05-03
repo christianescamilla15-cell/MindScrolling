@@ -48,7 +48,7 @@ export default function PaymentSuccessPage() {
         {status === "confirmed" ? "Welcome to Inside" : "Confirming your payment"}
       </h1>
 
-      <p className="m-0 mb-10 font-sans text-[15px] text-white/50 leading-[1.6] max-w-[360px]">
+      <p className="m-0 mb-10 font-sans text-[15px] text-white/70 leading-[1.6] max-w-[360px]">
         {status === "verifying" && "Stripe is wrapping up — this usually takes a couple of seconds."}
         {status === "confirmed" && "Premium unlocked. Export images, unlock all packs, support the project."}
         {status === "pending"  && "Payment captured. Premium will activate as soon as the webhook lands. Refresh in a minute if it hasn't already."}

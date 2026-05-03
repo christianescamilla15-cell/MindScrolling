@@ -23,7 +23,7 @@ function Chevron({ color = "rgba(255,255,255,0.25)" }: { color?: string }) {
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-6 mb-1 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/25">
+    <p className="mt-6 mb-1 font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-white/55">
       {children}
     </p>
   );
@@ -134,7 +134,7 @@ export default function Settings({ lang, onLangChange, isPremium, onClose, showT
                   className={`rounded-[10px] py-1.5 px-3 text-[13px] font-sans font-semibold cursor-pointer transition-all duration-150 border ${
                     lang === code
                       ? "bg-mindscroll-teal/15 border-mindscroll-teal/40 text-mindscroll-teal"
-                      : "bg-white/[0.05] border-white/10 text-white/40"
+                      : "bg-white/[0.05] border-white/10 text-white/60"
                   }`}
                 >
                   {code.toUpperCase()}
@@ -162,7 +162,7 @@ export default function Settings({ lang, onLangChange, isPremium, onClose, showT
                 className={`rounded-[10px] py-1.5 px-3 text-[13px] font-sans font-semibold cursor-pointer transition-all duration-150 border disabled:opacity-50 disabled:cursor-not-allowed ${
                   pushSubscribed
                     ? "bg-mindscroll-teal/15 border-mindscroll-teal/40 text-mindscroll-teal"
-                    : "bg-white/[0.05] border-white/10 text-white/40"
+                    : "bg-white/[0.05] border-white/10 text-white/60"
                 }`}
               >
                 {pushBusy ? "…" : pushSubscribed ? "ON" : "OFF"}

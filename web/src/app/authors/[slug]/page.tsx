@@ -90,7 +90,7 @@ export default async function AuthorPage({ params }: PageProps) {
 
       {/* Author header */}
       <header className="max-w-[640px] w-full mb-12">
-        <p className="m-0 mb-3 font-sans text-[11px] font-semibold tracking-[0.18em] uppercase text-white/40">
+        <p className="m-0 mb-3 font-sans text-[11px] font-semibold tracking-[0.18em] uppercase text-white/60">
           Author
         </p>
         <h1
@@ -99,7 +99,7 @@ export default async function AuthorPage({ params }: PageProps) {
         >
           {author.name}
         </h1>
-        <p className="m-0 font-sans text-sm text-white/50">
+        <p className="m-0 font-sans text-sm text-white/70">
           {author.quoteCount} curated {author.quoteCount === 1 ? "quote" : "quotes"}
         </p>
       </header>

@@ -14,7 +14,7 @@ export default function PaymentCancelPage() {
         Payment cancelled
       </h1>
 
-      <p className="m-0 mb-10 font-sans text-[15px] text-white/50 leading-[1.6] max-w-[360px]">
+      <p className="m-0 mb-10 font-sans text-[15px] text-white/70 leading-[1.6] max-w-[360px]">
         No charge was made. You can pick up where you left off — premium is still one tap away from Settings.
       </p>
 

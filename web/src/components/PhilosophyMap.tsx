@@ -206,7 +206,7 @@ export default function PhilosophyMap({ mapData, lang = "en", onClose }: Props) 
 
           {/* Empty state */}
           {!mapData && (
-            <div className="text-center py-5 text-white/25 font-sans text-sm">
+            <div className="text-center py-5 text-white/55 font-sans text-sm">
               Keep swiping to build your philosophy profile.
             </div>
           )}

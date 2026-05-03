@@ -43,7 +43,11 @@ export const viewport: Viewport = {
   themeColor: "#0f0f13",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // Allow up to 5x zoom for low-vision users (WCAG 1.4.4 / Lighthouse a11y).
+  // Earlier maximumScale: 1 was added to prevent gesture conflict with the
+  // swipe deck, but it failed the meta-viewport audit. The swipe deck is
+  // resilient enough; we accept the zoom interaction.
+  maximumScale: 5,
   viewportFit: "cover",
 };
 

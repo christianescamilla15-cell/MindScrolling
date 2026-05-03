@@ -152,7 +152,7 @@ export default async function QuotePage({ params }: PageProps) {
                     <p className="m-0 mb-1.5 font-serif italic text-[15px] text-mindscroll-cream-warm leading-[1.5] line-clamp-2">
                       &ldquo;{r.text}&rdquo;
                     </p>
-                    <span className="font-sans text-[12px] text-white/40">— {r.author}</span>
+                    <span className="font-sans text-[12px] text-white/60">— {r.author}</span>
                   </div>
                 </Link>
               );
