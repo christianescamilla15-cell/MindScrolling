@@ -1,7 +1,27 @@
 # MindScrolling — Product Roadmap
 
-**Last updated:** 2026-03-18
+**Last updated:** 2026-05-02
 **Methodology:** Continuous delivery with sprint-based milestones
+
+---
+
+## ⚠️ Strategic pivot — 2026-04-19
+
+The original Phase 6 "Google Play Launch + Retention" has been **reverted**.
+Direction changed to a webapp-first product on Next.js, with the Flutter
+app frozen and eventually deprecated. Why:
+
+- Google Play install friction was killing top-of-funnel conversion.
+- Organic SEO (search → philosophy quote landing pages) is a stronger
+  growth lever than store discovery for this category.
+- Single deploy target (Vercel) simplifies ops vs Play Store + Android
+  builds + iOS builds + RevenueCat IAP.
+
+The `flutter_app/` codebase is preserved but no longer receives features.
+All new work lands in `web/` (Next.js 16 + React 19 + Tailwind v4).
+
+The webapp ships at `mindscrolling-web.vercel.app` and reuses the existing
+Express/Supabase backend on `mindscrolling.onrender.com` unchanged.
 
 ---
 
@@ -17,13 +37,47 @@ Every phase must leave the product meaningfully more valuable to the user — no
 |---|---|---|
 | 1 | MVP Foundation | ✅ Complete |
 | 2 | Intelligent Feed & Onboarding | ✅ Complete |
-| 3 | Flutter Mobile Migration | ✅ Complete |
-| 4 | Philosophy Map & Evolution | ✅ Complete |
-| 5 | Premium & Content Packs | ✅ Complete (v1 — trial + one-time unlock) |
-| 6 | Google Play Launch + Retention | 🔄 In Progress (Sprint 7) |
-| 7 | Content Depth & Growth | 🔜 Next (Sprint 8) |
+| 3 | Flutter Mobile Migration | ✅ Complete (now frozen, see pivot above) |
+| 4 | Philosophy Map & Evolution | ✅ Complete (3 items deferred to later phase) |
+| 5 | Premium & Content Packs | ✅ Complete (v1 — trial + one-time unlock; Bloque B deferred) |
+| ~~6~~ | ~~Google Play Launch + Retention~~ | ❌ **Reverted 2026-04-19** — replaced by Phase 6′ |
+| **6′** | **Web Migration (Flutter → Next.js)** | 🔄 In Progress (Phases 0-3 done, Phase 4 deprecation pending) |
+| 7 | Content Depth & Growth | 📅 Planned (post web launch) |
 | 8 | Scale to 100k Users | 📅 Planned |
 | 9 | Scale to 1M+ Users | 📅 Future |
+
+---
+
+## Phase 6′ — Web Migration (Flutter → Next.js)
+
+**Goal:** Replace the Flutter mobile app with a Next.js webapp that ships
+on Vercel, preserves the existing backend, and adds SEO as a growth lever.
+
+**Status (2026-05-02):** Phases 0-3 shipped. Phase 4 deprecation pending
+real usage data from the webapp before pulling the Play Store listing.
+
+### Sub-phase status
+- [x] **Phase 0** — Scaffold Next.js 16 + Tailwind v4 + TypeScript strict
+- [x] **Phase 1** — Port MVP web (App.jsx → TSX, 4 routes, all components)
+- [x] **Phase 2a** — Stripe Checkout web flow (replaces RevenueCat IAP)
+- [x] **Phase 2b** — Social feed + QOTD + streak check-in
+- [x] **Phase 2c** — Web Push client wiring (Notifications API + PushManager)
+- [x] **Phase 2d** — Web Push **server-side** (POST /push/subscribe persists
+      PushSubscription rows; sendPushToDevice helper) — landed 2026-05-02
+- [x] **Phase 3a-d** — SEO end-to-end: 78-URL sitemap, OG dynamic, JSON-LD
+      Schema.org Quotation, category hubs, deployed at `mindscrolling-web.vercel.app`
+- [x] **/users/search + /users/:id** — discovery endpoints for /social
+      (landed 2026-05-02, unblocks add-friend flow)
+- [ ] **VAPID env wiring** — Render backend + Vercel frontend env vars
+      (pending human action — see `BACKUP_CHRIS/memoria-proyectos/mindscrolling/pending-human-actions.md`)
+- [ ] **APP_URL env on Render** — fixes Stripe success/cancel redirects
+- [ ] **Lighthouse > 90 mobile** audit on production deploy
+- [ ] **Domain decision** — `mindscrolling.com` vs subdomain
+- [ ] **Phase 4 — Flutter deprecation:**
+  - In-app banner on Flutter pointing to webapp
+  - Update Play Store listing
+  - Pull Flutter from Play Store once webapp adoption is healthy
+  - Archive `flutter_app/` (don't delete, preserve history)
 
 ---
 
@@ -174,9 +228,14 @@ See BACKLOG.md Pricing Decision Record v2 and SCOPE_BLOCK_B_PACK_MONETIZATION.md
 
 ---
 
-## Phase 6 — Google Play Launch + Retention
+## ~~Phase 6 — Google Play Launch + Retention~~ ❌ Reverted 2026-04-19
 
-**Goal:** Ship to real users on Google Play, protect the revenue funnel, and establish the first retention loop.
+> **This phase is no longer active.** Replaced by Phase 6′ (Web Migration)
+> above. The milestones below are preserved for historical context only.
+> Items that still apply (Sentry, push, conversion analytics) have been
+> reframed for the webapp in Phase 6′ and Phase 7.
+
+**Original goal (no longer pursued):** Ship to real users on Google Play, protect the revenue funnel, and establish the first retention loop.
 
 ### Product Milestones
 - [ ] Google Play Store submission and approval
