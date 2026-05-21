@@ -112,7 +112,7 @@ jobs:
 
       # Download the AAB built by the build job — no rebuild
       - name: Download AAB artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: app-release-aab
           # Restore to the path the Fastlane lanes expect relative to flutter_app/android
