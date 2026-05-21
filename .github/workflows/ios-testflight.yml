@@ -63,7 +63,7 @@ jobs:
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-release-ipa
           path: flutter_app/build/ios/ipa/*.ipa
